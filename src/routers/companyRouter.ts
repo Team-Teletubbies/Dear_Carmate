@@ -1,8 +1,7 @@
 import express from 'express';
-// Todo: withAsync
-// Todo: controller들
-// Todo: token verify 미들웨어들
 import { createCompany } from '../controllers/companyController';
+// Todo: withAsync
+// Todo: 인증인가 미들웨어들
 export const companyRouter = express.Router();
 
 companyRouter.post('/', createCompany);

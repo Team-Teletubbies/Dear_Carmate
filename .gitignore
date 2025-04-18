@@ -1,4 +1,8 @@
 node_modules
 .env
 /prisma/migrations
+<<<<<<< HEAD
 
+=======
+test
+>>>>>>> 85d3f08 (feat: Test post-company)
