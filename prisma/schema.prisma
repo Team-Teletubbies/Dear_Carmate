@@ -17,8 +17,6 @@ model Company {
   id                Int                @id @default(autoincrement())
   companyName       String             @unique
   companyCode       String             @unique
-  userCount         Int
-  authCode          String
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   users             User[]
