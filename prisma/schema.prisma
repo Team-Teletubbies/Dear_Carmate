@@ -17,7 +17,6 @@ model Company {
   id                Int                @id @default(autoincrement())
   companyName       String             @unique
   companyCode       String             @unique
-  userCount         Int
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   users             User[]
@@ -52,7 +51,7 @@ model Customer {
   phoneNumber   String
   ageGroup      AgeGroup?
   region        Region?
-  email         String?
+  email         String
   memo          String?
   contractCount Int       @default(0)
   createdAt     DateTime  @default(now())
@@ -65,22 +64,43 @@ model Customer {
 model Car {
   id                Int       @id @default(autoincrement())
   companyId         Int
+  manufacturerId    Int
+  modelId           Int
   carNumber         String    @unique
-  manufacturer      String
-  model             String
-  type              String
   manufacturingYear Int
   mileage           Int
   price             Int
   accidentCount     Int
-  explanation       String?
-  accidentDetails   String?
+  explanation       String
+  accidentDetails   String
   carStatus         CarStatus @default(POSSESSION)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
   company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  model     CarModel   @relation(fields: [modelId], references: [id], onDelete: Cascade)
   contracts Contract[]
+}
+
+model Manufacturer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  models CarModel[]
+}
+
+model CarModel {
+  id             Int      @id @default(autoincrement())
+  manufacturerId Int
+  name           String
+  type           String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  cars         Car[]
 }
 
 model Contract {
@@ -138,40 +158,39 @@ model ContractDocument {
 }
 
 enum Gender {
-  male
-  female
+  MALE
+  FEMALE
 }
 
 enum AgeGroup {
-  AGE_10
-  AGE_20
-  AGE_30
-  AGE_40
-  AGE_50
-  AGE_60
-  AGE_70
-  AGE_80
-  AGE_90
+  TEENAGER  @map("10대")
+  TWENTIES  @map("20대")
+  THIRTIES  @map("30대")
+  FORTIES   @map("40대")
+  FIFTIES   @map("50대")
+  SIXTIES   @map("60대")
+  SEVENTIES @map("70대")
+  EIGHTIES  @map("80대")
 }
 
 enum Region {
-  SEOUL
-  BUSAN
-  DAEGU
-  INCHEON
-  GWANGJU
-  DAEJEON
-  ULSAN
-  SEJONG
-  GYEONGGI
-  GANGWON
-  CHUNGBUK
-  CHUNGNAM
-  JEONBUK
-  JEONNAM
-  GYEONGBUK
-  GYEONGNAM
-  JEJU
+  SEOUL     @map("서울특별시")
+  BUSAN     @map("부산광역시")
+  DAEGU     @map("대구광역시")
+  INCHEON   @map("인천광역시")
+  GWANGJU   @map("광주광역시")
+  DAEJEON   @map("대전광역시")
+  ULSAN     @map("울산광역시")
+  SEJONG    @map("세종특별자치시")
+  GYEONGGI  @map("경기도")
+  GANGWON   @map("강원특별자치도")
+  CHUNGBUK  @map("충청북도")
+  CHUNGNAM  @map("충청남도")
+  JEONBUK   @map("전라북도")
+  JEONNAM   @map("전라남도")
+  GYEONGBUK @map("경상북도")
+  GYEONGNAM @map("경상남도")
+  JEJU      @map("제주특별자치도")
 }
 
 enum CarStatus {
