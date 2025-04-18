@@ -17,4 +17,5 @@ export interface UpdateCustomerDTO {
   ageGroup?: AgeGroup;
   region?: Region;
   email: string;
+  memo?: string;
 }
