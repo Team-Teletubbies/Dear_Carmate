@@ -10,8 +10,8 @@ export type CarType = {
   mileage: number;
   price: number;
   accidentCount: number;
-  explanation: string;
-  accidentDetails: string;
+  explanation: string | null;
+  accidentDetails: string | null;
   carStatus: CarStatus;
   type: string;
   createdAt: Date;
