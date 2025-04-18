@@ -1,8 +1,8 @@
 import express from 'express';
 import { registerCar } from '../controllers/carController';
 
-const carRoutder = express.Router();
+const carRouter = express.Router();
 
-carRoutder.post('/', registerCar);
+carRouter.post('/', registerCar);
 
-export default carRoutder;
+export default carRouter;

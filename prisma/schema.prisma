@@ -63,7 +63,7 @@ model Customer {
 
 model Car {
   id                Int       @id @default(autoincrement())
-  companyId         Int
+  companyId         Int?
   manufacturerId    Int
   modelId           Int
   carNumber         String    @unique
@@ -71,13 +71,13 @@ model Car {
   mileage           Int
   price             Int
   accidentCount     Int
-  explanation       String
-  accidentDetails   String
+  explanation       String?
+  accidentDetails   String?
   carStatus         CarStatus @default(POSSESSION)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company   Company?   @relation(fields: [companyId], references: [id], onDelete: Cascade)
   model     CarModel   @relation(fields: [modelId], references: [id], onDelete: Cascade)
   contracts Contract[]
 }

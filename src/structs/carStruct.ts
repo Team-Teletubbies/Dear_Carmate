@@ -11,6 +11,7 @@ import {
   defaulted,
   size,
   partial,
+  nullable,
 } from 'superstruct';
 import { PageParamsStruct } from './commonStruct';
 import { CarStatus } from '@prisma/client';
@@ -34,11 +35,13 @@ export const createCarBodyStruct = object({
   carNumber: size(nonempty(string()), 8, 30),
   manufacturer: nonempty(string()),
   model: nonempty(string()),
-  manufacturingYear: min(max(integer(), 1975), 2025),
+  manufacturingYear: max(min(integer(), 1975), 2025),
+  mileage: max(min(integer(), 1), 1000000),
   price: max(min(integer(), 1), 1000000000),
   accidentCount: defaulted(min(integer(), 0), 0),
-  explanation: optional(size(string(), 0, 300)),
-  accidentDetails: optional(size(string(), 0, 300)),
+  explanation: nullable(size(string(), 0, 300)),
+  accidentDetails: nullable(size(string(), 0, 300)),
+  carStatus: optional(enums([...statuses])),
 });
 
 export const updateCarBodyStruct = partial(createCarBodyStruct);
