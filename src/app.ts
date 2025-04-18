@@ -11,6 +11,7 @@ app.use('/companies', companyRouter);
 app.use('/users', userRouter);
 
 app.use('/companies', companyRouter);
+
 app.listen(3000, () => {
   console.log('Server is listening on port 3000');
 });
