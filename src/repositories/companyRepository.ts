@@ -19,3 +19,10 @@ export const getByCompanyName = async (companyName: string): Promise<Company | n
 export const getByCompanyCode = async (companyCode: string): Promise<Company | null> => {
   return await prisma.company.findUnique({ where: { companyCode } });
 };
+
+export const findValidateCompany = async (
+  companyName: string,
+  companyCode: string,
+): Promise<Company | null> => {
+  return await prisma.company.findFirst({ where: { AND: [{ companyName }, { companyCode }] } });
+};
