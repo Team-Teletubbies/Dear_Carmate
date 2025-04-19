@@ -11,3 +11,11 @@ export async function getCompanyList(data: GetCompanyListDTO): Promise<Prisma.Co
   const { page, pageSize, searchBy, keyword } = data;
   const where = {};
 }
+
+export const getByCompanyName = async (companyName: string): Promise<Company | null> => {
+  return await prisma.company.findUnique({ where: { companyName } });
+};
+
+export const getByCompanyCode = async (companyCode: string): Promise<Company | null> => {
+  return await prisma.company.findUnique({ where: { companyCode } });
+};
