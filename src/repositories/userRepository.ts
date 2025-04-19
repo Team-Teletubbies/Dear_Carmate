@@ -12,3 +12,11 @@ export const getWithCompanyCode = async (id: number): Promise<UserWithCompanyCod
     include: { company: { select: { companyCode: true } } },
   });
 };
+
+export const getByEmail = async (email: string): Promise<User | null> => {
+  return await prisma.user.findUnique({ where: { email } });
+};
+
+export const getByEmployeeNumber = async (employeeNumber: string): Promise<User | null> => {
+  return await prisma.user.findUnique({ where: { employeeNumber } });
+};
