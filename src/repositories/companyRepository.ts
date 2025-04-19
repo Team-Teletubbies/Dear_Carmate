@@ -7,10 +7,10 @@ export async function create(data: CreateCompanyDTO): Promise<Company> {
   return await prisma.company.create({ data });
 }
 
-export async function getCompanyList(data: GetCompanyListDTO): Promise<Prisma.CompanyGetPayload> {
-  const { page, pageSize, searchBy, keyword } = data;
-  const where = {};
-}
+// export async function getCompanyList(data: GetCompanyListDTO): Promise<Prisma.CompanyGetPayload> {
+//   const { page, pageSize, searchBy, keyword } = data;
+//   const where = {};
+// }
 
 export const getByCompanyName = async (companyName: string): Promise<Company | null> => {
   return await prisma.company.findUnique({ where: { companyName } });
