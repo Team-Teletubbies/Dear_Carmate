@@ -22,3 +22,28 @@ export async function findModelId(name: string) {
     },
   });
 }
+
+export async function findCarById(id: number) {
+  return await prisma.car.findUnique({
+    where: {
+      id,
+    },
+  });
+}
+
+export async function updateCar(id: number, data: Prisma.CarUpdateInput) {
+  return await prisma.car.update({
+    where: {
+      id,
+    },
+    data,
+  });
+}
+
+export async function deleteCar(id: number) {
+  return await prisma.car.delete({
+    where: {
+      id,
+    },
+  });
+}
