@@ -1,6 +1,6 @@
 import { CreateUserDTO, UserResponseDTO } from '../dto/userDTO';
 import * as userRepository from '../repositories/userRepository';
-import * as companyRepository from '../repositories/companyReposiotry'; // companyRepository에서 findValidateCompany잊지않고 만들어야 한다..
+import * as companyRepository from '../repositories/companyRepository'; // companyRepository에서 findValidateCompany잊지않고 만들어야 한다..
 import NotFoundError from '../lib/errors/notFoundError';
 import { hashPassword } from '../lib/auth/hash';
 import ConflictError from '../lib/errors/conflictError';

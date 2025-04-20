@@ -9,7 +9,20 @@ export const create = async (input: CreateUserInput): Promise<User> => {
 export const getWithCompanyCode = async (id: number): Promise<UserWithCompanyCode> => {
   return await prisma.user.findUniqueOrThrow({
     where: { id },
-    include: { company: { select: { companyCode: true } } },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      employeeNumber: true,
+      phoneNumber: true,
+      imageUrl: true,
+      isAdmin: true,
+      company: {
+        select: {
+          companyCode: true,
+        },
+      },
+    },
   });
 };
 
