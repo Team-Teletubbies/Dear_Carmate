@@ -12,10 +12,19 @@ import {
   size,
   partial,
   nullable,
+  coerce,
+  union,
+  literal,
 } from 'superstruct';
 import { PageParamsStruct } from './commonStruct';
 
 const statuses = ['possession', 'contractProceeding', 'contractCompleted'] as const;
+export const CarStatusStruct = coerce(
+  union(statuses.map((status) => literal(status)) as [any, any, any]),
+  string(),
+  (value) => value.toUpperCase(),
+);
+
 const carSearchKeys = ['carNumber', 'model'] as const;
 
 export const carFilterStruct = object({
@@ -36,7 +45,7 @@ export const createCarBodyStruct = object({
   accidentCount: defaulted(min(integer(), 0), 0),
   explanation: nullable(size(string(), 0, 300)),
   accidentDetails: nullable(size(string(), 0, 300)),
-  carStatus: optional(enums([...statuses])),
+  carStatus: optional(CarStatusStruct),
 });
 
 export const updateCarBodyStruct = partial(createCarBodyStruct);

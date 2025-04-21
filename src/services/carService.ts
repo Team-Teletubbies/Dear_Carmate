@@ -81,3 +81,8 @@ export async function deleteCar(id: number): Promise<void> {
 
   await carRepository.deleteCar(id);
 }
+
+export async function getCarList() {
+  const cars = await carRepository.getCarList();
+  return cars.map(carResponseDTO);
+}

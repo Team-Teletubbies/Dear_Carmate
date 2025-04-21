@@ -40,6 +40,6 @@ export function mapCarDTO(car: {
     accidentCount: car.accidentCount,
     explanation: car.explanation,
     accidentDetails: car.accidentDetails,
-    carStatus: car.carStatus,
+    carStatus: car.carStatus.toLowerCase() as carRegistUpdateDTO['carStatus'],
   };
 }
