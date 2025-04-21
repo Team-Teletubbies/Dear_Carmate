@@ -12,8 +12,7 @@ import {
 import { PageParamsStruct } from './commonStruct';
 
 const userSearchKey = ['companyName', 'name', 'email'] as const;
-export type UserListParams = (typeof userSearchKey)[number];
-// 조금 더 정교한 형태로 Email 재정의
+export type UserSearchKey = (typeof userSearchKey)[number];
 const Email = define<string>(
   'Email',
   (value) => typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),

@@ -1,5 +1,5 @@
 import { UserWithCompanyCode } from '../types/userType';
-import { UserListParams } from '../structs/userStruct';
+import { UserSearchKey } from '../structs/userStruct';
 // Request
 
 export interface CreateUserDTO {
@@ -15,7 +15,7 @@ export interface CreateUserDTO {
 export interface GetUserListDTO {
   page: number;
   pageSize: number;
-  searchBy?: UserListParams;
+  searchBy?: UserSearchKey;
   keyword?: string;
 }
 
