@@ -2,7 +2,7 @@ export interface AlarmDTO {
   time: string;
 }
 
-export interface MettingDTO {
+export interface MeetingDTO {
   date: string;
   alrams: AlarmDTO[];
 }
@@ -10,5 +10,5 @@ export interface MettingDTO {
 export interface CreateContractDTO {
   carId: number;
   customerId: number;
-  meetings: MettingDTO[];
+  meetings: MeetingDTO[];
 }
