@@ -5,8 +5,6 @@ import {
   optional,
   refine,
   nonempty,
-  max,
-  defaulted,
   size,
   partial,
   define,
@@ -38,7 +36,7 @@ const password = refine(size(nonempty(string()), 8, 16), 'password', (value) =>
 
 export const createUserBodyStruct = object({
   name: size(nonempty(string()), 1, 10),
-  email: Email,
+  email: email,
   phoneNumber: phoneNumber,
   password: password,
   passwordConfirmation: password,
@@ -50,3 +48,5 @@ export const createUserBodyStruct = object({
 export const registerUserStruct = refine(createUserBodyStruct, 'passwordsMatch', (value) => {
   return value.password === value.passwordConfirmation;
 });
+
+export const updateUserBodyStruct = partial(createUserBodyStruct);
