@@ -10,21 +10,29 @@ import {
   refine,
 } from 'superstruct';
 import { PageParamsStruct } from './commonStruct';
-import { AgeGroup, Gender, Region } from '@prisma/client';
 
 const customerSearchKey = ['name', 'email'] as const;
-const genders = [Gender.MALE, Gender.FEMALE];
-const ageGroups = [
-  AgeGroup.EIGHTIES,
-  AgeGroup.FIFTIES,
-  AgeGroup.FORTIES,
-  AgeGroup.SEVENTIES,
-  AgeGroup.SIXTIES,
-  AgeGroup.TEENAGER,
-  AgeGroup.THIRTIES,
-  AgeGroup.TWENTIES,
-];
-const regions = [Region.BUSAN];
+const genders = ['male', 'female'] as const;
+const ageGroups = ['10대', '20대', '30대', '40대', '50대', '60대', '70대', '80대'] as const;
+const regions = [
+  '서울',
+  '경기',
+  '인천',
+  '강원',
+  '충북',
+  '충남',
+  '세종',
+  '대전',
+  '전북',
+  '전남',
+  '광주',
+  '경북',
+  '경남',
+  '대구',
+  '울산',
+  '부산',
+  '제주',
+] as const;
 
 export const customerFilterStruct = object({
   ...PageParamsStruct.schema,
@@ -35,7 +43,7 @@ const email = refine(size(nonempty(string()), 1, 30), 'email', (value) => value.
 
 export const createCustomerBodyStruct = object({
   name: size(nonempty(string()), 1, 10),
-  gender: defaulted(enums(genders), Gender.MALE),
+  gender: defaulted(enums(genders), 'male'),
   AgeGroup: optional(enums(ageGroups)),
   region: optional(enums(regions)),
   email: email,

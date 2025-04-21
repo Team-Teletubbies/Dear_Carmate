@@ -12,18 +12,12 @@ import {
   size,
   partial,
   nullable,
-
 } from 'superstruct';
 import { PageParamsStruct } from './commonStruct';
-import { CarStatus } from '@prisma/client';
 
-const statuses = [
-  CarStatus.POSSESSION,
-  CarStatus.CONTRACT_PROCEEDING,
-  CarStatus.CONTRACT_COMPLETED,
-] as const;
-
+const statuses = ['possession', 'contractProceeding', 'contractCompleted'] as const;
 const carSearchKeys = ['carNumber', 'model'] as const;
+
 export const carFilterStruct = object({
   ...PageParamsStruct.schema,
   searchBy: optional(enums(carSearchKeys)),

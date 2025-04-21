@@ -163,34 +163,34 @@ enum Gender {
 }
 
 enum AgeGroup {
-  TEENAGER  @map("10대")
-  TWENTIES  @map("20대")
-  THIRTIES  @map("30대")
-  FORTIES   @map("40대")
-  FIFTIES   @map("50대")
-  SIXTIES   @map("60대")
-  SEVENTIES @map("70대")
-  EIGHTIES  @map("80대")
+  TEENAGER
+  TWENTIES
+  THIRTIES
+  FORTIES
+  FIFTIES
+  SIXTIES
+  SEVENTIES
+  EIGHTIES
 }
 
 enum Region {
-  SEOUL     @map("서울특별시")
-  BUSAN     @map("부산광역시")
-  DAEGU     @map("대구광역시")
-  INCHEON   @map("인천광역시")
-  GWANGJU   @map("광주광역시")
-  DAEJEON   @map("대전광역시")
-  ULSAN     @map("울산광역시")
-  SEJONG    @map("세종특별자치시")
-  GYEONGGI  @map("경기도")
-  GANGWON   @map("강원특별자치도")
-  CHUNGBUK  @map("충청북도")
-  CHUNGNAM  @map("충청남도")
-  JEONBUK   @map("전라북도")
-  JEONNAM   @map("전라남도")
-  GYEONGBUK @map("경상북도")
-  GYEONGNAM @map("경상남도")
-  JEJU      @map("제주특별자치도")
+  SEOUL
+  BUSAN
+  DAEGU
+  INCHEON
+  GWANGJU
+  DAEJEON
+  ULSAN
+  SEJONG
+  GYEONGGI
+  GANGWON
+  CHUNGBUK
+  CHUNGNAM
+  JEONBUK
+  JEONNAM
+  GYEONGBUK
+  GYEONGNAM
+  JEJU
 }
 
 enum CarStatus {
