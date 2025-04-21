@@ -1,15 +1,42 @@
 import * as companyRepository from '../repositories/companyRepository';
-import { CreateCompanyDTO, CompanyResponseDTO } from '../dto/companyDto';
+import {
+  CreateCompanyDTO,
+  CompanyResponseDTO,
+  GetCompanyListDTO,
+  CompanyListResponseDTO,
+} from '../dto/companyDto';
+import ConflictError from '../lib/errors/conflictError';
 
 export const createCompany = async (dto: CreateCompanyDTO) => {
   const { companyName, companyCode } = dto;
   const existingCompanyName = await companyRepository.getByCompanyName(companyName);
   const existingCompanyCode = await companyRepository.getByCompanyCode(companyCode);
   if (existingCompanyCode || existingCompanyName) {
-    // throw new ConflictError('CompanyCode or ComapnyName already exists.');
-    // ConflictError는 user 만들다가 이미 추가해두었기 때문에 이 브랜치에서는 따로 추가하지 않아서 오류가 날 뿐입니다요..
+    throw new ConflictError('CompanyCode or ComapnyName already exists.');
   }
   const createdCompany = await companyRepository.create(dto);
-  const company = new CompanyResponseDTO(createdCompany, 0);
+  const company = new CompanyResponseDTO(createdCompany);
   return company;
+};
+
+export const getCompanyList = async (dto: GetCompanyListDTO) => {
+  const input = {
+    ...dto,
+    searchBy: dto.searchBy ?? 'companyName',
+  };
+  const companyList = await companyRepository.getCompanyListWithUserCount(input);
+  const companyListWithUserCount = companyList.map((company) => {
+    return new CompanyResponseDTO(company);
+  });
+  const { page, pageSize, searchBy, keyword } = input;
+  const currentPage = page;
+  const totalItemCount = await companyRepository.countByKeyword(searchBy, keyword);
+  const totalPages = Math.ceil(totalItemCount / pageSize);
+  const result = new CompanyListResponseDTO(
+    companyListWithUserCount,
+    currentPage,
+    totalPages,
+    totalItemCount,
+  );
+  return result;
 };
