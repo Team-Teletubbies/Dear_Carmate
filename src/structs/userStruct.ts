@@ -5,8 +5,6 @@ import {
   optional,
   refine,
   nonempty,
-  max,
-  defaulted,
   size,
   partial,
   define,
@@ -25,8 +23,6 @@ export const userFilterStruct = object({
   ...PageParamsStruct.schema,
   searchBy: optional(enums(userSeachKey)),
 });
-
-const email = refine(size(nonempty(string()), 1, 30), 'email', (value) => value.includes('@'));
 
 const phoneNumber = refine(size(nonempty(string()), 1, 20), 'phoneNumber', (value) =>
   value.includes('-'),
@@ -50,3 +46,5 @@ export const createUserBodyStruct = object({
 export const registerUserStruct = refine(createUserBodyStruct, 'passwordsMatch', (value) => {
   return value.password === value.passwordConfirmation;
 });
+
+export const updateUserBodyStruct = partial(createUserBodyStruct);
