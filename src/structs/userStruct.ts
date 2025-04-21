@@ -11,8 +11,8 @@ import {
 } from 'superstruct';
 import { PageParamsStruct } from './commonStruct';
 
-const userSeachKey = ['companyName', 'name', 'email'] as const;
-
+const userSearchKey = ['companyName', 'name', 'email'] as const;
+export type UserListParams = (typeof userSearchKey)[number];
 // 조금 더 정교한 형태로 Email 재정의
 const Email = define<string>(
   'Email',
@@ -21,7 +21,7 @@ const Email = define<string>(
 
 export const userFilterStruct = object({
   ...PageParamsStruct.schema,
-  searchBy: optional(enums(userSeachKey)),
+  searchBy: optional(enums(userSearchKey)),
 });
 
 const phoneNumber = refine(size(nonempty(string()), 1, 20), 'phoneNumber', (value) =>

@@ -20,11 +20,15 @@ export const createCompany = async (dto: CreateCompanyDTO) => {
 };
 
 export const getCompanyList = async (dto: GetCompanyListDTO) => {
-  const companyList = await companyRepository.getCompanyListWithUserCount(dto);
+  const input = {
+    ...dto,
+    searchBy: dto.searchBy ?? 'companyName',
+  };
+  const companyList = await companyRepository.getCompanyListWithUserCount(input);
   const companyListWithUserCount = companyList.map((company) => {
     return new CompanyResponseDTO(company);
   });
-  const { searchBy = 'companyName', keyword = '', page, pageSize } = dto;
+  const { page, pageSize, searchBy, keyword } = input;
   const currentPage = page;
   const totalItemCount = await companyRepository.countByKeyword(searchBy, keyword);
   const totalPages = Math.ceil(totalItemCount / pageSize);
