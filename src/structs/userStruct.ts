@@ -24,8 +24,6 @@ export const userFilterStruct = object({
   searchBy: optional(enums(userSeachKey)),
 });
 
-const email = refine(size(nonempty(string()), 1, 30), 'email', (value) => value.includes('@'));
-
 const phoneNumber = refine(size(nonempty(string()), 1, 20), 'phoneNumber', (value) =>
   value.includes('-'),
 );
@@ -36,7 +34,7 @@ const password = refine(size(nonempty(string()), 8, 16), 'password', (value) =>
 
 export const createUserBodyStruct = object({
   name: size(nonempty(string()), 1, 10),
-  email: email,
+  email: Email,
   phoneNumber: phoneNumber,
   password: password,
   passwordConfirmation: password,
