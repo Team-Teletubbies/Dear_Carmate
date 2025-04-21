@@ -1,8 +1,8 @@
 import { RequestHandler } from 'express';
-import { CreateCompanyDTO } from '../dto/companyDto';
+import { CreateCompanyDTO, GetCompanyListDTO } from '../dto/companyDto';
 import * as companyService from '../services/companyService';
-import { assert } from 'superstruct';
-import { createCompanyBodyStruct } from '../structs/companyStruct';
+import { assert, create } from 'superstruct';
+import { companyFilterStruct, createCompanyBodyStruct } from '../structs/companyStruct';
 
 export const createCompany: RequestHandler = async (req, res) => {
   assert(req.body, createCompanyBodyStruct);
@@ -14,4 +14,12 @@ export const createCompany: RequestHandler = async (req, res) => {
   };
   const company = await companyService.createCompany(dto);
   res.status(201).json(company);
+};
+
+export const getCompanyList: RequestHandler = async (req, res) => {
+  // assert
+  const { page, pageSize, keyword, searchBy } = create(req.params, companyFilterStruct);
+  const dto: GetCompanyListDTO = { page, pageSize, keyword, searchBy };
+  const companyList = await companyService.getCompanyList(dto);
+  res.status(200).json(companyList);
 };

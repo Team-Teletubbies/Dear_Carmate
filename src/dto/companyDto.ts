@@ -1,4 +1,4 @@
-import { Company } from '../types/companyType';
+import { Company, CompanyWithCount } from '../types/companyType';
 
 // Request
 export interface CreateCompanyDTO {
@@ -9,22 +9,23 @@ export interface CreateCompanyDTO {
 export interface GetCompanyListDTO {
   page: number;
   pageSize: number;
-  searchBy: string;
-  keyword: string;
+  searchBy?: string;
+  keyword?: string;
 }
 
 // Response
+
 export class CompanyResponseDTO {
   id: number;
   companyName: string;
   companyCode: string;
   userCount: number;
 
-  constructor(company: Company, userCount: number) {
+  constructor(company: Company | CompanyWithCount) {
     this.id = company.id;
     this.companyName = company.companyName;
     this.companyCode = company.companyCode;
-    this.userCount = userCount;
+    this.userCount = (company as CompanyWithCount)._count.users ?? 0;
   }
 }
 

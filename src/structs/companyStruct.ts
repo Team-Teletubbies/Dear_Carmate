@@ -1,11 +1,12 @@
 import { string, object, enums, optional, nonempty, size, partial } from 'superstruct';
 import { PageParamsStruct } from './commonStruct';
 
-const companySerchKey = ['companyName', 'companyCode'] as const;
+const companySearchKey = ['companyName', 'companyCode'] as const;
+// 오타가 있어서 여기 수정했습니다
 
 export const companyFilterStruct = object({
   ...PageParamsStruct.schema,
-  searchBy: optional(enums(companySerchKey)),
+  searchBy: optional(enums(companySearchKey)),
 });
 
 export const createCompanyBodyStruct = object({
