@@ -2,4 +2,7 @@ node_modules/
 .env
 prisma/migrations/
 test.http
+/prisma/migrations
+test
+
 
