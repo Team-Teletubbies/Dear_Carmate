@@ -158,8 +158,8 @@ model ContractDocument {
 }
 
 enum Gender {
-  MALE
-  FEMALE
+  MALE   @map("male")
+  FEMALE @map("female")
 }
 
 enum AgeGroup {
@@ -194,15 +194,15 @@ enum Region {
 }
 
 enum CarStatus {
-  POSSESSION
-  CONTRACT_PROCEEDING
-  CONTRACT_COMPLETED
+  POSSESSION          @map("possession")
+  CONTRACT_PROCEEDING @map("contract_proceeding")
+  CONTRACT_COMPLETED  @map("contract_completed")
 }
 
 enum ContractStatus {
-  CAR_INSPECTION
-  PRICE_NEGOTIATION
-  CONTRACT_DRAFT
-  CONTRACT_SUCCESSFUL
-  CONTRACT_FAILED
+  CAR_INSPECTION      @map("car_inspection")
+  PRICE_NEGOTIATION   @map("price_negotiation")
+  CONTRACT_DRAFT      @map("contract_draft")
+  CONTRACT_SUCCESSFUL @map("contract_successful")
+  CONTRACT_FAILED     @map("contract_failed")
 }

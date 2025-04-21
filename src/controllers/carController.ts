@@ -9,7 +9,9 @@ export const registerCar = async (req: Request, res: Response): Promise<void> =>
   //   res.status(401).json({ message: '인증된 사용자만 차량을 등록할 수 있습니다.' });
   // }
   // const user = req.user as { companyId: number };
-
+  if (!data.carStatus) {
+    throw new Error('carStatus는 필수 값입니다.');
+  }
   const registerCars = await carService.registerCar(
     data /* , {
     companyId: user.companyId,
@@ -22,6 +24,10 @@ export const updateCar = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const data = create(req.body, updateCarBodyStruct);
 
+  if (!data.carStatus) {
+    throw new Error('carStatus는 필수 값입니다.');
+  }
+
   const updatedCar = await carService.updateCar(Number(id), data);
   res.status(200).json(updatedCar);
 };
@@ -31,4 +37,9 @@ export const deleteCar = async (req: Request, res: Response): Promise<void> => {
 
   await carService.deleteCar(Number(id));
   res.status(204).send();
+};
+
+export const getCarList = async (req: Request, res: Response): Promise<void> => {
+  const carList = await carService.getCarList();
+  res.status(200).json(carList);
 };
