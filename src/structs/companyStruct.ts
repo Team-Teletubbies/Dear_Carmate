@@ -2,7 +2,6 @@ import { string, object, enums, optional, nonempty, size, partial } from 'supers
 import { PageParamsStruct } from './commonStruct';
 
 const companySearchKey = ['companyName', 'companyCode'] as const;
-// 오타가 있어서 여기 수정했습니다
 
 export const companyFilterStruct = object({
   ...PageParamsStruct.schema,
