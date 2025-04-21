@@ -10,4 +10,5 @@ export type CarType = {
   accidentCount: number;
   explanation: string | null;
   accidentDetails: string | null;
+  carStatus: 'possession' | 'contractProceeding' | 'contractCompleted';
 };

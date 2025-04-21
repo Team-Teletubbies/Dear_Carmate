@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as carService from '../services/carService';
-import { CarStatusStruct, createCarBodyStruct, updateCarBodyStruct } from '../structs/carStruct';
+import { createCarBodyStruct, updateCarBodyStruct } from '../structs/carStruct';
 import { create } from 'superstruct';
 
 export const registerCar = async (req: Request, res: Response): Promise<void> => {
@@ -20,7 +20,7 @@ export const registerCar = async (req: Request, res: Response): Promise<void> =>
 
 export const updateCar = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  const data = updateCarBodyStruct.create(req.body);
+  const data = create(req.body, updateCarBodyStruct);
 
   const updatedCar = await carService.updateCar(Number(id), data);
   res.status(200).json(updatedCar);
