@@ -44,13 +44,9 @@ export const findValidateCompany = async (
   return await prisma.company.findFirst({ where: { AND: [{ companyName }, { companyCode }] } });
 };
 
-export const countByKeyword = async (searchBy: string, keyword: string) => {
+export const countByKeyword = async (searchBy: string, keyword?: string): Promise<number> => {
+  const where = keyword ? { [searchBy]: { contains: keyword, mode: 'insensitive' } } : undefined;
   return prisma.company.count({
-    where: {
-      [searchBy]: {
-        contains: keyword,
-        mode: 'insensitive',
-      },
-    },
+    where,
   });
 };

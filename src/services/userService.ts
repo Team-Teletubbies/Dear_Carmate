@@ -1,4 +1,9 @@
-import { CreateUserDTO, UserResponseDTO } from '../dto/userDTO';
+import {
+  CreateUserDTO,
+  GetUserListDTO,
+  GetUserListResponseDTO,
+  UserResponseDTO,
+} from '../dto/userDTO';
 import * as userRepository from '../repositories/userRepository';
 import * as companyRepository from '../repositories/companyRepository'; // companyRepository에서 findValidateCompany잊지않고 만들어야 한다..
 import NotFoundError from '../lib/errors/notFoundError';
@@ -31,4 +36,15 @@ export const createUser = async (dto: CreateUserDTO) => {
   const user = await userRepository.create(input);
   const userWithCompanyCode: UserResponseDTO = await userRepository.getWithCompanyCode(user.id);
   return userWithCompanyCode;
+};
+
+export const getUserList = async (dto: GetUserListDTO) => {
+  const input = { ...dto, searchBy: dto.searchBy ?? 'name' };
+  const userList = await userRepository.getUserList(input);
+  const { page, pageSize, searchBy, keyword } = input;
+  const currentPage = page;
+  const totalItemCount = await userRepository.countByKeyword(searchBy, keyword);
+  const totalPages = Math.ceil(totalItemCount / pageSize);
+  const result = new GetUserListResponseDTO(userList, currentPage, totalPages, totalItemCount);
+  return result;
 };

@@ -17,9 +17,7 @@ export const createCompany: RequestHandler = async (req, res) => {
 };
 
 export const getCompanyList: RequestHandler = async (req, res) => {
-  // assert
-  const { page, pageSize, keyword, searchBy } = create(req.params, companyFilterStruct);
-  const dto: GetCompanyListDTO = { page, pageSize, keyword, searchBy };
+  const dto: GetCompanyListDTO = create(req.query, companyFilterStruct);
   const companyList = await companyService.getCompanyList(dto);
   res.status(200).json(companyList);
 };
