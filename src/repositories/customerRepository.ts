@@ -37,15 +37,14 @@ export const getCustomers = async (
   searchBy?: 'name' | 'email',
   keyword?: string,
 ) => {
-  const where: any = {
-    companyId,
-  };
+  const where: Prisma.CustomerWhereInput = { companyId };
 
   if (searchBy && keyword) {
-    where[searchBy] = {
-      contains: keyword,
-      mode: 'insensitive',
-    };
+    if (searchBy === 'name') {
+      where.name = { contains: keyword, mode: 'insensitive' };
+    } else if (searchBy === 'email') {
+      where.email = { contains: keyword, mode: 'insensitive' };
+    }
   }
 
   const skip = (page - 1) * pageSize;
