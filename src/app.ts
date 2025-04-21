@@ -9,7 +9,6 @@ app.use(express.json());
 app.use('/cars', carRoutder);
 app.use('/companies', companyRouter);
 app.use('/users', userRouter);
-
 app.use('/companies', companyRouter);
 app.use('/users', userRouter);
 
