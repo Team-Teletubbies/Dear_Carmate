@@ -52,7 +52,7 @@ export async function registerCar(
   const { manufacturer, model, carStatus, ...rest } = data;
 
   const { manufacturerData, modelData } = await validManufacturerAndModel(manufacturer, model);
-  if (!carStatus) throw new Error('carStatus is required');
+  if (!carStatus) throw new Error('carStatus는 필수입니다.');
 
   const carData = commonCarData(
     {
@@ -68,7 +68,7 @@ export async function registerCar(
 }
 
 export async function updateCar(id: number, data: Partial<CarType>): Promise<carRegistUpdateDTO> {
-  const { manufacturer, model, ...rest } = data;
+  const { manufacturer, model, carStatus, ...rest } = data;
 
   const existingCar = await carRepository.findCarById(id);
   if (!existingCar) throw new NotFoundError('존재하지 않는 차량입니다.');
@@ -77,8 +77,16 @@ export async function updateCar(id: number, data: Partial<CarType>): Promise<car
     manufacturer as string,
     model as string,
   );
+  if (!carStatus) throw new Error('carStatus는 필수입니다.');
 
-  const carData = commonCarData(rest, manufacturerData.id, modelData.id);
+  const carData = commonCarData(
+    {
+      ...rest,
+      carStatus: mapCarStatus(carStatus) as CarType['carStatus'],
+    },
+    manufacturerData.id,
+    modelData.id,
+  );
   const updatedCar = await carRepository.updateCar(id, carData);
 
   return carResponseDTO(updatedCar, manufacturerData, modelData);
