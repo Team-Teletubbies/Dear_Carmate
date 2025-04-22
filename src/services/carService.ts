@@ -8,8 +8,8 @@ async function validManufacturerAndModel(manufacturer: string, model: string) {
   const manufacturerData = await carRepository.findManufacturerId(manufacturer);
   if (!manufacturerData) throw new NotFoundError('존재하지 않는 제조사입니다.');
 
-  const modelData = await carRepository.findModelId(model);
-  if (!modelData) throw new NotFoundError('존재하지 않는 차 모델입니다.');
+  const modelData = await carRepository.findModelId(model, manufacturerData.id);
+  if (!modelData) throw new NotFoundError('존재하지 않는 차량 모델입니다.');
 
   return { manufacturerData, modelData };
 }
@@ -18,7 +18,7 @@ function commonCarData(
   rest: Partial<CarType>,
   manufacturerId: number,
   modelId: number,
-  companyId?: number,
+  companyId: number,
 ) {
   const data: any = {
     ...rest,
@@ -28,11 +28,10 @@ function commonCarData(
     model: {
       connect: { id: modelId },
     },
+    company: {
+      connect: { id: companyId },
+    },
   };
-
-  if (companyId) {
-    data.company = { connect: { id: companyId } };
-  }
 
   return data;
 }
@@ -47,7 +46,7 @@ function carResponseDTO(car: any, manufacturerData: any, modelData: any): carReg
 
 export async function registerCar(
   data: CarRegisterRequestDTO,
-  // user: { companyId: number },
+  companyId: number,
 ): Promise<carRegistUpdateDTO> {
   const { manufacturer, model, carStatus, ...rest } = data;
 
@@ -60,14 +59,19 @@ export async function registerCar(
       carStatus: mapCarStatus(carStatus) as CarType['carStatus'],
     },
     manufacturerData.id,
-    modelData.id /*user.companyId*/,
+    modelData.id,
+    companyId,
   );
   const createdCar = await carRepository.createCar(carData);
 
   return carResponseDTO(createdCar, manufacturerData, modelData);
 }
 
-export async function updateCar(id: number, data: Partial<CarType>): Promise<carRegistUpdateDTO> {
+export async function updateCar(
+  id: number,
+  data: Partial<CarType>,
+  companyId: number,
+): Promise<carRegistUpdateDTO> {
   const { manufacturer, model, carStatus, ...rest } = data;
 
   const existingCar = await carRepository.findCarById(id);
@@ -86,6 +90,7 @@ export async function updateCar(id: number, data: Partial<CarType>): Promise<car
     },
     manufacturerData.id,
     modelData.id,
+    companyId,
   );
   const updatedCar = await carRepository.updateCar(id, carData);
 

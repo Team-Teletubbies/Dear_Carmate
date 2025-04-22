@@ -9,13 +9,13 @@ export interface carRegistUpdateDTO {
   carNumber: string;
   manufacturer: string;
   model: string;
-  manufacturingYear: number;
   mileage: number;
+  manufacturingYear: number;
   price: number;
+  carStatus: CarStatus;
   accidentCount: number;
   explanation: string | null;
   accidentDetails: string | null;
-  carStatus: CarStatus;
   type: string;
 }
 
@@ -24,13 +24,13 @@ export function mapCarDTO(car: {
   carNumber: string;
   manufacturer: { name: string };
   model: { name: string; type: string };
-  manufacturingYear: number;
   mileage: number;
+  manufacturingYear: number;
   price: number;
+  carStatus: CarStatus;
   accidentCount: number;
   explanation: string | null;
   accidentDetails: string | null;
-  carStatus: CarStatus;
 }): carRegistUpdateDTO {
   return {
     id: car.id,
@@ -38,13 +38,13 @@ export function mapCarDTO(car: {
     manufacturer: car.manufacturer.name,
     model: car.model.name,
     type: car.model.type,
-    manufacturingYear: car.manufacturingYear,
     mileage: car.mileage,
+    manufacturingYear: car.manufacturingYear,
     price: car.price,
+    carStatus: fromEnumStyle(car.carStatus) as carRegistUpdateDTO['carStatus'],
     accidentCount: car.accidentCount,
     explanation: car.explanation,
     accidentDetails: car.accidentDetails,
-    carStatus: fromEnumStyle(car.carStatus) as carRegistUpdateDTO['carStatus'],
   };
 }
 
@@ -52,11 +52,11 @@ export interface CarRegisterRequestDTO {
   manufacturer: string;
   model: string;
   carNumber: string;
-  manufacturingYear: number;
   mileage: number;
+  manufacturingYear: number;
   price: number;
+  carStatus: 'possession' | 'contractProceeding' | 'contractCompleted';
   accidentCount: number;
   explanation?: string | null;
   accidentDetails?: string | null;
-  carStatus: 'possession' | 'contractProceeding' | 'contractCompleted';
 }

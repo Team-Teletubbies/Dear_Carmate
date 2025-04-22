@@ -12,10 +12,6 @@ import {
   size,
   partial,
   nullable,
-  coerce,
-  union,
-  literal,
-  Struct,
 } from 'superstruct';
 import { PageParamsStruct } from './commonStruct';
 

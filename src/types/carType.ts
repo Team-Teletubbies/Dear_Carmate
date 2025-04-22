@@ -1,14 +1,12 @@
-import { CarStatus } from '@prisma/client';
-
 export type CarType = {
   carNumber: string;
   manufacturer: string;
   model: string;
-  manufacturingYear: number;
   mileage: number;
+  manufacturingYear: number;
   price: number;
+  carStatus: 'possession' | 'contractProceeding' | 'contractCompleted';
   accidentCount: number;
   explanation: string | null;
   accidentDetails: string | null;
-  carStatus: 'possession' | 'contractProceeding' | 'contractCompleted';
 };
