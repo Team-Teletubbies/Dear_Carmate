@@ -1,4 +1,12 @@
-export interface ContractDocumentSelectOption {
+export interface ContractDocument {
   id: number;
-  data: string;
+  contractId: number;
+  companyId: number;
+  fileName: string;
+  filePath: string;
+  fileSize: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
+
+export type UploadContractDocument = Omit<ContractDocument, 'id' | 'createdAt' | 'updatedAt'>;
