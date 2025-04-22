@@ -8,6 +8,9 @@
     "build": "tsc",
     "dev": "nodemon --watch src src/app.ts"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Team-Teletubbies/project1.git"
