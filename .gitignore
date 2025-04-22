@@ -2,5 +2,8 @@ node_modules/
 .env
 prisma/migrations/
 test.http
+<<<<<<< HEAD
+dist/
+=======
 test/
-
+>>>>>>> 8aa080d49f070b44251bef33fbad01dfdd001565

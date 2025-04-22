@@ -6,6 +6,7 @@ import { contractRouter } from './routers/contractRouter';
 import { contractDocumentRouter } from './routers/contractDocumentRouter';
 import { defaultNotFoundHandler, globalErrorHandler } from './controllers/errorController';
 import cors from 'cors';
+import customerRouter from './routers/customerRouter';
 
 const app: express.Application = express();
 app.use(express.json());
@@ -17,6 +18,9 @@ app.use('/contracts', contractRouter);
 app.use('/contractDocuments', contractDocumentRouter);
 app.use(defaultNotFoundHandler);
 app.use(globalErrorHandler);
+app.use('/companies', companyRouter);
+app.use('/users', userRouter);
+app.use('/customers', customerRouter);
 
 app.listen(3000, () => {
   console.log('Server is listening on port 3000');

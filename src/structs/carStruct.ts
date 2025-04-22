@@ -12,10 +12,28 @@ import {
   size,
   partial,
   nullable,
+  coerce,
+  union,
+  literal,
+  Struct,
 } from 'superstruct';
 import { PageParamsStruct } from './commonStruct';
 
 const statuses = ['possession', 'contractProceeding', 'contractCompleted'] as const;
+type StatusType = (typeof statuses)[number]; // 'possession' | 'contractProceeding' | 'contractCompleted' 리터럴 유니언 타입을 생성
+
+function toPrismaCarStatus(status: string): string {
+  return status.replace(/([A-Z])/g, '_$1').toUpperCase();
+}
+
+export function mapCarStatus(status: string): string {
+  if (!statuses.includes(status as StatusType)) {
+    // request data와 검증
+    throw new Error(`Invalid carStatus: ${status}`);
+  }
+  return toPrismaCarStatus(status);
+}
+
 const carSearchKeys = ['carNumber', 'model'] as const;
 
 export const carFilterStruct = object({
@@ -36,7 +54,7 @@ export const createCarBodyStruct = object({
   accidentCount: defaulted(min(integer(), 0), 0),
   explanation: nullable(size(string(), 0, 300)),
   accidentDetails: nullable(size(string(), 0, 300)),
-  carStatus: optional(enums([...statuses])),
+  carStatus: nonempty(enums([...statuses])), // statuses의 값 중 하나여야하고, undefined, null, ''이면 오류
 });
 
 export const updateCarBodyStruct = partial(createCarBodyStruct);

@@ -44,7 +44,7 @@ const email = refine(size(nonempty(string()), 1, 30), 'email', (value) => value.
 export const createCustomerBodyStruct = object({
   name: size(nonempty(string()), 1, 10),
   gender: defaulted(enums(genders), 'male'),
-  AgeGroup: optional(enums(ageGroups)),
+  ageGroup: optional(enums(ageGroups)),
   region: optional(enums(regions)),
   email: email,
   memo: optional(size(nonempty(string()), 1, 200)),
