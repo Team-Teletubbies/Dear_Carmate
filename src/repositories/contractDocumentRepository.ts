@@ -6,3 +6,7 @@ export const createContractDocument = async (
 ): Promise<ContractDocument> => {
   return await prisma.contractDocument.create({ data });
 };
+
+export const findContractDocumentById = async (id: number): Promise<ContractDocument | null> => {
+  return await prisma.contractDocument.findUnique({ where: { id } });
+};
