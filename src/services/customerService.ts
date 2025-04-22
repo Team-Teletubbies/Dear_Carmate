@@ -25,12 +25,17 @@ export const updateCustomer = async (
 };
 
 export const deleteCustomer = async (customerId: number, companyId: number) => {
-  return prisma.customer.deleteMany({
+  const result = await prisma.customer.deleteMany({
     where: {
       id: customerId,
       companyId,
     },
   });
+  if (result.count === 0) {
+    throw new NotFoundError('고객을 찾을 수 없습니다.');
+  }
+
+  return result;
 };
 
 export const getCustomersService = async (
