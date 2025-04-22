@@ -20,11 +20,9 @@ export const deleteCustomerHandler = async (req: Request, res: Response) => {
   const customerId = Number(req.params.id);
   const result = await customerService.deleteCustomer(customerId, companyId);
 
-  if (result.count === 0) {
-    throw new NotFoundError('존재하지 않는 고객입니다');
-  }
+  await customerService.deleteCustomer(customerId, companyId); // ✅ 수정: 에러 처리는 서비스에서
 
-  res.status(200).json({ message: '고객 삭제 성공' });
+  res.status(200).json({ message: '고객 삭제 성공' }); // ✅ 수정: 성공 응답만
 };
 
 export const getCustomersHandler = async (req: Request, res: Response) => {
