@@ -5,18 +5,19 @@ import { create } from 'superstruct';
 
 export const registerCar = async (req: Request, res: Response): Promise<void> => {
   const data = create(req.body, createCarBodyStruct);
+
+  // console.log('req.user:', req.user);
+
   // if (!req.user) {
-  //   res.status(401).json({ message: '인증된 사용자만 차량을 등록할 수 있습니다.' });
+  //   res.status(401).json({ message: '로그인 정보가 없습니다.' });
   // }
-  // const user = req.user as { companyId: number };
-  if (!data.carStatus) {
-    throw new Error('carStatus는 필수 값입니다.');
-  }
-  const registerCars = await carService.registerCar(
-    data /* , {
-    companyId: user.companyId,
-  } */,
-  );
+  // const companyId = (req.user as { companyId: number }).companyId;
+
+  const companyId = 3; // 임시로 companyId 지정
+
+  if (!companyId) throw new Error('companyId는 필수입니다.');
+
+  const registerCars = await carService.registerCar(data, companyId);
   res.status(201).json(registerCars);
 };
 
@@ -24,11 +25,17 @@ export const updateCar = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const data = create(req.body, updateCarBodyStruct);
 
-  if (!data.carStatus) {
-    throw new Error('carStatus는 필수 값입니다.');
-  }
+  // console.log('req.user:', req.user);
 
-  const updatedCar = await carService.updateCar(Number(id), data);
+  // if (!req.user) {
+  //   res.status(401).json({ message: '로그인 정보가 없습니다.' });
+  // }
+  // const companyId = (req.user as { companyId: number }).companyId;
+
+  const companyId = 3; // 임시로 companyId 지정
+
+  if (!companyId) throw new Error('companyId는 필수입니다.');
+  const updatedCar = await carService.updateCar(Number(id), data, companyId);
   res.status(200).json(updatedCar);
 };
 
