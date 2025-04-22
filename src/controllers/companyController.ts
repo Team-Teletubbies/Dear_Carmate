@@ -32,6 +32,6 @@ export const updateCompany: RequestHandler = async (req, res) => {
 
 export const deleteCompany: RequestHandler = async (req, res) => {
   const { id: companyId } = create(req.params, IdParamsStruct);
-  // await companyService.deleteCompany(companyId);
+  await companyService.deleteCompany(companyId);
   res.status(204).send();
 };

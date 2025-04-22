@@ -79,3 +79,8 @@ export const updateAndGetWithCount = async (
   return updatedWithCount;
 };
 // Todo: ErrorHandler에 Prisma unique 넘는 (code P2002) 넘는 애 필요
+
+export const deleteById = async (id: number): Promise<Company> => {
+  return await prisma.company.delete({ where: { id } });
+};
+// Todo: delete 실패 시 prisma의 에러가 뜨는게 (ㅖ2025)그거 잡아야 함
