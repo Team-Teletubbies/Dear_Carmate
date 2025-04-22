@@ -1,5 +1,3 @@
-import { CarStatus } from '@prisma/client';
-
 export type CarType = {
   carNumber: string;
   manufacturer: string;
