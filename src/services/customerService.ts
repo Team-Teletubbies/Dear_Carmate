@@ -1,10 +1,9 @@
 import * as customerRepo from '../repositories/customerRepository';
 import { CreateCustomerDTO, UpdateCustomerDTO } from '../dto/customer.dto';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { prisma } from '../lib/prisma';
 import NotFoundError from '../lib/errors/notFoundError';
 import { getCustomers } from '../repositories/customerRepository';
-
-export const prisma = new PrismaClient();
 
 export const createCustomer = (companyId: number, data: CreateCustomerDTO) => {
   return customerRepo.createCustomer(companyId, data as Prisma.CustomerUncheckedCreateInput);
