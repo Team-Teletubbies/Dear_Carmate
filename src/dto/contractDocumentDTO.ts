@@ -1,7 +1,16 @@
-export class UploadContractDocumentResponseDTO {
-  constractDocumentId: number;
+import { ContractDocument } from '@prisma/client';
 
-  constructor(constractDocumentId: number) {
-    this.constractDocumentId = constractDocumentId;
+export class UploadContractDocumentResponseDTO {
+  contractDocumentId: number;
+  constructor(data: ContractDocument) {
+    this.contractDocumentId = data.id;
+  }
+}
+
+export class ContractDocumentListItemDTO {
+  id: number;
+
+  constructor(id: number, fileName: string) {
+    this.id = id;
   }
 }
