@@ -5,7 +5,6 @@ export function fromEnumStyle(value: string): string {
 }
 
 export interface carRegistUpdateDTO {
-  id: number;
   carNumber: string;
   manufacturer: string;
   model: string;
@@ -20,7 +19,6 @@ export interface carRegistUpdateDTO {
 }
 
 export function mapCarDTO(car: {
-  id: number;
   carNumber: string;
   manufacturer: { name: string };
   model: { name: string; type: string };
@@ -33,7 +31,6 @@ export function mapCarDTO(car: {
   accidentDetails: string | null;
 }): carRegistUpdateDTO {
   return {
-    id: car.id,
     carNumber: car.carNumber,
     manufacturer: car.manufacturer.name,
     model: car.model.name,

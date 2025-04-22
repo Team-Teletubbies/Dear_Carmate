@@ -117,7 +117,7 @@ async function main() {
   await prisma.car.createMany({
     data: [
       {
-        carNumber: '12가1234',
+        carNumber: '12가12345',
         companyId: allCompanies[0].id,
         manufacturerId: kia.id,
         modelId: allModels.find((m) => m.name === 'K5')!.id,
@@ -129,7 +129,7 @@ async function main() {
         accidentDetails: '조수석 범퍼 교체',
       },
       {
-        carNumber: '34나5678',
+        carNumber: '34나56789',
         companyId: allCompanies[1].id,
         manufacturerId: hyundai.id,
         modelId: allModels.find((m) => m.name === 'Sonata')!.id,
@@ -141,7 +141,7 @@ async function main() {
         accidentDetails: '뒤 범퍼, 도장',
       },
       {
-        carNumber: '56다9012',
+        carNumber: '56다90123',
         companyId: allCompanies[2].id,
         manufacturerId: tesla.id,
         modelId: allModels.find((m) => m.name === 'Model 3')!.id,
