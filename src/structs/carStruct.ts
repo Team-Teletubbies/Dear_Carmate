@@ -41,7 +41,7 @@ export const carFilterStruct = object({
 export type CarFilter = Infer<typeof carFilterStruct>;
 
 export const createCarBodyStruct = object({
-  carNumber: size(nonempty(string()), 8, 30),
+  carNumber: size(nonempty(string()), 7, 8),
   manufacturer: nonempty(string()),
   model: nonempty(string()),
   manufacturingYear: max(min(integer(), 1975), 2025),
