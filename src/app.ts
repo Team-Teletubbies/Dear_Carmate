@@ -16,11 +16,10 @@ app.use('/companies', companyRouter);
 app.use('/users', userRouter);
 app.use('/contracts', contractRouter);
 app.use('/contractDocuments', contractDocumentRouter);
+app.use('/customers', customerRouter);
+
 app.use(defaultNotFoundHandler);
 app.use(globalErrorHandler);
-app.use('/companies', companyRouter);
-app.use('/users', userRouter);
-app.use('/customers', customerRouter);
 
 app.listen(3000, () => {
   console.log('Server is listening on port 3000');
