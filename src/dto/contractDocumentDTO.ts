@@ -14,3 +14,13 @@ export class ContractDocumentListItemDTO {
     this.id = id;
   }
 }
+
+export class DownloadContractDocumentResponseDTO {
+  filePath: string;
+  fileName: string;
+
+  constructor(data: { filePath: string; fileName: string }) {
+    this.filePath = data.filePath;
+    this.fileName = data.fileName;
+  }
+}
