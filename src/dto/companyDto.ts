@@ -1,7 +1,7 @@
 import { Company, CompanyWithCount } from '../types/companyType';
 
 // Request
-export interface CreateCompanyDTO {
+export interface CreateUpdateCompanyDTO {
   companyName: string;
   companyCode: string;
 }

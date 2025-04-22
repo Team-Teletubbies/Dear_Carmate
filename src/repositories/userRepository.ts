@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import { UserWithCompanyCode, User, CreateUserInput, GetUserListInput } from '../types/userType';
 import { GetUserListDTO, UserListItem } from '../dto/userDTO';
+import { CreateUpdateCompanyDTO } from '../dto/companyDto';
 
 export const create = async (input: CreateUserInput): Promise<User> => {
   return await prisma.user.create({ data: input });
