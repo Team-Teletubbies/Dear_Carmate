@@ -1,9 +1,13 @@
 import { prisma } from '../lib/prisma';
-import { CreateCompanyDTO, GetCompanyListDTO, CompanyListResponseDTO } from '../dto/companyDto';
+import {
+  GetCompanyListDTO,
+  CompanyListResponseDTO,
+  CreateUpdateCompanyDTO,
+} from '../dto/companyDto';
 import { Company, CompanyWithCount } from '../types/companyType';
 import { Prisma } from '@prisma/client';
 
-export async function create(data: CreateCompanyDTO): Promise<Company> {
+export async function create(data: CreateUpdateCompanyDTO): Promise<Company> {
   return await prisma.company.create({ data });
 }
 
@@ -50,3 +54,28 @@ export const countByKeyword = async (searchBy: string, keyword?: string): Promis
     where,
   });
 };
+
+export const updateAndGetWithCount = async (
+  companyId: number,
+  data: CreateUpdateCompanyDTO,
+): Promise<CompanyWithCount | null> => {
+  const where = { id: companyId };
+  const [_, updatedWithCount] = await prisma.$transaction([
+    prisma.company.update({ where, data }),
+    prisma.company.findUnique({
+      where,
+      select: {
+        id: true,
+        companyName: true,
+        companyCode: true,
+        _count: {
+          select: {
+            users: true,
+          },
+        },
+      },
+    }),
+  ]);
+  return updatedWithCount;
+};
+// Todo: ErrorHandler에 Prisma unique 넘는 (code P2002) 넘는 애 필요

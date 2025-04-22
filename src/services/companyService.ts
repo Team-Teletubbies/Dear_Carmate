@@ -1,13 +1,14 @@
 import * as companyRepository from '../repositories/companyRepository';
 import {
-  CreateCompanyDTO,
+  CreateUpdateCompanyDTO,
   CompanyResponseDTO,
   GetCompanyListDTO,
   CompanyListResponseDTO,
 } from '../dto/companyDto';
 import ConflictError from '../lib/errors/conflictError';
+import NotFoundError from '../lib/errors/notFoundError';
 
-export const createCompany = async (dto: CreateCompanyDTO) => {
+export const createCompany = async (dto: CreateUpdateCompanyDTO) => {
   const { companyName, companyCode } = dto;
   const existingCompanyName = await companyRepository.getByCompanyName(companyName);
   const existingCompanyCode = await companyRepository.getByCompanyCode(companyCode);
@@ -38,5 +39,17 @@ export const getCompanyList = async (dto: GetCompanyListDTO) => {
     totalPages,
     totalItemCount,
   );
+  return result;
+};
+
+export const updateAndGetCompany = async (
+  id: number,
+  data: CreateUpdateCompanyDTO,
+): Promise<CompanyResponseDTO> => {
+  const companyWithCount = await companyRepository.updateAndGetWithCount(id, data);
+  if (!companyWithCount) {
+    throw new NotFoundError('Company not found.');
+  }
+  const result = new CompanyResponseDTO(companyWithCount);
   return result;
 };
