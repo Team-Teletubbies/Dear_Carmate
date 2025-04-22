@@ -47,3 +47,11 @@ export async function deleteCar(id: number) {
     },
   });
 }
+
+export async function getCarList() {
+  return await prisma.car.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+}

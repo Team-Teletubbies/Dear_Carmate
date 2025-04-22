@@ -1,7 +1,8 @@
 import * as carRepository from '../repositories/carRepository';
 import { CarType } from '../types/carType';
-import { carRegistUpdateDTO, mapCarDTO } from '../dto/carDTO';
+import { CarRegisterRequestDTO, carRegistUpdateDTO, mapCarDTO } from '../dto/carDTO';
 import NotFoundError from '../lib/errors/notFoundError';
+import { mapCarStatus } from '../structs/carStruct';
 
 async function validManufacturerAndModel(manufacturer: string, model: string) {
   const manufacturerData = await carRepository.findManufacturerId(manufacturer);
@@ -45,21 +46,29 @@ function carResponseDTO(car: any, manufacturerData: any, modelData: any): carReg
 }
 
 export async function registerCar(
-  data: CarType,
+  data: CarRegisterRequestDTO,
   // user: { companyId: number },
 ): Promise<carRegistUpdateDTO> {
-  const { manufacturer, model, ...rest } = data;
+  const { manufacturer, model, carStatus, ...rest } = data;
 
   const { manufacturerData, modelData } = await validManufacturerAndModel(manufacturer, model);
+  if (!carStatus) throw new Error('carStatus는 필수입니다.');
 
-  const carData = commonCarData(rest, manufacturerData.id, modelData.id /*user.companyId*/);
+  const carData = commonCarData(
+    {
+      ...rest,
+      carStatus: mapCarStatus(carStatus) as CarType['carStatus'],
+    },
+    manufacturerData.id,
+    modelData.id /*user.companyId*/,
+  );
   const createdCar = await carRepository.createCar(carData);
 
   return carResponseDTO(createdCar, manufacturerData, modelData);
 }
 
 export async function updateCar(id: number, data: Partial<CarType>): Promise<carRegistUpdateDTO> {
-  const { manufacturer, model, ...rest } = data;
+  const { manufacturer, model, carStatus, ...rest } = data;
 
   const existingCar = await carRepository.findCarById(id);
   if (!existingCar) throw new NotFoundError('존재하지 않는 차량입니다.');
@@ -68,8 +77,16 @@ export async function updateCar(id: number, data: Partial<CarType>): Promise<car
     manufacturer as string,
     model as string,
   );
+  if (!carStatus) throw new Error('carStatus는 필수입니다.');
 
-  const carData = commonCarData(rest, manufacturerData.id, modelData.id);
+  const carData = commonCarData(
+    {
+      ...rest,
+      carStatus: mapCarStatus(carStatus) as CarType['carStatus'],
+    },
+    manufacturerData.id,
+    modelData.id,
+  );
   const updatedCar = await carRepository.updateCar(id, carData);
 
   return carResponseDTO(updatedCar, manufacturerData, modelData);
@@ -80,4 +97,9 @@ export async function deleteCar(id: number): Promise<void> {
   if (!existingCar) throw new NotFoundError('존재하지 않는 차량입니다.');
 
   await carRepository.deleteCar(id);
+}
+
+export async function getCarList() {
+  const cars = await carRepository.getCarList();
+  return cars.map(carResponseDTO);
 }

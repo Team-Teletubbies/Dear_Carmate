@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { UserSearchKey } from '../structs/userStruct';
 
 // Entity
 
@@ -38,4 +39,11 @@ export interface CreateUserInput {
   companyId: any;
   name: string;
   phoneNumber: string;
+}
+
+export interface GetUserListInput {
+  page: number;
+  pageSize: number;
+  searchBy: UserSearchKey;
+  keyword?: string;
 }
