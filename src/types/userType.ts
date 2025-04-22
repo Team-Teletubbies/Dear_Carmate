@@ -32,6 +32,8 @@ export interface UserWithCompanyCode {
   };
 }
 
+export type UserWithPasswordAndCompany = User & { company: { id: number; companyCode: string } };
+
 export interface CreateUserInput {
   email: string;
   employeeNumber: string;
