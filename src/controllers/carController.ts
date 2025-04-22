@@ -10,7 +10,6 @@ export const registerCar = async (req: Request, res: Response): Promise<void> =>
 
   // if (!req.user) {
   //   res.status(401).json({ message: '로그인 정보가 없습니다.' });
-  //   return;
   // }
   // const companyId = (req.user as { companyId: number }).companyId;
 
@@ -30,7 +29,6 @@ export const updateCar = async (req: Request, res: Response): Promise<void> => {
 
   // if (!req.user) {
   //   res.status(401).json({ message: '로그인 정보가 없습니다.' });
-  //   return;
   // }
   // const companyId = (req.user as { companyId: number }).companyId;
 
