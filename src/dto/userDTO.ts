@@ -1,4 +1,4 @@
-import { UserWithCompanyCode } from '../types/userType';
+import { UserWithCompanyCode, UserWithPasswordAndCompany } from '../types/userType';
 import { UserSearchKey } from '../structs/userStruct';
 // Request
 
@@ -17,6 +17,11 @@ export interface GetUserListDTO {
   pageSize: number;
   searchBy?: UserSearchKey;
   keyword?: string;
+}
+
+export interface LoginDTO {
+  email: string;
+  password: string;
 }
 
 // Response
@@ -48,4 +53,35 @@ export interface UserListItem {
   employeeNumber: string;
   phoneNumber: string;
   company: { companyName: string };
+}
+
+export class LoginResponseDTO {
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    employeeNumber: string;
+    imageUrl: string;
+    isAdmin: boolean;
+    company: { companyCode: string };
+  };
+  accessToken: string;
+  refreshToken: string;
+
+  constructor(
+    user: UserWithPasswordAndCompany,
+    tokens: { refreshToken: string; accessToken: string },
+  ) {
+    this.user = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      employeeNumber: user.employeeNumber,
+      imageUrl: user.imageUrl ?? '',
+      isAdmin: user.isAdmin,
+      company: { companyCode: user.company.companyCode },
+    };
+    this.accessToken = tokens.accessToken;
+    this.refreshToken = tokens.refreshToken;
+  }
 }
