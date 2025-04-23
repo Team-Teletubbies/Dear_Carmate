@@ -1,9 +1,9 @@
-import { RequestHandler } from 'express';
+import { Request, RequestHandler, Response } from 'express';
 import * as userService from '../services/userService';
-import { CreateUserDTO, GetUserListDTO } from '../dto/userDTO';
+import { CreateUserDTO, GetUserListDTO, LoginDTO } from '../dto/userDTO';
 import BadRequestError from '../lib/errors/badRequestError';
 import { assert, create } from 'superstruct';
-import { registerUserStruct, userFilterStruct } from '../structs/userStruct';
+import { loginBodyStruct, registerUserStruct, userFilterStruct } from '../structs/userStruct';
 
 export const createUser: RequestHandler = async (req, res) => {
   assert(req.body, registerUserStruct);
@@ -14,8 +14,14 @@ export const createUser: RequestHandler = async (req, res) => {
   res.status(201).json(user);
 };
 
-export const getUserList: RequestHandler = async (req, res) => {
+export const getUserList = async (req: Request, res: Response) => {
   const dto: GetUserListDTO = create(req.query, userFilterStruct);
   const userList = await userService.getUserList(dto);
   res.status(200).json(userList);
+};
+
+export const login = async (req: Request, res: Response): Promise<void> => {
+  const dto: LoginDTO = create(req.body, loginBodyStruct);
+  const user = await userService.login(dto);
+  res.status(200).json(user);
 };

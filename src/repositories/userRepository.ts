@@ -1,6 +1,12 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
-import { UserWithCompanyCode, User, CreateUserInput, GetUserListInput } from '../types/userType';
+import {
+  UserWithCompanyCode,
+  User,
+  CreateUserInput,
+  GetUserListInput,
+  UserWithPasswordAndCompany,
+} from '../types/userType';
 import { GetUserListDTO, UserListItem } from '../dto/userDTO';
 import { CreateUpdateCompanyDTO } from '../dto/companyDto';
 
@@ -58,4 +64,24 @@ export const getUserList = async (input: GetUserListInput): Promise<UserListItem
 export const countByKeyword = async (searchBy: string, keyword?: string): Promise<number> => {
   const where = keyword ? { [searchBy]: { contains: keyword, mode: 'insensitive' } } : undefined;
   return prisma.user.count({ where });
+};
+
+export const findForLoginByEmail = async (
+  email: string,
+): Promise<UserWithPasswordAndCompany | null> => {
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      password: true,
+      employeeNumber: true,
+      phoneNumber: true,
+      imageUrl: true,
+      isAdmin: true,
+      company: { select: { id: true, companyCode: true } },
+    },
+  });
+  return user;
 };

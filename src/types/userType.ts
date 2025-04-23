@@ -32,7 +32,17 @@ export interface UserWithCompanyCode {
   };
 }
 
-export type UserWithPasswordAndCompany = User & { company: { id: number; companyCode: string } };
+export type UserWithPasswordAndCompany = {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+  employeeNumber: string;
+  phoneNumber: string;
+  imageUrl: string | null;
+  isAdmin: boolean;
+  company: { id: number; companyCode: string };
+};
 
 export interface CreateUserInput {
   email: string;
