@@ -1,6 +1,6 @@
 import * as carRepository from '../repositories/carRepository';
 import { CarType } from '../types/carType';
-import { CarRegisterRequestDTO, carRegistUpdateDTO, mapCarDTO } from '../dto/carDTO';
+import { CarRegisterRequestDTO, carRegistUpdateDTO, GetCarListDTO, mapCarDTO } from '../dto/carDTO';
 import NotFoundError from '../lib/errors/notFoundError';
 import { mapCarStatus } from '../structs/carStruct';
 
@@ -104,7 +104,26 @@ export async function deleteCar(id: number): Promise<void> {
   await carRepository.deleteCar(id);
 }
 
-export async function getCarList() {
-  const cars = await carRepository.getCarList();
-  return cars.map(carResponseDTO);
+export async function getCarList(
+  data: GetCarListDTO,
+): Promise<{ totalCount: number; cars: carRegistUpdateDTO[] }> {
+  const { totalCount, carList } = await carRepository.getCarList(data);
+
+  const cars = carList.map((car) =>
+    mapCarDTO({
+      ...car,
+      manufacturer: {
+        name: car.model.manufacturer.name,
+      },
+      model: {
+        name: car.model.name,
+        type: car.model.type,
+      },
+    }),
+  );
+
+  return {
+    totalCount,
+    cars,
+  };
 }
