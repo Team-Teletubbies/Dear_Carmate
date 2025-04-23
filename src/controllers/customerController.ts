@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import * as customerService from '../services/customerService';
-import NotFoundError from '../lib/errors/notFoundError';
 
 export const createCustomerHandler = async (req: Request, res: Response) => {
   const companyId = (req.user as { companyId: number }).companyId;
@@ -18,11 +17,9 @@ export const updateCustomerHandler = async (req: Request, res: Response) => {
 export const deleteCustomerHandler = async (req: Request, res: Response) => {
   const companyId = (req.user as { companyId: number }).companyId;
   const customerId = Number(req.params.id);
-  const result = await customerService.deleteCustomer(customerId, companyId);
 
-  await customerService.deleteCustomer(customerId, companyId); // ✅ 수정: 에러 처리는 서비스에서
-
-  res.status(200).json({ message: '고객 삭제 성공' }); // ✅ 수정: 성공 응답만
+  await customerService.deleteCustomer(customerId, companyId);
+  res.status(200).json({ message: '고객 삭제 성공' });
 };
 
 export const getCustomersHandler = async (req: Request, res: Response) => {
