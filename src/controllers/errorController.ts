@@ -35,7 +35,7 @@ export function globalErrorHandler(
   }
 
   if (err instanceof UnauthorizedError) {
-    res.status(401).send({ message: 'Internal serveer error' });
+    res.status(401).send({ message: err.message });
     return;
   }
 
