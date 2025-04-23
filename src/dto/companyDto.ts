@@ -25,6 +25,7 @@ export class CompanyResponseDTO {
     this.id = company.id;
     this.companyName = company.companyName;
     this.companyCode = company.companyCode;
+
     this.userCount =
       '_count' in company && company._count?.users !== undefined ? company._count.users : 0;
   }
