@@ -47,3 +47,8 @@ export const registerUserStruct = refine(createUserBodyStruct, 'passwordsMatch',
 });
 
 export const updateUserBodyStruct = partial(createUserBodyStruct);
+
+export const loginBodyStruct = object({
+  email: Email,
+  password: password,
+});

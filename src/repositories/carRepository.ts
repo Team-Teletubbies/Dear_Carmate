@@ -1,5 +1,6 @@
-import { CarStatus, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
+import { GetCarListDTO } from '../dto/carDTO';
 
 export async function createCar(data: Prisma.CarCreateInput) {
   return await prisma.car.create({
@@ -49,10 +50,47 @@ export async function deleteCar(id: number) {
   });
 }
 
-export async function getCarList() {
-  return await prisma.car.findMany({
-    orderBy: {
-      createdAt: 'desc',
+export async function getCarList(data: GetCarListDTO) {
+  const { page, pageSize, searchBy = 'carNumber', keyword } = data;
+  // searchBy = 'carNumber'로 기본값 설정(data.searchBy없을 때 에러 방지)
+  const serchByFields = ['carNumber', 'model'] as const;
+  if (!serchByFields.includes(searchBy)) {
+    throw new Error(`유효하지 않은 searchBy 입니다. : ${searchBy}`);
+  }
+
+  let where: Prisma.CarWhereInput = {};
+
+  if (keyword) {
+    switch (searchBy) {
+      case 'carNumber':
+        where.carNumber = { contains: keyword, mode: 'insensitive' };
+        break;
+      case 'model':
+        where.model = {
+          name: { contains: keyword, mode: 'insensitive' },
+        };
+        break;
+      default:
+        break;
+    }
+  }
+
+  const totalCount = await prisma.car.count({ where });
+
+  const carList = await prisma.car.findMany({
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    where,
+    include: {
+      model: {
+        include: {
+          manufacturer: { select: { name: true } }, //Car → model → manufacturer 로 연결되 있으니 중첩 include로 가져옴 // manufacturer의 name만 가져옴
+        },
+      },
     },
   });
+  return {
+    totalCount,
+    carList,
+  };
 }

@@ -29,3 +29,9 @@ export const updateCompany: RequestHandler = async (req, res) => {
   const updated = await companyService.updateAndGetCompany(companyId, data);
   res.status(200).json(updated);
 };
+
+export const deleteCompany: RequestHandler = async (req, res) => {
+  const { id: companyId } = create(req.params, IdParamsStruct);
+  await companyService.deleteCompany(companyId);
+  res.status(204).send();
+};

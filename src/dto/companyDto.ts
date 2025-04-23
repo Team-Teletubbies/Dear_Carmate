@@ -21,11 +21,12 @@ export class CompanyResponseDTO {
   companyCode: string;
   userCount: number;
 
-  constructor(company: Company | CompanyWithCount) {
+  constructor(company: CompanyWithCount | Company) {
     this.id = company.id;
     this.companyName = company.companyName;
     this.companyCode = company.companyCode;
-    this.userCount = (company as CompanyWithCount)._count.users ?? 0;
+    this.userCount =
+      '_count' in company && company._count?.users !== undefined ? company._count.users : 0;
   }
 }
 

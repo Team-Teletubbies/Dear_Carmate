@@ -3,6 +3,7 @@ import carRoutder from './routers/carRouter';
 import { companyRouter } from './routers/companyRouter';
 import { userRouter } from './routers/userRouter';
 import { contractRouter } from './routers/contractRouter';
+import { authRouter } from './routers/authRouter';
 import { contractDocumentRouter } from './routers/contractDocumentRouter';
 import { defaultNotFoundHandler, globalErrorHandler } from './controllers/errorController';
 import cors from 'cors';
@@ -17,6 +18,7 @@ app.use('/users', userRouter);
 app.use('/contracts', contractRouter);
 app.use('/contractDocuments', contractDocumentRouter);
 app.use('/customers', customerRouter);
+app.use('/auth', authRouter);
 
 app.use(defaultNotFoundHandler);
 app.use(globalErrorHandler);

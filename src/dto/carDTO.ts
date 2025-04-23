@@ -1,4 +1,5 @@
 import { CarStatus } from '@prisma/client';
+import { GetCompanyListDTO } from './companyDto';
 
 export function fromEnumStyle(value: string): string {
   return value.toLowerCase().replace(/_([a-z])/g, (_, g) => g.toUpperCase());
@@ -59,4 +60,11 @@ export interface CarRegisterRequestDTO {
   accidentCount: number;
   explanation?: string | null;
   accidentDetails?: string | null;
+}
+
+export type SearchField = 'carNumber' | 'model';
+
+export interface GetCarListDTO extends GetCompanyListDTO {
+  // 현재 사용되는 DTO이용, 나중에 중복코드 리팩토링 시 변경?!
+  searchBy?: SearchField;
 }
