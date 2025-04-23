@@ -110,7 +110,7 @@ model Contract {
   customerId     Int
   companyId      Int
   contractStatus ContractStatus @default(CAR_INSPECTION)
-  resolutionDate DateTime
+  resolutionDate DateTime?
   contractPrice  Int
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt

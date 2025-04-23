@@ -3,13 +3,22 @@ import {
   findContractDocumentById,
 } from '../repositories/contractDocumentRepository';
 import {
+  ContractDocumnetTotalResponseDTO,
   DownloadContractDocumentResponseDTO,
+  GetConstractDocumentListDTO,
   UploadContractDocumentResponseDTO,
 } from '../dto/contractDocumentDTO';
-import { UploadContractDocument } from '../types/contractDocumentType';
+import { DraftContractDocumentItem, UploadContractDocument } from '../types/contractDocumentType';
 import NotFoundError from '../lib/errors/notFoundError';
 import fs from 'fs';
 import path from 'path';
+import { ContractDocumentStructKey } from '../structs/contractDocumentStruct';
+import { ContractDocumentItem } from '../types/contractDocumentType';
+import {
+  findContractDocuments,
+  countContract,
+  findDraftContracts,
+} from '../repositories/contractRepository';
 
 export const uploadContractDocument = async (
   data: UploadContractDocument,
@@ -35,4 +44,46 @@ export const downloadContractDocument = async (
     filePath: path.resolve(document.filePath),
     fileName: document.fileName,
   });
+};
+
+export const getContractDocumentList = async (
+  dto: GetConstractDocumentListDTO,
+): Promise<ContractDocumnetTotalResponseDTO> => {
+  const { page, pageSize, searchBy, keyword } = dto;
+
+  const skip = (page - 1) * pageSize;
+  const take = pageSize;
+
+  const where = buildWhereCondition(searchBy, keyword);
+
+  const [items, totalItemCount] = await Promise.all([
+    findContractDocuments(where, skip, take),
+    countContract(where),
+  ]);
+
+  const data = items.map((item: any) => new ContractDocumentItem(item));
+  const totalPages = Math.ceil(totalItemCount / pageSize);
+
+  return new ContractDocumnetTotalResponseDTO(page, totalPages, totalItemCount, data);
+};
+
+const buildWhereCondition = (
+  searchBy?: ContractDocumentStructKey,
+  keyword?: string,
+): Record<string, any> | undefined => {
+  if (!searchBy || !keyword) return undefined;
+
+  const cond = { contains: keyword, mode: 'insensitive' as const };
+  return {
+    ...{
+      contractName: { OR: [{ car: { model: { name: cond } } }, { customer: { name: cond } }] },
+      userName: { user: { name: cond } },
+      carNumber: { car: { carNumber: cond } },
+    }[searchBy],
+  };
+};
+
+export const getDraftContractDocuments = async () => {
+  const drafts = await findDraftContracts();
+  return drafts.map((contract) => new DraftContractDocumentItem(contract));
 };

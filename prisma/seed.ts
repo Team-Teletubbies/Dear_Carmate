@@ -166,7 +166,7 @@ async function main() {
       customerId: allCustomers[0].id,
       companyId: allCompanies[0].id,
       contractPrice: 2200,
-      resolutionDate: new Date(),
+      resolutionDate: null,
     },
   });
   const contract2 = await prisma.contract.create({
@@ -176,7 +176,7 @@ async function main() {
       customerId: allCustomers[1].id,
       companyId: allCompanies[1].id,
       contractPrice: 1800,
-      resolutionDate: new Date(),
+      resolutionDate: null,
     },
   });
   const contract3 = await prisma.contract.create({
