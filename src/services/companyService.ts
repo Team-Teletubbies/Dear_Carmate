@@ -53,3 +53,7 @@ export const updateAndGetCompany = async (
   const result = new CompanyResponseDTO(companyWithCount);
   return result;
 };
+
+export const deleteCompany = async (companyId: number): Promise<void> => {
+  const deleted = await companyRepository.deleteById(companyId);
+};
