@@ -59,3 +59,8 @@ export interface GetUserListInput {
   searchBy: UserSearchKey;
   keyword?: string;
 }
+
+export interface TokenPayload {
+  userId: number;
+  companyId: number;
+}

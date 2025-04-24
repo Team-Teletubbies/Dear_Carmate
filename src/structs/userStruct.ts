@@ -52,3 +52,7 @@ export const loginBodyStruct = object({
   email: Email,
   password: password,
 });
+
+export const refreshTokenBodyStruct = object({
+  refreshToken: nonempty(string()),
+});
