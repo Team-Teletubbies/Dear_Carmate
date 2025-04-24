@@ -66,7 +66,8 @@ export interface TokenPayload {
 }
 
 export interface updateMyInfoInput {
-  employeeNumber?: string;
+  employeeNumber: string;
+  phoneNumber: string;
   password?: string;
-  imageUrl?: string;
+  imageUrl: string | null;
 }

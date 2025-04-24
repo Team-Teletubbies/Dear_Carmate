@@ -30,10 +30,11 @@ export interface RefreshTokenDTO {
 }
 
 export interface updateMyInfoDTO {
-  employeeNumber?: string;
+  employeeNumber: string;
   currentPassword: string;
+  phoneNumber: string;
   password?: string;
-  imageUrl?: string;
+  imageUrl: string | null;
 }
 
 // Response
