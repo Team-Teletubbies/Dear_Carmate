@@ -64,3 +64,9 @@ export interface TokenPayload {
   userId: number;
   companyId: number;
 }
+
+export interface updateMyInfoInput {
+  employeeNumber?: string;
+  password?: string;
+  imageUrl?: string;
+}

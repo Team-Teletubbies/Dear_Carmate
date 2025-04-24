@@ -6,6 +6,7 @@ import {
   LoginResponseDTO,
   RefreshTokenDTO,
   RefreshTokenResponseDTO,
+  updateMyInfoDTO,
   UserProfileDTO,
   UserResponseDTO,
 } from '../dto/userDTO';
@@ -95,4 +96,18 @@ export const refreshToken = async (dto: RefreshTokenDTO): Promise<RefreshTokenRe
 export const getMyInfo = async (userId: number): Promise<UserProfileDTO> => {
   const userProfile: UserProfileDTO = await userRepository.getWithCompanyCode(userId);
   return userProfile;
+};
+
+export const updateMyInfo = async (
+  userId: number,
+  data: updateMyInfoDTO,
+): Promise<UserProfileDTO> => {
+  const { currentPassword, ...dataWithoutCurrentPassword } = data;
+  const user = await userRepository.getById(userId);
+  const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+  if (!isValidPassword) {
+    throw new BadRequestError('현재 비밀번호가 맞지 않습니다');
+  }
+  const updated = await userRepository.updateAndGetUser(userId, dataWithoutCurrentPassword);
+  return updated;
 };

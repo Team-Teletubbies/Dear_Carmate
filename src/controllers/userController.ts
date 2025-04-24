@@ -6,6 +6,7 @@ import {
   LoginDTO,
   RefreshTokenDTO,
   RefreshTokenResponseDTO,
+  updateMyInfoDTO,
   UserProfileDTO,
 } from '../dto/userDTO';
 import BadRequestError from '../lib/errors/badRequestError';
@@ -14,6 +15,7 @@ import {
   loginBodyStruct,
   refreshTokenBodyStruct,
   registerUserStruct,
+  updateUserBodyStruct,
   userFilterStruct,
 } from '../structs/userStruct';
 import NotFoundError from '../lib/errors/notFoundError';
@@ -54,5 +56,20 @@ export const getMyInfo = async (req: Request, res: Response): Promise<void> => {
   }
   const { userId } = req.user;
   const user: UserProfileDTO = await userService.getMyInfo(userId);
+  res.status(200).json(user);
+};
+
+export const updateMyInfo = async (req: Request, res: Response): Promise<void> => {
+  assert(req.body, updateUserBodyStruct);
+  if (req.body.password !== req.body.passwordConfirmation) {
+    throw new BadRequestError('비밀번호와 비밀번호 확인이 일치하지 않습니다');
+  }
+  const { passwordConfirmation, ...rest } = req.body;
+  const data: updateMyInfoDTO = rest;
+  if (!req.user) {
+    throw new UnauthorizedError('로그인이 필요합니다');
+  }
+  const { userId } = req.user;
+  const user: UserProfileDTO = await userService.updateMyInfo(userId, data);
   res.status(200).json(user);
 };
