@@ -14,16 +14,15 @@ datasource db {
 }
 
 model Company {
-  id                Int                @id @default(autoincrement())
-  companyName       String             @unique
-  companyCode       String             @unique
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  users             User[]
-  customers         Customer[]
-  cars              Car[]
-  contracts         Contract[]
-  contractDocuments ContractDocument[]
+  id               Int                @id @default(autoincrement())
+  companyName      String             @unique
+  companyCode      String             @unique
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  users            User[]
+  customers        Customer[]
+  cars             Car[]
+  ContractDocument ContractDocument[]
 }
 
 model User {
@@ -108,7 +107,6 @@ model Contract {
   userId         Int
   carId          Int
   customerId     Int
-  companyId      Int
   contractStatus ContractStatus @default(CAR_INSPECTION)
   resolutionDate DateTime?
   contractPrice  Int
@@ -118,7 +116,6 @@ model Contract {
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   car               Car                @relation(fields: [carId], references: [id], onDelete: Cascade)
   customer          Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  company           Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
   meeting           Meeting[]
   contractDocuments ContractDocument[]
 }
@@ -153,8 +150,8 @@ model ContractDocument {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  company  Company  @relation(fields: [companyId], references: [id])
   contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
-  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
 enum Gender {

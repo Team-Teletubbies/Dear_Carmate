@@ -8,7 +8,7 @@ export interface ContractDocument {
   createdAt: Date;
   updatedAt: Date;
 }
-
+export type contractDocuments = Pick<ContractDocument, 'id' | 'fileName'>;
 export type UploadContractDocument = Omit<ContractDocument, 'id' | 'createdAt' | 'updatedAt'>;
 
 export class DocumentSummary {
@@ -20,25 +20,27 @@ export class DocumentSummary {
 export class ContractDocumentItem {
   id: number;
   contractName: string;
-  resolutionDate: Date;
+  resolutionDate: Date | null;
   documentsCount: number;
   manager: string;
   carNumber: string;
   documents: DocumentSummary[];
 
-  constructor(contract: any) {
+  constructor(contract: ContractForDocumentItem) {
     this.id = contract.id;
 
-    const modelName = contract.car?.model?.name ?? '모델없음';
-    const customerName = contract.customer?.name ?? '고객없음';
+    const modelName = contract.car.model.name;
+    const customerName = contract.customer.name;
     this.contractName = `${modelName} - ${customerName} 고객님`;
 
     this.resolutionDate = contract.resolutionDate;
     this.documentsCount = contract.contractDocuments.length ?? 0;
-    this.manager = contract.user.name ?? '담당자없음';
-    this.carNumber = contract.car.carNumber ?? '차량번호없음';
+    this.manager = contract.user.name;
+    this.carNumber = contract.car.carNumber;
     this.documents =
-      contract.contractDocuments.map((d: any) => new DocumentSummary(d.id, d.fileName)) ?? [];
+      contract.contractDocuments.map(
+        (document: contractDocuments) => new DocumentSummary(document.id, document.fileName),
+      ) ?? [];
   }
 }
 
@@ -46,10 +48,37 @@ export class DraftContractDocumentItem {
   id: number;
   data: string;
 
-  constructor(contract: any) {
+  constructor(contract: DraftContractForDocumentItem) {
     this.id = contract.id;
-    const model = contract.car?.model?.name ?? '모델없음';
-    const customerName = contract.customer?.name ?? '고객없음';
+    const model = contract.car.model.name;
+    const customerName = contract.customer.name;
     this.data = `${model} - ${customerName} 고객님`;
   }
 }
+
+export type ContractForDocumentItem = {
+  id: number;
+  resolutionDate: Date | null;
+  user: {
+    name: string;
+  };
+  customer: {
+    name: string;
+  };
+  car: {
+    carNumber: string;
+    model: {
+      name: string;
+    };
+  };
+  contractDocuments: {
+    id: number;
+    fileName: string;
+  }[];
+};
+
+export type DraftContractForDocumentItem = {
+  id: number;
+  car: { model: { name: string } };
+  customer: { name: string };
+};

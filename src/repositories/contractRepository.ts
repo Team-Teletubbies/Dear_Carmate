@@ -2,7 +2,7 @@ import { prisma } from '../lib/prisma';
 import { Prisma } from '@prisma/client';
 
 export const findContractDocuments = async (
-  where: Record<string, any> | undefined,
+  where: Prisma.ContractWhereInput = {},
   skip: number,
   take: number,
 ) => {
@@ -21,7 +21,7 @@ export const findContractDocuments = async (
   });
 };
 
-export const countContract = async (where: Record<string, any> | undefined): Promise<number> => {
+export const countContract = async (where: Prisma.ContractWhereInput = {}): Promise<number> => {
   return await prisma.contract.count({ where });
 };
 

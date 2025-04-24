@@ -8,7 +8,12 @@ import {
   GetConstractDocumentListDTO,
   UploadContractDocumentResponseDTO,
 } from '../dto/contractDocumentDTO';
-import { DraftContractDocumentItem, UploadContractDocument } from '../types/contractDocumentType';
+import {
+  DraftContractDocumentItem,
+  UploadContractDocument,
+  ContractForDocumentItem,
+  DraftContractForDocumentItem,
+} from '../types/contractDocumentType';
 import NotFoundError from '../lib/errors/notFoundError';
 import fs from 'fs';
 import path from 'path';
@@ -19,6 +24,7 @@ import {
   countContract,
   findDraftContracts,
 } from '../repositories/contractRepository';
+import { Prisma } from '@prisma/client';
 
 export const uploadContractDocument = async (
   data: UploadContractDocument,
@@ -61,7 +67,7 @@ export const getContractDocumentList = async (
     countContract(where),
   ]);
 
-  const data = items.map((item: any) => new ContractDocumentItem(item));
+  const data = items.map((item: ContractForDocumentItem) => new ContractDocumentItem(item));
   const totalPages = Math.ceil(totalItemCount / pageSize);
 
   return new ContractDocumnetTotalResponseDTO(page, totalPages, totalItemCount, data);
@@ -70,8 +76,8 @@ export const getContractDocumentList = async (
 const buildWhereCondition = (
   searchBy?: ContractDocumentStructKey,
   keyword?: string,
-): Record<string, any> | undefined => {
-  if (!searchBy || !keyword) return undefined;
+): Prisma.ContractWhereInput | {} => {
+  if (!searchBy || !keyword) return {};
 
   const cond = { contains: keyword, mode: 'insensitive' as const };
   return {
@@ -85,5 +91,8 @@ const buildWhereCondition = (
 
 export const getDraftContractDocuments = async () => {
   const drafts = await findDraftContracts();
-  return drafts.map((contract) => new DraftContractDocumentItem(contract));
+  console.log('🔥 drafts:', drafts); // 여기에 로깅
+  return drafts.map(
+    (contract: DraftContractForDocumentItem) => new DraftContractDocumentItem(contract),
+  );
 };
