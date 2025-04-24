@@ -14,6 +14,10 @@ export function globalErrorHandler(
   res: Response,
   next: NextFunction,
 ): void {
+  if (res.headersSent) {
+    return next(err);
+  }
+
   if (err instanceof StructError || err instanceof BadRequestError) {
     res.status(400).send({ message: err.message });
     return;
@@ -32,6 +36,7 @@ export function globalErrorHandler(
 
   if (err instanceof NotFoundError) {
     res.status(404).send({ message: err.message });
+    return;
   }
 
   if (err instanceof UnauthorizedError) {

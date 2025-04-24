@@ -7,9 +7,7 @@ export const contractFilterStruct = object({
   ...PageParamsStruct.schema,
   searchBy: optional(enums(contractStructKey)),
 });
-const alarmStruct = object({
-  time: string(),
-});
+const alarmStruct = string();
 
 const meetingStruct = object({
   date: string(),
