@@ -1,9 +1,22 @@
 import { Request, RequestHandler, Response } from 'express';
 import * as userService from '../services/userService';
-import { CreateUserDTO, GetUserListDTO, LoginDTO } from '../dto/userDTO';
+import {
+  CreateUserDTO,
+  GetUserListDTO,
+  LoginDTO,
+  RefreshTokenDTO,
+  RefreshTokenResponseDTO,
+} from '../dto/userDTO';
 import BadRequestError from '../lib/errors/badRequestError';
 import { assert, create } from 'superstruct';
-import { loginBodyStruct, registerUserStruct, userFilterStruct } from '../structs/userStruct';
+import {
+  loginBodyStruct,
+  refreshTokenBodyStruct,
+  registerUserStruct,
+  userFilterStruct,
+} from '../structs/userStruct';
+import { UnauthorizedError } from 'express-jwt';
+import NotFoundError from '../lib/errors/notFoundError';
 
 export const createUser: RequestHandler = async (req, res) => {
   assert(req.body, registerUserStruct);
@@ -24,4 +37,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   const dto: LoginDTO = create(req.body, loginBodyStruct);
   const user = await userService.login(dto);
   res.status(200).json(user);
+};
+
+export const refreshToken = async (req: Request, res: Response): Promise<void> => {
+  const { refreshToken } = create(req.body, refreshTokenBodyStruct);
+  const userId = req.user!.userId;
+  const dto: RefreshTokenDTO = { refreshToken, userId };
+  const newTokens: RefreshTokenResponseDTO = await userService.refreshToken(dto);
+  res.status(200).json(newTokens);
 };

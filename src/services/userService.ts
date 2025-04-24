@@ -4,6 +4,8 @@ import {
   GetUserListResponseDTO,
   LoginDTO,
   LoginResponseDTO,
+  RefreshTokenDTO,
+  RefreshTokenResponseDTO,
   UserResponseDTO,
 } from '../dto/userDTO';
 import * as userRepository from '../repositories/userRepository';
@@ -15,6 +17,8 @@ import { CreateUserInput, UserWithPasswordAndCompany } from '../types/userType';
 import bcrypt from 'bcrypt';
 import { createToken } from '../lib/auth/jwt';
 import { redis } from '../lib/auth/redis';
+import { UnauthorizedError } from 'express-jwt';
+import BadRequestError from '../lib/errors/badRequestError';
 
 export const createUser = async (dto: CreateUserDTO) => {
   const { email, employeeNumber, company, companyCode, password, ...rest } = dto;
@@ -64,10 +68,25 @@ export const login = async (dto: LoginDTO): Promise<LoginResponseDTO> => {
   if (!isValidPassword) {
     throw new NotFoundError('존재하지 않거나 비밀번호가 일치하지 않습니다');
   }
-  const accessToken = createToken(user);
-  const refreshToken = createToken(user, 'refresh');
   const userId = user.id;
-  await redis.set(`refresh:user:${userId}`, refreshToken, 'EX', 60 * 60 * 24 * 14);
+  const companyId = user.company.id;
+  const accessToken = createToken({ userId, companyId });
+  const refreshToken = createToken({ userId, companyId }, 'refresh');
+  await userRepository.setRedisRefreshToken(userId, refreshToken);
   const result = new LoginResponseDTO(user, { accessToken, refreshToken });
   return result;
+};
+
+export const refreshToken = async (dto: RefreshTokenDTO): Promise<RefreshTokenResponseDTO> => {
+  const { userId, refreshToken } = dto;
+  const original = await userRepository.getRedisRefreshToken(userId);
+  if (!original || original !== refreshToken) {
+    throw new BadRequestError('잘못된 요청입니다.');
+  }
+  const user = await userRepository.getById(userId);
+  const companyId = user.companyId;
+  const accessToken = createToken({ userId, companyId });
+  const newRefreshToken = createToken({ userId, companyId }, 'refresh');
+  await userRepository.setRedisRefreshToken(userId, newRefreshToken);
+  return { refreshToken: newRefreshToken, accessToken };
 };

@@ -9,6 +9,7 @@ import {
 } from '../types/userType';
 import { GetUserListDTO, UserListItem } from '../dto/userDTO';
 import { CreateUpdateCompanyDTO } from '../dto/companyDto';
+import { redis } from '../lib/auth/redis';
 
 export const create = async (input: CreateUserInput): Promise<User> => {
   return await prisma.user.create({ data: input });
@@ -88,4 +89,13 @@ export const findForLoginByEmail = async (
 
 export const getById = async (id: number): Promise<User> => {
   return await prisma.user.findUniqueOrThrow({ where: { id } });
+};
+
+export const setRedisRefreshToken = async (userId: number, refreshToken: string): Promise<void> => {
+  await redis.set(`refresh:user:${userId}`, refreshToken, 'EX', 60 * 60 * 24 * 14);
+};
+
+export const getRedisRefreshToken = async (userId: number): Promise<string | null> => {
+  const refreshToken = await redis.get(`refresh:user:${userId}`);
+  return refreshToken;
 };

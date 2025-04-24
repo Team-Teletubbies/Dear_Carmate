@@ -1,7 +1,7 @@
 import { UserWithCompanyCode, UserWithPasswordAndCompany } from '../types/userType';
 import { UserSearchKey } from '../structs/userStruct';
-// Request
 
+// Request
 export interface CreateUserDTO {
   name: string;
   email: string;
@@ -22,6 +22,11 @@ export interface GetUserListDTO {
 export interface LoginDTO {
   email: string;
   password: string;
+}
+
+export interface RefreshTokenDTO {
+  userId: number;
+  refreshToken: string;
 }
 
 // Response
@@ -84,4 +89,9 @@ export class LoginResponseDTO {
     this.accessToken = tokens.accessToken;
     this.refreshToken = tokens.refreshToken;
   }
+}
+
+export interface RefreshTokenResponseDTO {
+  refreshToken: string;
+  accessToken: string;
 }
