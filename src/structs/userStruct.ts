@@ -46,7 +46,18 @@ export const registerUserStruct = refine(createUserBodyStruct, 'passwordsMatch',
   return value.password === value.passwordConfirmation;
 });
 
-export const updateUserBodyStruct = partial(createUserBodyStruct);
+export const updateUserBodyStruct = object({
+  employeeNumber: optional(size(string(), 4, 20)),
+  phoneNumber: optional(phoneNumber),
+  currentPassword: password,
+  password: optional(password),
+  passwordConfirmation: optional(password),
+  imageUrl: optional(string()),
+});
+
+export const updateUserStruct = refine(updateUserBodyStruct, 'passwordMatch', (value) => {
+  return value.password === value.passwordConfirmation;
+});
 
 export const loginBodyStruct = object({
   email: Email,

@@ -29,6 +29,12 @@ export interface RefreshTokenDTO {
   refreshToken: string;
 }
 
+export interface updateMyInfoDTO {
+  employeeNumber?: string;
+  password?: string;
+  imageUrl?: string;
+}
+
 // Response
 export type UserResponseDTO = UserWithCompanyCode;
 
