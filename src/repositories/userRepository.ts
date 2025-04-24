@@ -85,3 +85,7 @@ export const findForLoginByEmail = async (
   });
   return user;
 };
+
+export const getById = async (id: number): Promise<User> => {
+  return await prisma.user.findUniqueOrThrow({ where: { id } });
+};

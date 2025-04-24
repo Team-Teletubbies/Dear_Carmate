@@ -1,9 +1,12 @@
-import { User } from '@prisma/client';
+import Express from 'express';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: Pick<User, 'id' | 'companyId'>;
+      user?: {
+        userId: number;
+        companyId: number;
+      };
     }
   }
 }
