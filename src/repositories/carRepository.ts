@@ -1,6 +1,7 @@
-import { Prisma } from '@prisma/client';
+import { CarStatus, Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import { GetCarListDTO } from '../dto/carDTO';
+import { mapCarStatus } from '../structs/carStruct';
 
 export async function createCar(data: Prisma.CarCreateInput) {
   return await prisma.car.create({
@@ -71,7 +72,12 @@ export async function getCarList(data: GetCarListDTO) {
         };
         break;
       case 'carStatus':
-        where.carStatus = keyword as Prisma.EnumCarStatusFilter; // keyword가 단순 문자열이더라도 강제로 타입 캐스팅만 한 상태라서, 실제 런타임에서는 Prisma가 기대하는 CarStatus enum 값이 아닌 경우 오류를 발생시킴, 그래서 Request를 할 경우엔 schema에서 정의한 enum 값으로만 요청해야함(이 경우엔 고정 쿼리여서 상관 없을꺼라 생각됨). 아니면 다른 코드로 바꿔야함
+        const prismaCarStatus = mapCarStatus(keyword);
+        if (prismaCarStatus) {
+          where.carStatus = prismaCarStatus as CarStatus;
+        } else {
+          throw new Error(`Invalid car status: ${keyword}`);
+        }
         break;
       default:
         break;
