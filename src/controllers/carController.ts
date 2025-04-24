@@ -3,6 +3,7 @@ import * as carService from '../services/carService';
 import { carFilterStruct, createCarBodyStruct, updateCarBodyStruct } from '../structs/carStruct';
 import { create } from 'superstruct';
 import { SearchField } from '../dto/carDTO';
+import { IdParamsStruct } from '../structs/commonStruct';
 
 export const registerCar = async (req: Request, res: Response): Promise<void> => {
   const data = create(req.body, createCarBodyStruct);
@@ -23,7 +24,7 @@ export const registerCar = async (req: Request, res: Response): Promise<void> =>
 };
 
 export const updateCar = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
+  const { id } = create(req.params, IdParamsStruct);
   const data = create(req.body, updateCarBodyStruct);
 
   // console.log('req.user:', req.user);
@@ -41,7 +42,7 @@ export const updateCar = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const deleteCar = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
+  const { id } = create(req.params, IdParamsStruct);
 
   await carService.deleteCar(Number(id));
   res.status(204).send();
@@ -64,4 +65,16 @@ export const getCarList = async (req: Request, res: Response): Promise<void> => 
     pageSize,
     cars: carList.cars,
   });
+};
+
+export const getCarDetail = async (req: Request, res: Response): Promise<void> => {
+  const { id } = create(req.params, IdParamsStruct);
+
+  const car = await carService.getCarById(Number(id));
+  res.status(200).json(car);
+};
+
+export const getManufacturerModelList = async (req: Request, res: Response): Promise<void> => {
+  const data = await carService.getManufacturerModelList();
+  res.status(200).json(data);
 };

@@ -53,7 +53,7 @@ export async function deleteCar(id: number) {
 export async function getCarList(data: GetCarListDTO) {
   const { page, pageSize, searchBy = 'carNumber', keyword } = data;
   // searchBy = 'carNumber'로 기본값 설정(data.searchBy없을 때 에러 방지)
-  const serchByFields = ['carNumber', 'model'] as const;
+  const serchByFields = ['carNumber', 'model', 'carStatus'] as const;
   if (!serchByFields.includes(searchBy)) {
     throw new Error(`유효하지 않은 searchBy 입니다. : ${searchBy}`);
   }
@@ -69,6 +69,9 @@ export async function getCarList(data: GetCarListDTO) {
         where.model = {
           name: { contains: keyword, mode: 'insensitive' },
         };
+        break;
+      case 'carStatus':
+        where.carStatus = keyword as Prisma.EnumCarStatusFilter; // keyword가 단순 문자열이더라도 강제로 타입 캐스팅만 한 상태라서, 실제 런타임에서는 Prisma가 기대하는 CarStatus enum 값이 아닌 경우 오류를 발생시킴, 그래서 Request를 할 경우엔 schema에서 정의한 enum 값으로만 요청해야함(이 경우엔 고정 쿼리여서 상관 없을꺼라 생각됨). 아니면 다른 코드로 바꿔야함
         break;
       default:
         break;
@@ -93,4 +96,35 @@ export async function getCarList(data: GetCarListDTO) {
     totalCount,
     carList,
   };
+}
+
+export async function getCarById(id: number) {
+  return await prisma.car.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      model: {
+        include: {
+          manufacturer: { select: { name: true } },
+        },
+      },
+    },
+  });
+}
+
+export async function getManufacturerModelList() {
+  return await prisma.manufacturer.findMany({
+    include: {
+      models: {
+        select: { name: true },
+      },
+    },
+  });
+}
+
+export async function getCarByCarNumber(carNumber: string) {
+  return await prisma.car.findUnique({
+    where: { carNumber },
+  });
 }

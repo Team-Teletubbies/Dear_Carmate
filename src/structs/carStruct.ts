@@ -23,14 +23,16 @@ function toPrismaCarStatus(status: string): string {
 }
 
 export function mapCarStatus(status: string): string {
+  const normalizedCarStatus = status ?? 'possession'; // possession 기본값 설정
+
   if (!statuses.includes(status as StatusType)) {
     // request data와 검증
     throw new Error(`Invalid carStatus: ${status}`);
   }
-  return toPrismaCarStatus(status);
+  return toPrismaCarStatus(normalizedCarStatus);
 }
 
-const carSearchKeys = ['carNumber', 'model'] as const;
+const carSearchKeys = ['carNumber', 'model', 'carStatus'] as const;
 
 export const carFilterStruct = object({
   ...PageParamsStruct.schema,
@@ -50,7 +52,7 @@ export const createCarBodyStruct = object({
   accidentCount: defaulted(min(integer(), 0), 0),
   explanation: nullable(size(string(), 0, 300)),
   accidentDetails: nullable(size(string(), 0, 300)),
-  carStatus: nonempty(enums([...statuses])), // statuses의 값 중 하나여야하고, undefined, null, ''이면 오류
+  carStatus: defaulted(enums(statuses), 'possession'), // possession 기본값 설정
 });
 
 export const updateCarBodyStruct = partial(createCarBodyStruct);
