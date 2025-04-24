@@ -103,11 +103,16 @@ export const updateMyInfo = async (
   data: updateMyInfoDTO,
 ): Promise<UserProfileDTO> => {
   const { currentPassword, ...dataWithoutCurrentPassword } = data;
-  const user = await userRepository.getById(userId);
-  const isValidPassword = await bcrypt.compare(currentPassword, user.password);
-  if (!isValidPassword) {
-    throw new BadRequestError('현재 비밀번호가 맞지 않습니다');
+  if (data.password) {
+    const user = await userRepository.getById(userId);
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    if (!isValidPassword) {
+      throw new BadRequestError('현재 비밀번호가 맞지 않습니다');
+    }
+    const hashedPassword = await hashPassword(data.password);
+    dataWithoutCurrentPassword.password = hashedPassword;
   }
+
   const updated = await userRepository.updateAndGetUser(userId, dataWithoutCurrentPassword);
   return updated;
 };
