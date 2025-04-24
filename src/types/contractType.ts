@@ -1,3 +1,5 @@
+import { statusMap } from '../lib/utils/statusMap';
+
 export interface ContractParticipant {
   id: number;
   name: string;
@@ -12,7 +14,7 @@ export interface ContractCar {
 
 export interface Meeting {
   date: string;
-  alarms: string[];
+  alarms?: string[];
 }
 
 export type MinimalContract = {
@@ -45,3 +47,19 @@ export type GroupedContractSearchParams = {
   searchBy?: 'customerName' | 'userName';
   keyword?: string;
 };
+
+export interface BaseUpdateContractFields {
+  contractStatus?: keyof typeof statusMap;
+  resolutionDate?: string;
+  contractPrice?: number;
+  meetings?: Meeting[];
+  contractDocuments?: { id: number; fileName?: string }[];
+  carId?: number;
+  customerId?: number;
+  userId?: number;
+}
+
+export interface UpdateContractType extends BaseUpdateContractFields {
+  contractId: number;
+  editorUserId: number;
+}

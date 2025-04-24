@@ -2,14 +2,24 @@ import {
   createContract,
   findGroupedContracts,
   countGroupedContracts,
+  findContractById,
+  updateContractInDB,
 } from '../repositories/contractRepository';
 import {
   CreateContractResponseDTO,
   CreateContractDTO,
   GroupedContractsResponseDTO,
+  UpdateContractDTO,
 } from '../dto/contractDTO';
-import { MinimalContract, GroupedContractSearchParams } from '../types/contractType';
+import {
+  MinimalContract,
+  GroupedContractSearchParams,
+  UpdateContractType,
+} from '../types/contractType';
 import { Prisma, ContractStatus } from '@prisma/client';
+import ForbiddenError from '../lib/errors/forbiddenError';
+import NotFoundError from '../lib/errors/notFoundError';
+import { toDBStatus } from '../lib/utils/statusMap';
 
 export const createContractData = async (
   data: CreateContractDTO,
@@ -80,4 +90,49 @@ const buildWhereCondition = (
   return {
     [searchBy === 'customerName' ? 'customer' : 'user']: { name: cond },
   };
+};
+
+export const updateContractData = async (input: UpdateContractType): Promise<UpdateContractDTO> => {
+  const {
+    contractId,
+    editorUserId,
+    contractStatus,
+    resolutionDate,
+    contractPrice,
+    meetings,
+    contractDocuments,
+    carId,
+    customerId,
+    userId,
+  } = input;
+
+  const dbContract = await findContractById(contractId);
+  if (!dbContract) throw new NotFoundError('존재하지 않는 계약입니다.');
+
+  if (dbContract.userId !== editorUserId) throw new ForbiddenError('담당자만 수정 가능합니다.');
+
+  const basic: Prisma.ContractUpdateInput = {};
+  if (contractStatus) basic.contractStatus = toDBStatus(contractStatus);
+  if (resolutionDate) basic.resolutionDate = new Date(resolutionDate);
+  if (contractPrice !== undefined) basic.contractPrice = contractPrice;
+  if (userId) basic.user = { connect: { id: userId } };
+  if (customerId) basic.customer = { connect: { id: customerId } };
+  if (carId) basic.car = { connect: { id: carId } };
+  if (contractDocuments) {
+    basic.contractDocuments = {
+      set: contractDocuments.map((doc) => ({ id: doc.id })),
+    };
+  }
+
+  const meetingList = meetings?.map((meet) => ({
+    date: new Date(meet.date),
+    alarm: (meet.alarms ?? []).map((alarm) => ({ time: new Date(alarm) })),
+  }));
+
+  const contract = await updateContractInDB(contractId, {
+    basic,
+    meetings: meetingList,
+  });
+
+  return new UpdateContractDTO(contract);
 };

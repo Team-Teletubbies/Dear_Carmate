@@ -1,12 +1,17 @@
 import { Request, Response } from 'express';
-import { createContractData, getGroupedContractByStatus } from '../services/contractService';
+import {
+  createContractData,
+  getGroupedContractByStatus,
+  updateContractData,
+} from '../services/contractService';
 import { CreateContractDTO } from '../dto/contractDTO';
 import { asyncHandler } from '../lib/async-handler';
 import UnauthorizedError from '../lib/errors/unauthorizedError';
 import BadRequestError from '../lib/errors/badRequestError';
-import { createContractBodyStruct } from '../structs/contractStruct';
+import { createContractBodyStruct, updateContractBodyStruct } from '../structs/contractStruct';
 import { create } from 'superstruct';
 import { GroupedContractSearchParams } from '../types/contractType';
+import { IdParamsStruct } from '../structs/commonStruct';
 
 export const createContract = asyncHandler(async (req: Request, res: Response) => {
   const { carId, customerId, meetings } = create(req.body, createContractBodyStruct);
@@ -37,7 +42,7 @@ export const createContract = asyncHandler(async (req: Request, res: Response) =
   return;
 });
 
-export const getGroupedContracts = async (req: Request, res: Response) => {
+export const getGroupedContracts = asyncHandler(async (req: Request, res: Response) => {
   const { searchBy, keyword } = req.query;
   const companyId = req.user?.companyId;
 
@@ -54,4 +59,20 @@ export const getGroupedContracts = async (req: Request, res: Response) => {
   const result = await getGroupedContractByStatus(params);
 
   res.status(200).json(result);
-};
+});
+
+export const patchContracts = asyncHandler(async (req: Request, res: Response) => {
+  create(req.params, IdParamsStruct);
+  const data = create(req.body, updateContractBodyStruct);
+  const user = req.user;
+
+  if (!user) throw new UnauthorizedError('로그인이 필요합니다.');
+
+  const result = await updateContractData({
+    contractId: Number(req.params.id),
+    editorUserId: user.userId,
+    ...data,
+  });
+
+  res.status(200).json(result);
+});

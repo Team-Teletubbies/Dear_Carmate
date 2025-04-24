@@ -1,5 +1,6 @@
 import { ContractParticipant, Meeting, MinimalContract } from '../types/contractType';
-
+import { toClientStatus } from '../lib/utils/statusMap';
+import { Contract } from '@prisma/client';
 export interface CreateContractDTO {
   carId: number;
   customerId: number;
@@ -38,21 +39,45 @@ export class CreateContractResponseDTO {
   }
 }
 
-export interface UpdateContractDTO {
-  contractStatus:
-    | 'carInspection'
-    | 'priceNegotiation'
-    | 'contractDraft'
-    | 'contractSuccessful'
-    | 'contractFailed';
+export class UpdateContractDTO {
+  id: number;
+  contractStatus: string;
   resolutionDate: string;
   contractPrice: number;
-  meetings: Meeting[];
-  contractDocumentIdsToAdd: number[];
-  contractDocumentIdsToRemove: number[];
-  userId: number;
-  customerId: number;
-  carId: number;
+  meetings: { date: string; alarms: string[] }[];
+  user: { id: number; name: string };
+  customer: { id: number; name: string };
+  car: { id: number; model: string };
+
+  constructor(
+    contract: Contract & {
+      user: { id: number; name: string };
+      customer: { id: number; name: string };
+      car: { id: number; model: { name: string } };
+      meeting: { date: Date; alarm: { time: Date }[] }[];
+    },
+  ) {
+    this.id = contract.id;
+    this.contractStatus = toClientStatus(contract.contractStatus);
+    this.resolutionDate = contract.resolutionDate?.toISOString() ?? '';
+    this.contractPrice = contract.contractPrice;
+    this.meetings = contract.meeting.map((meet) => ({
+      date: meet.date.toISOString().slice(0, 10),
+      alarms: meet.alarm.map((alarm) => alarm.time.toISOString()),
+    }));
+    this.user = {
+      id: contract.user.id,
+      name: contract.user.name,
+    };
+    this.customer = {
+      id: contract.customer.id,
+      name: contract.customer.name,
+    };
+    this.car = {
+      id: contract.car.id,
+      model: contract.car.model.name,
+    };
+  }
 }
 
 export class ContractResponseDTO {
