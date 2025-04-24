@@ -1,9 +1,45 @@
-import { ContractParticipant, ContractCar, Meeting } from '../types/contractType';
+import { ContractParticipant, ContractCar, Meeting, MinimalContract } from '../types/contractType';
 
 export interface CreateContractDTO {
   carId: number;
   customerId: number;
+  userId: number;
+  contractPrice: number;
   meetings: Meeting[];
+}
+
+export class CreateContractResponseDTO {
+  id: number;
+  contractStatus: string;
+  resolutionDate: string | null;
+  contractPrice: number;
+  meetings: Meeting[];
+  user: { id: number; name: string };
+  customer: { id: number; name: string };
+  car: { id: number; model: string };
+
+  constructor(contract: MinimalContract) {
+    this.id = contract.id;
+    this.contractStatus = contract.contractStatus;
+    this.resolutionDate = contract.resolutionDate ? contract.resolutionDate.toISOString() : null;
+    this.contractPrice = contract.contractPrice;
+    this.meetings = contract.meeting.map((meet) => ({
+      date: meet.date.toISOString(),
+      alarms: meet.alarm.map((alarm) => alarm.time.toISOString()),
+    }));
+    this.user = {
+      id: contract.user.id,
+      name: contract.user.name,
+    };
+    this.customer = {
+      id: contract.customer.id,
+      name: contract.customer.name,
+    };
+    this.car = {
+      id: contract.car.id,
+      model: contract.car.model.name,
+    };
+  }
 }
 
 export interface UpdateContractDTO {
