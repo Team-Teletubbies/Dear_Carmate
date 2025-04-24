@@ -3,13 +3,28 @@ import {
   findContractDocumentById,
 } from '../repositories/contractDocumentRepository';
 import {
+  ContractDocumnetTotalResponseDTO,
   DownloadContractDocumentResponseDTO,
+  GetConstractDocumentListDTO,
   UploadContractDocumentResponseDTO,
 } from '../dto/contractDocumentDTO';
-import { UploadContractDocument } from '../types/contractDocumentType';
+import {
+  DraftContractDocumentItem,
+  UploadContractDocument,
+  ContractForDocumentItem,
+  DraftContractForDocumentItem,
+} from '../types/contractDocumentType';
 import NotFoundError from '../lib/errors/notFoundError';
 import fs from 'fs';
 import path from 'path';
+import { ContractDocumentStructKey } from '../structs/contractDocumentStruct';
+import { ContractDocumentItem } from '../types/contractDocumentType';
+import {
+  findContractDocuments,
+  countContract,
+  findDraftContracts,
+} from '../repositories/contractRepository';
+import { Prisma } from '@prisma/client';
 
 export const uploadContractDocument = async (
   data: UploadContractDocument,
@@ -35,4 +50,49 @@ export const downloadContractDocument = async (
     filePath: path.resolve(document.filePath),
     fileName: document.fileName,
   });
+};
+
+export const getContractDocumentList = async (
+  dto: GetConstractDocumentListDTO,
+): Promise<ContractDocumnetTotalResponseDTO> => {
+  const { page, pageSize, searchBy, keyword } = dto;
+
+  const skip = (page - 1) * pageSize;
+  const take = pageSize;
+
+  const where = buildWhereCondition(searchBy, keyword);
+
+  const [items, totalItemCount] = await Promise.all([
+    findContractDocuments(where, skip, take),
+    countContract(where),
+  ]);
+
+  const data = items.map((item: ContractForDocumentItem) => new ContractDocumentItem(item));
+  const totalPages = Math.ceil(totalItemCount / pageSize);
+
+  return new ContractDocumnetTotalResponseDTO(page, totalPages, totalItemCount, data);
+};
+
+const buildWhereCondition = (
+  searchBy?: ContractDocumentStructKey,
+  keyword?: string,
+): Prisma.ContractWhereInput | {} => {
+  if (!searchBy || !keyword) return {};
+
+  const cond = { contains: keyword, mode: 'insensitive' as const };
+  return {
+    ...{
+      contractName: { OR: [{ car: { model: { name: cond } } }, { customer: { name: cond } }] },
+      userName: { user: { name: cond } },
+      carNumber: { car: { carNumber: cond } },
+    }[searchBy],
+  };
+};
+
+export const getDraftContractDocuments = async () => {
+  const drafts = await findDraftContracts();
+  console.log('🔥 drafts:', drafts); // 여기에 로깅
+  return drafts.map(
+    (contract: DraftContractForDocumentItem) => new DraftContractDocumentItem(contract),
+  );
 };

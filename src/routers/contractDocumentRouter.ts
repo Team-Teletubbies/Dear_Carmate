@@ -3,6 +3,8 @@ import upload from '../middlewares/uploadMiddleware';
 import {
   downloadContractDocumentController,
   uploadContractDocumentController,
+  getContractDocumentLists,
+  getDrafts,
 } from '../controllers/contractDocumentController';
 
 export const contractDocumentRouter = express.Router();
@@ -14,3 +16,7 @@ contractDocumentRouter.post(
 );
 
 contractDocumentRouter.get('/:id/download', downloadContractDocumentController);
+
+contractDocumentRouter.get('/', getContractDocumentLists);
+
+contractDocumentRouter.get('/draft', getDrafts);

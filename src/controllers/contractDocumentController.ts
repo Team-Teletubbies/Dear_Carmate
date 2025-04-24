@@ -3,9 +3,14 @@ import NotFoundError from '../lib/errors/notFoundError';
 import {
   uploadContractDocument,
   downloadContractDocument,
+  getContractDocumentList,
+  getDraftContractDocuments,
 } from '../services/contractDocumentService';
 import { asyncHandler } from '../lib/async-handler';
 import fs from 'fs';
+import { create } from 'superstruct';
+import { contractDocumentFilterStruct } from '../structs/contractDocumentStruct';
+import BadRequestError from '../lib/errors/badRequestError';
 
 export const uploadContractDocumentController = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
@@ -58,3 +63,32 @@ export const downloadContractDocumentController = asyncHandler(
     });
   },
 );
+
+export const getContractDocument = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const data = create(req.params, contractDocumentFilterStruct);
+
+    if (!data) {
+      throw new BadRequestError('잘못된 요청 입니다.');
+    }
+  },
+);
+
+export const getContractDocumentLists = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const data = create(req.query, contractDocumentFilterStruct);
+
+    if (!data) {
+      throw new BadRequestError('잘못된 요청 입니다.');
+    }
+
+    const result = await getContractDocumentList(data);
+
+    res.json(result);
+  },
+);
+
+export const getDrafts = asyncHandler(async (req: Request, res: Response) => {
+  const data = await getDraftContractDocuments();
+  res.json(data);
+});
