@@ -88,7 +88,7 @@ export const getContractDocumentLists = asyncHandler(
   },
 );
 
-export const getDrafts = async (req: Request, res: Response) => {
+export const getDrafts = asyncHandler(async (req: Request, res: Response) => {
   const data = await getDraftContractDocuments();
   res.json(data);
-};
+});
