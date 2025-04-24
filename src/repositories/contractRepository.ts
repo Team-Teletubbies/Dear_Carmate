@@ -58,10 +58,10 @@ export const createContract = async ({
       contractPrice: car.price,
       meeting: {
         create: meetings.map((meeting) => ({
-          date: meeting.date,
+          date: new Date(meeting.date),
           alarm: {
             create: meeting.alarms.map((alarmTime) => ({
-              time: alarmTime,
+              time: new Date(alarmTime),
             })),
           },
         })),

@@ -24,7 +24,7 @@ export class CreateContractResponseDTO {
     this.resolutionDate = contract.resolutionDate ? contract.resolutionDate.toISOString() : null;
     this.contractPrice = contract.contractPrice;
     this.meetings = contract.meeting.map((meet) => ({
-      date: meet.date.toISOString(),
+      date: meet.date.toISOString().slice(0, 10),
       alarms: meet.alarm.map((alarm) => alarm.time.toISOString()),
     }));
     this.user = {
