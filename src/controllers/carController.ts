@@ -14,7 +14,7 @@ export const registerCar = async (req: Request, res: Response): Promise<void> =>
   // }
   // const companyId = (req.user as { companyId: number }).companyId;
 
-  const companyId = 10; // 임시로 companyId 지정
+  const companyId = 1; // 임시로 companyId 지정
 
   if (!companyId) throw new Error('companyId는 필수입니다.');
 
@@ -33,7 +33,7 @@ export const updateCar = async (req: Request, res: Response): Promise<void> => {
   // }
   // const companyId = (req.user as { companyId: number }).companyId;
 
-  const companyId = 10; // 임시로 companyId 지정
+  const companyId = 1; // 임시로 companyId 지정
 
   if (!companyId) throw new Error('companyId는 필수입니다.');
   const updatedCar = await carService.updateCar(Number(id), data, companyId);
