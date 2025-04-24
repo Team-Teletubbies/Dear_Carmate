@@ -2,7 +2,7 @@ import { string, object, enums, optional, array, nonempty, integer, partial } fr
 import { PageParamsStruct } from './commonStruct';
 
 const contractStructKey = ['customerName', 'userName'] as const;
-
+export type ContractStructKey = (typeof contractStructKey)[number];
 export const contractFilterStruct = object({
   ...PageParamsStruct.schema,
   searchBy: optional(enums(contractStructKey)),
