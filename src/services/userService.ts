@@ -6,6 +6,7 @@ import {
   LoginResponseDTO,
   RefreshTokenDTO,
   RefreshTokenResponseDTO,
+  UserProfileDTO,
   UserResponseDTO,
 } from '../dto/userDTO';
 import * as userRepository from '../repositories/userRepository';
@@ -89,4 +90,9 @@ export const refreshToken = async (dto: RefreshTokenDTO): Promise<RefreshTokenRe
   const newRefreshToken = createToken({ userId, companyId }, 'refresh');
   await userRepository.setRedisRefreshToken(userId, newRefreshToken);
   return { refreshToken: newRefreshToken, accessToken };
+};
+
+export const getMyInfo = async (userId: number): Promise<UserProfileDTO> => {
+  const userProfile: UserProfileDTO = await userRepository.getWithCompanyCode(userId);
+  return userProfile;
 };

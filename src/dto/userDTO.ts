@@ -95,3 +95,5 @@ export interface RefreshTokenResponseDTO {
   refreshToken: string;
   accessToken: string;
 }
+
+export type UserProfileDTO = UserWithCompanyCode;
