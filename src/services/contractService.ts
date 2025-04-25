@@ -159,8 +159,8 @@ type Segment = 'cars' | 'customers' | 'users';
 
 const formatMap: Record<Segment, (contract: ContractWithRelations) => ContractListItem> = {
   cars: (contract) => {
-    const model = contract.car?.model?.name || '';
-    const carNumber = contract.car?.carNumber || '';
+    const model = contract.car.model.name || '';
+    const carNumber = contract.car.carNumber || '';
     return {
       id: contract.id,
       data: `${model}(${carNumber})`,

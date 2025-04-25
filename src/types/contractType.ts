@@ -94,7 +94,7 @@ export type ContractWithRelations = Prisma.ContractGetPayload<{
 export type ContractWithUser = Prisma.ContractGetPayload<{
   include: {
     user: true;
-    meeing: true;
+    meeting: true;
     contractDocuments: true;
   };
 }>;
