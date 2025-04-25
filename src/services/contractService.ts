@@ -4,6 +4,7 @@ import {
   countGroupedContracts,
   findContractById,
   updateContractInDB,
+  deleteContractData,
 } from '../repositories/contractRepository';
 import {
   CreateContractResponseDTO,
@@ -135,4 +136,17 @@ export const updateContractData = async (input: UpdateContractType): Promise<Upd
   });
 
   return new UpdateContractDTO(contract);
+};
+
+export const delContract = async (id: number, userId: number): Promise<void> => {
+  const dbContract = await findContractById(id);
+  if (!dbContract) {
+    throw new NotFoundError('존재하지 않는 계약입니다');
+  }
+  if (dbContract.userId !== userId) {
+    throw new ForbiddenError('담당자만 삭제가 가능합니다');
+  }
+
+  await deleteContractData(id);
+  return;
 };

@@ -3,13 +3,14 @@ import {
   createContractData,
   getGroupedContractByStatus,
   updateContractData,
+  delContract,
 } from '../services/contractService';
 import { CreateContractDTO } from '../dto/contractDTO';
 import { asyncHandler } from '../lib/async-handler';
 import UnauthorizedError from '../lib/errors/unauthorizedError';
 import BadRequestError from '../lib/errors/badRequestError';
 import { createContractBodyStruct, updateContractBodyStruct } from '../structs/contractStruct';
-import { create } from 'superstruct';
+import { create, number } from 'superstruct';
 import { GroupedContractSearchParams } from '../types/contractType';
 import { IdParamsStruct } from '../structs/commonStruct';
 
@@ -75,4 +76,16 @@ export const patchContracts = asyncHandler(async (req: Request, res: Response) =
   });
 
   res.status(200).json(result);
+});
+
+export const deleteContract = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = create(req.params, IdParamsStruct);
+  const user = req.user;
+  if (!user) {
+    throw new UnauthorizedError('로그인이 필요합니다');
+  }
+  await delContract(id, user.userId);
+
+  res.status(200).json({ message: '계약 삭제 성공' });
+  return;
 });

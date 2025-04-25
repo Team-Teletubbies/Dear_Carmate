@@ -154,3 +154,7 @@ export const updateContractInDB = async (
 export const findContractById = async (contractId: number) => {
   return await prisma.contract.findUnique({ where: { id: contractId } });
 };
+
+export const deleteContractData = async (id: number) => {
+  return prisma.contract.delete({ where: { id } });
+};

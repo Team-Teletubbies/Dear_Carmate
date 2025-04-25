@@ -4,9 +4,11 @@ import {
   createContract,
   getGroupedContracts,
   patchContracts,
+  deleteContract,
 } from '../controllers/contractController';
 export const contractRouter = express.Router();
 
 contractRouter.post('/', verifyAccessToken, createContract);
 contractRouter.get('/', verifyAccessToken, getGroupedContracts);
 contractRouter.patch('/:id', verifyAccessToken, patchContracts);
+contractRouter.delete('/:id', verifyAccessToken, deleteContract);
