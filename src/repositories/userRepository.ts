@@ -124,3 +124,8 @@ export const updateAndGetUser = async (
   ]);
   return updatedWithCompany;
 };
+
+export const deleteById = async (userId: number): Promise<User> => {
+  const deleted = await prisma.user.delete({ where: { id: userId } });
+  return deleted;
+};
