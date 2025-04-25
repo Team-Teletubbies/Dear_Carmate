@@ -10,6 +10,7 @@ import {
   deleteUser,
 } from '../controllers/userController';
 import { verifyAccessToken } from '../middlewares/verifyAccessToken';
+import { requireAdmin } from '../middlewares/requireAdmin';
 
 export const userRouter = express.Router();
 
@@ -21,4 +22,4 @@ userRouter
   .patch(updateMyInfo)
   .delete(deleteMyAccount);
 userRouter.route('/me').get(verifyAccessToken, getMyInfo).patch(verifyAccessToken, updateMyInfo);
-userRouter.delete('/:id', deleteUser);
+userRouter.delete('/:id', verifyAccessToken, requireAdmin, deleteUser);
