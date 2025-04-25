@@ -172,33 +172,67 @@ export async function getManufacturerModelList() {
   }));
 }
 
-export async function carCsvUpload(filePath: string, companyId: number): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const errors: any[] = [];
+interface CsvUploadError {
+  // CSV 파일을 업로드하고 실패한 행(row)들을 반환
+  row: CarCsvRow;
+  error: string;
+}
 
-    fs.createReadStream(filePath)
-      .pipe(csv())
-      .on('data', async (row: CarCsvRow) => {
+export async function carCsvUpload(filePath: string, companyId: number): Promise<CsvUploadError[]> {
+  const concurrencyLimit = 5; // 동시 실행할 최대 작업 수 (병렬 처리시 안정화를 위해.. DB 커넥션 병목, 순서 꼬임, 에러 누락 등 비장상적인 병령처리 가능한 에러방지)
+  let running = 0; // 현재 실행중인 작업 수
+  let resolveEnd: () => void;
+  const endPromise = new Promise<void>((resolve) => (resolveEnd = resolve)); // / Promise를 사용하여 CSV 파일 처리 완료를 기다림
+  const errors: CsvUploadError[] = [];
+  const queue: (() => Promise<void>)[] = []; // 대기 중인 작업 리스트, 할 일(task) 저장
+
+  const next = () => {
+    // 실행 중인 작업이 5개보다 적으면 queue에서 꺼내 실행
+    while (running < concurrencyLimit && queue.length) {
+      const task = queue.shift()!; // 대기 중인 작업 꺼냄
+      running++;
+      task()
+        .catch(() => {}) // 개별 오류는 내부에서 errors에 수집하고 여기서는 무시
+        .finally(() => {
+          running--;
+          if (queue.length === 0 && running === 0) {
+            resolveEnd();
+          } else {
+            next(); // 끝난 후 다음 작업 실행
+          }
+        });
+    }
+  };
+
+  fs.createReadStream(filePath)
+    .pipe(csv())
+    .on('data', (row: CarCsvRow) => {
+      queue.push(async () => {
         try {
+          // CSV 파일의 각 행(row)을 처리하는 비동기 작업을 큐에 추가
           await carRepository.carCsvUpload(row, companyId);
         } catch (err) {
           console.error('등록 오류:', row, err);
-
-          if (err instanceof Error) {
-            // TypeScript에서 catch 블록 내의 err는 기본적으로 unknown 타입 안전하게 .message 프로퍼티에 접근하려면 instanceof Error로 먼저 타입 검사를 해줘야함
-            errors.push({ row, error: err.message }); // err가 Error 타입일 경우, .message를 꺼내서 errors 배열에 저장, 나중에 전체 처리 결과에 실패 목록을 함께 리턴
-          } else {
-            errors.push({ row, error: '알 수 없는 오류' }); // 만약 err가 Error 타입이 아니라면 (ex: 문자열, 객체, 숫자 등), '알 수 없는 오류'로 처리
-          }
+          const errorMessage = err instanceof Error ? err.message : '알 수 없는 오류';
+          errors.push({ row, error: errorMessage }); // 등록 오류가 발생한 행(row)과 오류 메시지를 errors 배열에 저장
+          throw err;
         }
-      })
-      .on('end', () => {
-        console.log('CSV 파일 처리 완료');
-        resolve();
-      })
-      .on('error', (err) => {
-        console.error('CSV 파일 처리 중 오류 발생:', err);
-        reject(err);
       });
-  });
+      next();
+    })
+    .on('end', () => {
+      //	CSV 파일 다 읽으면, 아직 남은 작업이 다 끝나는지 확인
+      if (queue.length === 0 && running === 0) {
+        // 대기 중인 작업이 없고 실행 중인 작업도 없으면 resolve
+        resolveEnd();
+      }
+    })
+    .on('error', (err) => {
+      console.error('CSV 파일 처리 중 스트림 오류 발생:', err);
+      resolveEnd();
+    });
+
+  await endPromise; // CSV 파일 처리 완료를 기다림
+  console.log('CSV 파일 처리 완료');
+  return errors; // ✅ 실패한 row 목록 반환
 }
