@@ -8,6 +8,7 @@ import {
   size,
   partial,
   define,
+  nullable,
 } from 'superstruct';
 import { PageParamsStruct } from './commonStruct';
 
@@ -46,7 +47,18 @@ export const registerUserStruct = refine(createUserBodyStruct, 'passwordsMatch',
   return value.password === value.passwordConfirmation;
 });
 
-export const updateUserBodyStruct = partial(createUserBodyStruct);
+export const updateUserBodyStruct = object({
+  employeeNumber: size(string(), 4, 20),
+  phoneNumber: phoneNumber,
+  currentPassword: password,
+  password: optional(password),
+  passwordConfirmation: optional(password),
+  imageUrl: nullable(string()),
+});
+
+// export const updateUserStruct = refine(updateUserBodyStruct, 'passwordMatch', (value) => {
+//   return value.password === value.passwordConfirmation;
+// });
 
 export const loginBodyStruct = object({
   email: Email,

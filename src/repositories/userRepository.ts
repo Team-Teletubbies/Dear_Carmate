@@ -6,8 +6,9 @@ import {
   CreateUserInput,
   GetUserListInput,
   UserWithPasswordAndCompany,
+  updateMyInfoInput,
 } from '../types/userType';
-import { GetUserListDTO, UserListItem } from '../dto/userDTO';
+import { GetUserListDTO, updateMyInfoDTO, UserListItem, UserProfileDTO } from '../dto/userDTO';
 import { CreateUpdateCompanyDTO } from '../dto/companyDto';
 import { redis } from '../lib/auth/redis';
 
@@ -98,4 +99,28 @@ export const setRedisRefreshToken = async (userId: number, refreshToken: string)
 export const getRedisRefreshToken = async (userId: number): Promise<string | null> => {
   const refreshToken = await redis.get(`refresh:user:${userId}`);
   return refreshToken;
+};
+
+export const updateAndGetUser = async (
+  userId: number,
+  data: updateMyInfoInput,
+): Promise<UserProfileDTO> => {
+  const where = { id: userId };
+  const [_, updatedWithCompany] = await prisma.$transaction([
+    prisma.user.update({ where, data }),
+    prisma.user.findUniqueOrThrow({
+      where,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        employeeNumber: true,
+        phoneNumber: true,
+        imageUrl: true,
+        isAdmin: true,
+        company: { select: { companyCode: true } },
+      },
+    }),
+  ]);
+  return updatedWithCompany;
 };
