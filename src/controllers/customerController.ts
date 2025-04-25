@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as customerService from '../services/customerService';
+import BadRequestError from '../lib/errors/badRequestError';
 
 export const createCustomerHandler = async (req: Request, res: Response) => {
   const companyId = (req.user as { companyId: number }).companyId;
@@ -40,4 +41,14 @@ export const getCustomersHandler = async (req: Request, res: Response) => {
   );
 
   res.status(200).json(result);
+};
+
+export const bulkUploadCustomersHandler = async (req: Request, res: Response) => {
+  const companyId = (req.user as { companyId: number }).companyId;
+  const fileBuffer = req.file?.buffer;
+
+  if (!fileBuffer) throw new BadRequestError('CSV 파일을 업로드해주세요');
+
+  const message = await customerService.bulkUploadCustomers(companyId, fileBuffer);
+  res.status(200).json({ message });
 };

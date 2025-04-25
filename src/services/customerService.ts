@@ -5,6 +5,7 @@ import { prisma } from '../lib/prisma';
 import NotFoundError from '../lib/errors/notFoundError';
 import { getCustomers } from '../repositories/customerRepository';
 import { ageGroupToLabel, regionToLabel, genderToLabel } from '../types/customerType';
+import { parse } from 'csv-parse/sync';
 
 function toGenderEnum(label: string): Gender {
   switch (label) {
@@ -13,7 +14,7 @@ function toGenderEnum(label: string): Gender {
     case '여성':
       return 'FEMALE';
     default:
-      throw new Error(`gender 변환 실패: ${label}`);
+      throw new Error(`잘못된 성별 값: ${label}`);
   }
 }
 
@@ -38,7 +39,7 @@ function toAgeGroupEnum(label?: string): AgeGroup | undefined {
     case undefined:
       return undefined;
     default:
-      throw new Error(`ageGroup 변환 실패: ${label}`);
+      throw new Error(`잘못된 연령대 값: ${label}`);
   }
 }
 
@@ -81,7 +82,7 @@ function toRegionEnum(label?: string): Region | undefined {
     case undefined:
       return undefined;
     default:
-      throw new Error(`region 변환 실패: ${label}`);
+      throw new Error(`잘못된 지역 값: ${label}`);
   }
 }
 
@@ -157,4 +158,40 @@ export const getCustomersService = async (
     totalItemCount: totalCount,
     data: parsedCustomers,
   };
+};
+
+//대용량 업로드
+
+type CustomerCSVRecord = {
+  name: string;
+  gender: string;
+  phoneNumber: string;
+  ageGroup?: string;
+  region?: string;
+  email: string;
+  memo?: string;
+};
+
+export const bulkUploadCustomers = async (companyId: number, buffer: Buffer) => {
+  const csvText = buffer.toString('utf-8');
+  const records = parse(csvText, {
+    columns: true,
+    skip_empty_lines: true,
+    trim: true,
+  });
+
+  const customers = (records as CustomerCSVRecord[]).map((record) => ({
+    name: record.name,
+    gender: toGenderEnum(record.gender),
+    phoneNumber: record.phoneNumber,
+    ageGroup: toAgeGroupEnum(record.ageGroup),
+    region: toRegionEnum(record.region),
+    email: record.email,
+    memo: record.memo,
+    companyId,
+  }));
+
+  await prisma.customer.createMany({ data: customers, skipDuplicates: true });
+
+  return '성공적으로 업로드 되었습니다.';
 };
