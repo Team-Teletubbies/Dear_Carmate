@@ -20,6 +20,7 @@ import {
 } from '../structs/userStruct';
 import NotFoundError from '../lib/errors/notFoundError';
 import UnauthorizedError from '../lib/errors/unauthorizedError';
+import { resourceLimits } from 'worker_threads';
 
 export const createUser: RequestHandler = async (req, res) => {
   assert(req.body, registerUserStruct);
@@ -72,4 +73,13 @@ export const updateMyInfo = async (req: Request, res: Response): Promise<void> =
   const { userId } = req.user;
   const user: UserProfileDTO = await userService.updateMyInfo(userId, data);
   res.status(200).json(user);
+};
+
+export const deleteMyAccount = async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) {
+    throw new UnauthorizedError('로그인이 필요합니다');
+  }
+  const { userId } = req.user;
+  await userService.deleteMyAccount(userId);
+  res.status(200).json({ message: '유저 삭제 성공' });
 };

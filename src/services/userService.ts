@@ -116,3 +116,10 @@ export const updateMyInfo = async (
   const updated = await userRepository.updateAndGetUser(userId, dataWithoutCurrentPassword);
   return updated;
 };
+
+export const deleteMyAccount = async (userId: number): Promise<void> => {
+  const deleted = await userRepository.deleteById(userId);
+  if (!deleted) {
+    throw new NotFoundError('유저를 찾지 못했습니다');
+  }
+};
