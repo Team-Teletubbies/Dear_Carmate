@@ -67,7 +67,9 @@ export const patchContracts = asyncHandler(async (req: Request, res: Response) =
   const data = create(req.body, updateContractBodyStruct);
   const user = req.user;
 
-  if (!user) throw new UnauthorizedError('로그인이 필요합니다.');
+  if (!user) {
+    throw new UnauthorizedError('로그인이 필요합니다.');
+  }
 
   const result = await updateContractData({
     contractId: Number(req.params.id),
