@@ -91,7 +91,6 @@ const buildWhereCondition = (
 
 export const getDraftContractDocuments = async () => {
   const drafts = await findDraftContracts();
-  console.log('🔥 drafts:', drafts); // 여기에 로깅
   return drafts.map(
     (contract: DraftContractForDocumentItem) => new DraftContractDocumentItem(contract),
   );

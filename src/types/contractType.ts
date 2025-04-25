@@ -1,18 +1,4 @@
-export type MinimalContract = {
-  id: number;
-  contractStatus: string;
-  resolutionDate: Date | null;
-  contractPrice: number;
-  meeting: {
-    date: Date;
-    alarm: {
-      time: Date;
-    }[];
-  }[];
-  user: { id: number; name: string };
-  customer: { id: number; name: string };
-  car: { id: number; model: { name: string } };
-};
+import { statusMap } from '../lib/utils/statusMap';
 
 export interface ContractParticipant {
   id: number;
@@ -21,10 +7,59 @@ export interface ContractParticipant {
 
 export interface ContractCar {
   id: number;
-  model: string;
+  model: {
+    name: string;
+  };
 }
 
 export interface Meeting {
   date: string;
-  alarms: string[];
+  alarms?: string[];
+}
+
+export type MinimalContract = {
+  id: number;
+  contractStatus: string;
+  resolutionDate: string | Date | null;
+  contractPrice: number;
+  meeting: {
+    date: string | Date;
+    alarms: string[];
+  }[];
+  user: { id: number; name: string };
+  customer: { id: number; name: string };
+  car: { id: number; model: { name: string } };
+};
+
+export interface StatusContractItem {
+  id: number;
+  car: ContractCar;
+  customer: ContractParticipant;
+  user: ContractParticipant;
+  meetings: Meeting[];
+  contractPrice: number;
+  resolutionDate: string;
+  contractStatus: string;
+}
+
+export type GroupedContractSearchParams = {
+  companyId: number;
+  searchBy?: 'customerName' | 'userName';
+  keyword?: string;
+};
+
+export interface BaseUpdateContractFields {
+  contractStatus?: keyof typeof statusMap;
+  resolutionDate?: string;
+  contractPrice?: number;
+  meetings?: Meeting[];
+  contractDocuments?: { id: number; fileName?: string }[];
+  carId?: number;
+  customerId?: number;
+  userId?: number;
+}
+
+export interface UpdateContractType extends BaseUpdateContractFields {
+  contractId: number;
+  editorUserId: number;
 }

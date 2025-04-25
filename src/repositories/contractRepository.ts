@@ -1,6 +1,9 @@
 import { prisma } from '../lib/prisma';
-import { Prisma } from '@prisma/client';
+import { ContractStatus, Prisma } from '@prisma/client';
 import { CreateContractDTO } from '../dto/contractDTO';
+import { ContractStructKey } from '../structs/contractStruct';
+import { MinimalContract } from '../types/contractType';
+
 export const findContractDocuments = async (
   where: Prisma.ContractWhereInput = {},
   skip: number,
@@ -60,8 +63,8 @@ export const createContract = async ({
         create: meetings.map((meeting) => ({
           date: new Date(meeting.date),
           alarm: {
-            create: meeting.alarms.map((alarmTime) => ({
-              time: new Date(alarmTime),
+            create: meeting.alarms?.map((alarm) => ({
+              time: new Date(alarm),
             })),
           },
         })),
@@ -76,4 +79,82 @@ export const createContract = async ({
   });
 
   return contract;
+};
+
+export const getContractsGroupedByStatus = async () => {
+  return prisma.contract.findMany({
+    include: {
+      car: {
+        include: {
+          model: true,
+        },
+      },
+      customer: true,
+      user: true,
+      meeting: {
+        include: {
+          alarm: true,
+        },
+      },
+    },
+  });
+};
+
+export const findGroupedContracts = async (where: Prisma.ContractWhereInput) => {
+  return prisma.contract.findMany({
+    where,
+    include: {
+      car: { include: { model: true } },
+      customer: true,
+      user: true,
+      meeting: { include: { alarm: true } },
+    },
+  });
+};
+
+export const countGroupedContracts = async (where: Prisma.ContractWhereInput) => {
+  return prisma.contract.count({ where });
+};
+
+export const updateContractInDB = async (
+  contractId: number,
+  updateData: {
+    basic: Prisma.ContractUpdateInput;
+    meetings?: { date: Date; alarm: { time: Date }[] }[];
+  },
+) => {
+  if (updateData.meetings) {
+    await prisma.meeting.deleteMany({ where: { contractId } });
+
+    for (const meet of updateData.meetings) {
+      await prisma.meeting.create({
+        data: {
+          contractId,
+          date: meet.date,
+          alarm: {
+            create: meet.alarm.map((alarm) => ({ time: alarm.time })),
+          },
+        },
+      });
+    }
+  }
+
+  return prisma.contract.update({
+    where: { id: contractId },
+    data: updateData.basic,
+    include: {
+      user: true,
+      customer: true,
+      car: { include: { model: true } },
+      meeting: { include: { alarm: true } },
+    },
+  });
+};
+
+export const findContractById = async (contractId: number) => {
+  return await prisma.contract.findUnique({ where: { id: contractId } });
+};
+
+export const deleteContractData = async (id: number) => {
+  return prisma.contract.delete({ where: { id } });
 };

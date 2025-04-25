@@ -1,11 +1,18 @@
 import { Request, Response } from 'express';
-import { createContractData } from '../services/contractService';
+import {
+  createContractData,
+  getGroupedContractByStatus,
+  updateContractData,
+  delContract,
+} from '../services/contractService';
 import { CreateContractDTO } from '../dto/contractDTO';
 import { asyncHandler } from '../lib/async-handler';
 import UnauthorizedError from '../lib/errors/unauthorizedError';
 import BadRequestError from '../lib/errors/badRequestError';
-import { createContractBodyStruct } from '../structs/contractStruct';
-import { create } from 'superstruct';
+import { createContractBodyStruct, updateContractBodyStruct } from '../structs/contractStruct';
+import { create, number } from 'superstruct';
+import { GroupedContractSearchParams } from '../types/contractType';
+import { IdParamsStruct } from '../structs/commonStruct';
 
 export const createContract = asyncHandler(async (req: Request, res: Response) => {
   const { carId, customerId, meetings } = create(req.body, createContractBodyStruct);
@@ -33,5 +40,54 @@ export const createContract = asyncHandler(async (req: Request, res: Response) =
   const contract = await createContractData(dto);
 
   res.status(201).json(contract);
+  return;
+});
+
+export const getGroupedContracts = asyncHandler(async (req: Request, res: Response) => {
+  const { searchBy, keyword } = req.query;
+  const companyId = req.user?.companyId;
+
+  if (!companyId) {
+    throw new UnauthorizedError('로그인이 필요합니다.');
+  }
+
+  const params: GroupedContractSearchParams = {
+    companyId,
+    searchBy: searchBy as 'customerName' | 'userName' | undefined,
+    keyword: keyword as string | undefined,
+  };
+
+  const result = await getGroupedContractByStatus(params);
+
+  res.status(200).json(result);
+});
+
+export const patchContracts = asyncHandler(async (req: Request, res: Response) => {
+  create(req.params, IdParamsStruct);
+  const data = create(req.body, updateContractBodyStruct);
+  const user = req.user;
+
+  if (!user) {
+    throw new UnauthorizedError('로그인이 필요합니다.');
+  }
+
+  const result = await updateContractData({
+    contractId: Number(req.params.id),
+    editorUserId: user.userId,
+    ...data,
+  });
+
+  res.status(200).json(result);
+});
+
+export const deleteContract = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = create(req.params, IdParamsStruct);
+  const user = req.user;
+  if (!user) {
+    throw new UnauthorizedError('로그인이 필요합니다');
+  }
+  await delContract(id, user.userId);
+
+  res.status(200).json({ message: '계약 삭제 성공' });
   return;
 });

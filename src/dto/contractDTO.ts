@@ -1,5 +1,6 @@
-import { ContractParticipant, ContractCar, Meeting, MinimalContract } from '../types/contractType';
-
+import { ContractParticipant, Meeting, MinimalContract } from '../types/contractType';
+import { toClientStatus } from '../lib/utils/statusMap';
+import { Contract } from '@prisma/client';
 export interface CreateContractDTO {
   carId: number;
   customerId: number;
@@ -14,14 +15,51 @@ export class CreateContractResponseDTO {
   resolutionDate: string | null;
   contractPrice: number;
   meetings: Meeting[];
-  user: { id: number; name: string };
-  customer: { id: number; name: string };
+  user: ContractParticipant;
+  customer: ContractParticipant;
   car: { id: number; model: string };
 
   constructor(contract: MinimalContract) {
     this.id = contract.id;
     this.contractStatus = contract.contractStatus;
-    this.resolutionDate = contract.resolutionDate ? contract.resolutionDate.toISOString() : null;
+    this.resolutionDate = contract.resolutionDate
+      ? new Date(contract.resolutionDate).toISOString()
+      : null;
+    this.contractPrice = contract.contractPrice;
+    this.meetings = contract.meeting.map((meet) => ({
+      date: new Date(meet.date).toISOString().slice(0, 10),
+      alarms: meet.alarms.map((alarm) => new Date(alarm).toISOString()),
+    }));
+    this.user = contract.user;
+    this.customer = contract.customer;
+    this.car = {
+      id: contract.car.id,
+      model: contract.car.model.name,
+    };
+  }
+}
+
+export class UpdateContractDTO {
+  id: number;
+  contractStatus: string;
+  resolutionDate: string;
+  contractPrice: number;
+  meetings: { date: string; alarms: string[] }[];
+  user: { id: number; name: string };
+  customer: { id: number; name: string };
+  car: { id: number; model: string };
+
+  constructor(
+    contract: Contract & {
+      user: { id: number; name: string };
+      customer: { id: number; name: string };
+      car: { id: number; model: { name: string } };
+      meeting: { date: Date; alarm: { time: Date }[] }[];
+    },
+  ) {
+    this.id = contract.id;
+    this.contractStatus = toClientStatus(contract.contractStatus);
+    this.resolutionDate = contract.resolutionDate?.toISOString() ?? '';
     this.contractPrice = contract.contractPrice;
     this.meetings = contract.meeting.map((meet) => ({
       date: meet.date.toISOString().slice(0, 10),
@@ -42,50 +80,30 @@ export class CreateContractResponseDTO {
   }
 }
 
-export interface UpdateContractDTO {
-  contractStatus:
-    | 'carInspection'
-    | 'priceNegotiation'
-    | 'contractDraft'
-    | 'contractSuccessful'
-    | 'contractFailed';
-  resolutionDate: string;
-  contractPrice: number;
-  meetings: Meeting[];
-  contractDocumentIdsToAdd: number[];
-  contractDocumentIdsToRemove: number[];
-  userId: number;
-  customerId: number;
-  carId: number;
-}
-
 export class ContractResponseDTO {
   id: number;
-  car: ContractCar;
-  customer: ContractParticipant;
-  user: ContractParticipant;
-  meetings: Meeting[];
+  car: { id: number; model: { name: string } };
+  customer: { id: number; name: string };
+  user: { id: number; name: string };
+  meetings: {
+    date: string;
+    alarms: string[];
+  }[];
   contractPrice: number;
   resolutionDate: string;
   contractStatus: string;
 
-  constructor(data: {
-    id: number;
-    car: ContractCar;
-    customer: ContractParticipant;
-    user: ContractParticipant;
-    meetings: Meeting[];
-    contractPrice: number;
-    resolutionDate: string;
-    contractStatus: string;
-  }) {
+  constructor(data: MinimalContract) {
     this.id = data.id;
-    this.car = data.car;
-    this.customer = data.customer;
-    this.user = data.user;
-    this.meetings = data.meetings;
+    this.car = { id: data.car.id, model: { name: data.car.model.name } };
+    this.customer = { id: data.customer.id, name: data.customer.name };
+    this.user = { id: data.user.id, name: data.user.name };
+    this.meetings = data.meeting.map((meet) => ({
+      date: new Date(meet.date).toISOString().slice(0, 10),
+      alarms: meet.alarms.map((alarm) => new Date(alarm).toISOString()),
+    }));
     this.contractPrice = data.contractPrice;
-    this.resolutionDate = data.resolutionDate;
+    this.resolutionDate = data.resolutionDate ? new Date(data.resolutionDate).toISOString() : '';
     this.contractStatus = data.contractStatus;
   }
 }
@@ -100,24 +118,22 @@ export class ContractCategoryResponseDTO {
   }
 }
 
-export class ContractListResponseDTO {
-  carInspection: ContractCategoryResponseDTO;
-  priceNegotiation: ContractCategoryResponseDTO;
-  contractDraft: ContractCategoryResponseDTO;
-  contractSuccessful: ContractCategoryResponseDTO;
-  contractFailed: ContractCategoryResponseDTO;
+export class GroupedContractsResponseDTO {
+  [satus: string]: {
+    totalItemCount: number;
+    data: ContractResponseDTO[];
+  };
 
-  constructor(data: {
-    carInspection: ContractCategoryResponseDTO;
-    priceNegotiation: ContractCategoryResponseDTO;
-    contractDraft: ContractCategoryResponseDTO;
-    contractSuccessful: ContractCategoryResponseDTO;
-    contractFailed: ContractCategoryResponseDTO;
-  }) {
-    this.carInspection = data.carInspection;
-    this.priceNegotiation = data.priceNegotiation;
-    this.contractDraft = data.contractDraft;
-    this.contractSuccessful = data.contractSuccessful;
-    this.contractFailed = data.contractFailed;
+  constructor(
+    groupData: Partial<Record<string, MinimalContract[]>>,
+    counts: Record<string, number>,
+  ) {
+    for (const status in groupData) {
+      const data = groupData[status] ?? [];
+      this[status] = {
+        totalItemCount: counts[status] ?? 0,
+        data: data.map((contract) => new ContractResponseDTO(contract)),
+      };
+    }
   }
 }
