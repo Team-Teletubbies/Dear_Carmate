@@ -83,7 +83,7 @@ model Car {
 
 model Manufacturer {
   id        Int      @id @default(autoincrement())
-  name      String
+  name      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -100,6 +100,8 @@ model CarModel {
 
   manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
   cars         Car[]
+
+  @@unique([name, manufacturerId, type])
 }
 
 model Contract {
@@ -191,8 +193,8 @@ enum Region {
 
 enum CarStatus {
   POSSESSION          @map("possession")
-  CONTRACT_PROCEEDING @map("contract_proceeding")
-  CONTRACT_COMPLETED  @map("contract_completed")
+  CONTRACT_PROCEEDING @map("contractProceeding")
+  CONTRACT_COMPLETED  @map("contractCompleted")
 }
 
 enum ContractStatus {

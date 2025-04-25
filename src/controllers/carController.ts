@@ -4,6 +4,7 @@ import { carFilterStruct, createCarBodyStruct, updateCarBodyStruct } from '../st
 import { create } from 'superstruct';
 import { SearchField } from '../dto/carDTO';
 import { IdParamsStruct } from '../structs/commonStruct';
+// import multer from 'multer';
 
 export const registerCar = async (req: Request, res: Response): Promise<void> => {
   const data = create(req.body, createCarBodyStruct);
@@ -77,4 +78,20 @@ export const getCarDetail = async (req: Request, res: Response): Promise<void> =
 export const getManufacturerModelList = async (req: Request, res: Response): Promise<void> => {
   const data = await carService.getManufacturerModelList();
   res.status(200).json(data);
+};
+
+export const carCsvUpload = async (req: Request, res: Response): Promise<void> => {
+  const path = req.file?.path;
+  if (!path) {
+    res.status(400).json({ message: '파일이 없습니다.' });
+    return;
+  }
+
+  const companyId = req.user?.companyId;
+  if (!companyId) {
+    res.status(400).json({ message: '회사 ID가 없습니다.' });
+    return;
+  }
+  await carService.carCsvUpload(path, companyId);
+  res.json({ message: 'CSV 업로드 및 차량 등록 완료' });
 };
