@@ -11,6 +11,7 @@ import customerRouter from './routers/customerRouter';
 import path from 'path';
 import { PUBLIC_PATH, STATIC_PATH } from './lib/constants';
 import imageRouter from './routers/imageRouter';
+import dashboardRouter from './routers/dashboardRouter';
 
 const app: express.Application = express();
 app.use(express.json());
@@ -25,6 +26,7 @@ app.use('/contractDocuments', contractDocumentRouter);
 app.use('/customers', customerRouter);
 app.use('/auth', authRouter);
 app.use('/images', imageRouter);
+app.use('/dashboard', dashboardRouter);
 
 app.use(defaultNotFoundHandler);
 app.use(globalErrorHandler);
