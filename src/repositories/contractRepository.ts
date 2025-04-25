@@ -2,7 +2,7 @@ import { prisma } from '../lib/prisma';
 import { ContractStatus, Prisma } from '@prisma/client';
 import { CreateContractDTO } from '../dto/contractDTO';
 import { ContractStructKey } from '../structs/contractStruct';
-import { MinimalContract } from '../types/contractType';
+import { ContractQueryParams, ContractWithRelations, MinimalContract } from '../types/contractType';
 
 export const findContractDocuments = async (
   where: Prisma.ContractWhereInput = {},
@@ -157,4 +157,23 @@ export const findContractById = async (contractId: number) => {
 
 export const deleteContractData = async (id: number) => {
   return prisma.contract.delete({ where: { id } });
+};
+
+export const listDetails = async ({
+  where,
+}: ContractQueryParams): Promise<ContractWithRelations[]> => {
+  return prisma.contract.findMany({
+    where,
+    include: {
+      user: true,
+      customer: true,
+      car: {
+        include: {
+          model: true,
+        },
+      },
+      meeting: true,
+      contractDocuments: true,
+    },
+  });
 };

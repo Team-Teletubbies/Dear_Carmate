@@ -4,6 +4,7 @@ import {
   getGroupedContractByStatus,
   updateContractData,
   delContract,
+  detailList,
 } from '../services/contractService';
 import { CreateContractDTO } from '../dto/contractDTO';
 import { asyncHandler } from '../lib/async-handler';
@@ -89,5 +90,24 @@ export const deleteContract = asyncHandler(async (req: Request, res: Response) =
   await delContract(id, user.userId);
 
   res.status(200).json({ message: '계약 삭제 성공' });
+  return;
+});
+
+export const getDetailList = asyncHandler(async (req: Request, res: Response) => {
+  const user = req.user;
+  const path = req.path;
+  const segments = path.split('/').filter(Boolean);
+  const lastSegment = segments[segments.length - 1] as 'cars' | 'customers' | 'users';
+
+  if (!user) {
+    throw new UnauthorizedError('로그인이 필요합니다.');
+  }
+
+  const result = await detailList({
+    companyId: user.companyId,
+    lastSegment,
+  });
+
+  res.status(200).json(result);
   return;
 });

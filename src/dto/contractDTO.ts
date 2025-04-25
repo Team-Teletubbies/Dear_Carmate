@@ -137,3 +137,8 @@ export class GroupedContractsResponseDTO {
     }
   }
 }
+
+export interface ContractListItem {
+  id: number;
+  data: string;
+}
