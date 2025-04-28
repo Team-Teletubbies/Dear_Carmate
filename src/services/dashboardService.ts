@@ -17,14 +17,14 @@ export const getDashboardStats = async (companyId: number) => {
     prisma.contract.aggregate({
       _sum: { contractPrice: true },
       where: {
-        companyId,
+        user: { companyId },
         resolutionDate: { gte: thisMonthStart },
       },
     }),
     prisma.contract.aggregate({
       _sum: { contractPrice: true },
       where: {
-        companyId,
+        user: { companyId },
         resolutionDate: {
           gte: lastMonthStart,
           lte: lastMonthEnd,
@@ -33,27 +33,27 @@ export const getDashboardStats = async (companyId: number) => {
     }),
     prisma.contract.count({
       where: {
-        companyId,
+        user: { companyId },
         contractStatus: { not: 'CONTRACT_SUCCESSFUL' },
       },
     }),
     prisma.contract.count({
       where: {
-        companyId,
+        user: { companyId },
         contractStatus: 'CONTRACT_SUCCESSFUL',
       },
     }),
     prisma.contract.groupBy({
       by: ['carId'],
       where: {
-        companyId,
+        user: { companyId },
       },
       _count: true,
     }),
     prisma.contract.groupBy({
       by: ['carId'],
       where: {
-        companyId,
+        user: { companyId },
       },
       _sum: {
         contractPrice: true,
