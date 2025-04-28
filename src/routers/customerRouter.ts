@@ -6,10 +6,10 @@ import * as customerController from '../controllers/customerController';
 
 const router = express.Router();
 
-router.post('/', asyncHandler(customerController.createCustomerHandler));
-router.patch('/:id', asyncHandler(customerController.updateCustomerHandler));
-router.delete('/:id', asyncHandler(customerController.deleteCustomerHandler));
-router.get('/', asyncHandler(customerController.getCustomersHandler));
+router.post('/', verifyAccessToken, asyncHandler(customerController.createCustomerHandler));
+router.patch('/:id', verifyAccessToken, asyncHandler(customerController.updateCustomerHandler));
+router.delete('/:id', verifyAccessToken, asyncHandler(customerController.deleteCustomerHandler));
+router.get('/', verifyAccessToken, asyncHandler(customerController.getCustomersHandler));
 router.post(
   '/upload',
   verifyAccessToken,

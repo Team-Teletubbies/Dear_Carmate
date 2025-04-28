@@ -9,6 +9,8 @@ export const createCustomer = async (
     data: {
       ...data,
       companyId,
+      contractCount: 0,
+      updatedAt: new Date(),
     },
   });
 };
