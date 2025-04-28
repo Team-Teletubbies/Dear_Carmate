@@ -11,15 +11,19 @@ import {
 } from '../controllers/userController';
 import { verifyAccessToken } from '../middlewares/verifyAccessToken';
 import { requireAdmin } from '../middlewares/requireAdmin';
+import { asyncHandler } from '../lib/async-handler';
 
 export const userRouter = express.Router();
 
-userRouter.post('/', createUser);
+userRouter.post('/', asyncHandler(createUser));
 userRouter
   .route('/me')
   .all(verifyAccessToken)
-  .get(getMyInfo)
-  .patch(updateMyInfo)
-  .delete(deleteMyAccount);
-userRouter.route('/me').get(verifyAccessToken, getMyInfo).patch(verifyAccessToken, updateMyInfo);
-userRouter.delete('/:id', verifyAccessToken, requireAdmin, deleteUser);
+  .get(asyncHandler(getMyInfo))
+  .patch(asyncHandler(updateMyInfo))
+  .delete(asyncHandler(deleteMyAccount));
+userRouter
+  .route('/me')
+  .get(verifyAccessToken, asyncHandler(getMyInfo))
+  .patch(verifyAccessToken, asyncHandler(updateMyInfo));
+userRouter.delete('/:id', verifyAccessToken, requireAdmin, asyncHandler(deleteUser));
