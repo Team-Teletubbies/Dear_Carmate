@@ -1,4 +1,5 @@
 import { statusMap } from '../lib/utils/statusMap';
+import { Prisma } from '@prisma/client';
 
 export interface ContractParticipant {
   id: number;
@@ -63,3 +64,37 @@ export interface UpdateContractType extends BaseUpdateContractFields {
   contractId: number;
   editorUserId: number;
 }
+
+export type ContractIncludeMap = {
+  cars: { car: { include: { model: true } } };
+  customers: { customer: true };
+  users: { user: true };
+};
+
+export interface ContractQueryParams {
+  where: Prisma.ContractWhereInput;
+  include: Prisma.ContractInclude;
+}
+
+export type ContractWithRelations = Prisma.ContractGetPayload<{
+  include: {
+    user: true;
+    customer: true;
+    car: {
+      include: {
+        model: true;
+      };
+    };
+
+    meeting: true;
+    contractDocuments: true;
+  };
+}>;
+
+export type ContractWithUser = Prisma.ContractGetPayload<{
+  include: {
+    user: true;
+    meeting: true;
+    contractDocuments: true;
+  };
+}>;

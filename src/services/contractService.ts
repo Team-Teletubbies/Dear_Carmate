@@ -5,17 +5,21 @@ import {
   findContractById,
   updateContractInDB,
   deleteContractData,
+  listDetails,
 } from '../repositories/contractRepository';
 import {
   CreateContractResponseDTO,
   CreateContractDTO,
   GroupedContractsResponseDTO,
   UpdateContractDTO,
+  ContractListItem,
 } from '../dto/contractDTO';
 import {
   MinimalContract,
   GroupedContractSearchParams,
   UpdateContractType,
+  ContractQueryParams,
+  ContractWithRelations,
 } from '../types/contractType';
 import { Prisma, ContractStatus } from '@prisma/client';
 import ForbiddenError from '../lib/errors/forbiddenError';
@@ -149,4 +153,56 @@ export const delContract = async (id: number, userId: number): Promise<void> => 
 
   await deleteContractData(id);
   return;
+};
+
+type Segment = 'cars' | 'customers' | 'users';
+
+const formatMap: Record<Segment, (contract: ContractWithRelations) => ContractListItem> = {
+  cars: (contract) => {
+    const model = contract.car.model.name || '';
+    const carNumber = contract.car.carNumber || '';
+    return {
+      id: contract.id,
+      data: `${model}(${carNumber})`,
+    };
+  },
+  customers: (contract) => ({
+    id: contract.customer.id,
+    data: `${contract.customer.name}(${contract.customer.email})`,
+  }),
+  users: (contract) => ({
+    id: contract.user.id,
+    data: `${contract.user.name}(${contract.user.email})`,
+  }),
+};
+
+export const detailList = async (data: {
+  companyId: number;
+  lastSegment: Segment;
+}): Promise<ContractListItem[]> => {
+  const baseInclude = { user: true, meeting: true, contractDocuments: true };
+
+  const enumMap: Record<Segment, Prisma.ContractInclude> = {
+    cars: { ...baseInclude, car: { include: { model: true } }, customer: true },
+    customers: { ...baseInclude, customer: true },
+    users: { ...baseInclude, user: true },
+  };
+
+  const include = enumMap[data.lastSegment];
+
+  const formatter: (contract: ContractWithRelations) => ContractListItem =
+    formatMap[data.lastSegment];
+
+  const queryParams: ContractQueryParams = {
+    where: {
+      user: {
+        companyId: data.companyId,
+      },
+    },
+    include,
+  };
+
+  const contracts = await listDetails(queryParams);
+
+  return contracts.map(formatter);
 };
