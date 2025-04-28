@@ -6,7 +6,7 @@ import { Request, Response } from 'express';
 import fs from 'fs';
 
 const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif']; // 허용할 파일 형식
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 용량 5 MB
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // 용량 5 MB
 
 const uploadDir = path.join(__dirname, '../../public'); // 업로드 된 파일을 받아줄 public 폴더가 없다면 생성해줌
 if (!fs.existsSync(uploadDir)) {
@@ -58,6 +58,6 @@ export async function uploadImage(req: Request, res: Response): Promise<void> {
   }
 
   const filePath = path.join(host, STATIC_PATH, req.file.filename); // 이미지가 클라이언트에서 접근 가능한 상대 URL 경로를 만들어주는 역할
-  const fileUrl = `http://${filePath}`; // 업로드된 이미지를 클라이언트가 접근할 수 있도록 정적 URL 형태로 가공해 응답으로 내려줌
+  const fileUrl = `http://${filePath.replace(/\\/g, '/')}`; // 업로드된 이미지를 클라이언트가 접근할 수 있도록 정적 URL 형태로 가공해 응답으로 내려줌
   res.status(201).json({ fileUrl });
 }
