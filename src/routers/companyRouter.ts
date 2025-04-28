@@ -11,7 +11,14 @@ import { requireAdmin } from '../middlewares/requireAdmin';
 // Todo: withAsync
 // Todo: 인증인가 미들웨어들
 export const companyRouter = express.Router();
+import { asyncHandler } from '../lib/async-handler';
 
-companyRouter.route('/').post(verifyAccessToken, requireAdmin, createCompany).get(getCompanyList);
-companyRouter.get('/users/', getUserList);
-companyRouter.route('/:id').patch(updateCompany).delete(deleteCompany);
+companyRouter
+  .route('/')
+  .post(verifyAccessToken, requireAdmin, asyncHandler(createCompany))
+  .get(verifyAccessToken, requireAdmin, asyncHandler(getCompanyList));
+companyRouter.get('/users/', verifyAccessToken, requireAdmin, asyncHandler(getUserList));
+companyRouter
+  .route('/:id')
+  .patch(verifyAccessToken, requireAdmin, asyncHandler(updateCompany))
+  .delete(verifyAccessToken, requireAdmin, asyncHandler(deleteCompany));

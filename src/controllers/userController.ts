@@ -22,7 +22,7 @@ import NotFoundError from '../lib/errors/notFoundError';
 import UnauthorizedError from '../lib/errors/unauthorizedError';
 import { IdParamsStruct } from '../structs/commonStruct';
 
-export const createUser: RequestHandler = async (req, res) => {
+export const createUser = async (req: Request, res: Response): Promise<void> => {
   assert(req.body, registerUserStruct);
   // Todo: 여기서 오류 시 어떤 오류 던지는지, 잘 잡히는지 체크
   const { passwordConfirmation, ...rest } = req.body;

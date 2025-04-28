@@ -6,4 +6,4 @@ import { verifyRefreshToken } from '../middlewares/verifyRefreshToken';
 export const authRouter = express.Router();
 
 authRouter.post('/login', asyncHandler(login));
-authRouter.post('/refresh', verifyRefreshToken, refreshToken);
+authRouter.post('/refresh', verifyRefreshToken, asyncHandler(refreshToken));
