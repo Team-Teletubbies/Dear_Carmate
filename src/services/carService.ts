@@ -11,6 +11,7 @@ import NotFoundError from '../lib/errors/notFoundError';
 import { mapCarStatus } from '../structs/carStruct';
 import fs from 'fs';
 import csv from 'csv-parser';
+import BadRequestError from '../lib/errors/badRequestError';
 
 async function validManufacturerAndModel(manufacturer: string, model: string, carNumber: string) {
   const manufacturerData = await carRepository.findManufacturerId(manufacturer);
@@ -20,7 +21,7 @@ async function validManufacturerAndModel(manufacturer: string, model: string, ca
   if (!modelData) throw new NotFoundError('존재하지 않는 차량 모델입니다.');
 
   const existingCarData = await carRepository.getCarByCarNumber(carNumber);
-  if (existingCarData) throw new NotFoundError('이미 등록된 차량 번호입니다.');
+  if (existingCarData) throw new BadRequestError('이미 등록된 차량 번호입니다.');
 
   return { manufacturerData, modelData, existingCarData };
 }

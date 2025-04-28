@@ -16,5 +16,6 @@ router.post(
   upload.single('file'),
   asyncHandler(customerController.bulkUploadCustomersHandler),
 );
+router.get('/:id', verifyAccessToken, asyncHandler(customerController.getCustomersHandler));
 
 export default router;
