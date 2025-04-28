@@ -123,3 +123,10 @@ export const deleteMyAccount = async (userId: number): Promise<void> => {
     throw new NotFoundError('유저를 찾지 못했습니다');
   }
 };
+
+export const deleteUser = async (userId: number): Promise<void> => {
+  const deleted = await userRepository.deleteById(userId);
+  if (!deleted) {
+    throw new NotFoundError('유저를 찾지 못했습니다');
+  }
+};
