@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  carCsvUpload,
   deleteCar,
   getCarDetail,
   getCarList,
@@ -8,6 +9,8 @@ import {
   updateCar,
 } from '../controllers/carController';
 import { asyncHandler } from '../lib/async-handler';
+import upload from '../middlewares/uploadMiddleware';
+import { verifyAccessToken } from '../middlewares/verifyAccessToken';
 
 const carRouter = express.Router();
 
@@ -17,5 +20,6 @@ carRouter.delete('/:id', asyncHandler(deleteCar));
 carRouter.get('/', asyncHandler(getCarList));
 carRouter.get('/models', asyncHandler(getManufacturerModelList));
 carRouter.get('/:id', asyncHandler(getCarDetail));
+carRouter.post('/upload', upload.single('file'), verifyAccessToken, asyncHandler(carCsvUpload));
 
 export default carRouter;

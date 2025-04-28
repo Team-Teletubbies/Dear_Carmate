@@ -58,8 +58,8 @@ export interface CarRegisterRequestDTO {
   price: number;
   carStatus: 'possession' | 'contractProceeding' | 'contractCompleted';
   accidentCount: number;
-  explanation?: string | null;
-  accidentDetails?: string | null;
+  explanation: string | null;
+  accidentDetails: string | null;
 }
 
 export type SearchField = 'carNumber' | 'model' | 'carStatus';
@@ -67,4 +67,18 @@ export type SearchField = 'carNumber' | 'model' | 'carStatus';
 export interface GetCarListDTO extends GetCompanyListDTO {
   // 현재 사용되는 DTO이용, 나중에 중복코드 리팩토링 시 변경?!
   searchBy?: SearchField;
+}
+
+export interface CarCsvRow {
+  carNumber: string;
+  manufacturer: string;
+  model: string;
+  type: string;
+  mileage: string;
+  manufacturingYear: string;
+  price: string;
+  carStatus: string;
+  accidentCount: string;
+  explanation: string | null;
+  accidentDetails: string | null;
 }
