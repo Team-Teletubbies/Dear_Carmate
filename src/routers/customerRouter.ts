@@ -10,6 +10,7 @@ router.post('/', verifyAccessToken, asyncHandler(customerController.createCustom
 router.patch('/:id', verifyAccessToken, asyncHandler(customerController.updateCustomerHandler));
 router.delete('/:id', verifyAccessToken, asyncHandler(customerController.deleteCustomerHandler));
 router.get('/', verifyAccessToken, asyncHandler(customerController.getCustomersHandler));
+router.get('/search', verifyAccessToken, asyncHandler(customerController.getCustomerDetailHandler));
 router.post(
   '/upload',
   verifyAccessToken,

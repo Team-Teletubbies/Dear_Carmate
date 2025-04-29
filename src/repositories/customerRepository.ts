@@ -20,7 +20,7 @@ export const updateCustomer = async (
   companyId: number,
   data: Prisma.CustomerUncheckedUpdateManyInput,
 ) => {
-  return prisma.customer.updateMany({
+  return prisma.customer.update({
     where: { id: customerId, companyId },
     data,
   });
@@ -81,5 +81,33 @@ export const getCustomers = async (
 export const getCustomerById = async (customerId: number, companyId: number) => {
   return prisma.customer.findFirst({
     where: { id: customerId, companyId },
+  });
+};
+
+export const findCustomerByKeyword = async (
+  companyId: number,
+  searchBy: 'name' | 'email',
+  keyword: string,
+) => {
+  const where: Prisma.CustomerWhereInput = {
+    companyId,
+    [searchBy]: { contains: keyword, mode: 'insensitive' },
+  };
+
+  return prisma.customer.findFirst({
+    where,
+    select: {
+      id: true,
+      name: true,
+      gender: true,
+      phoneNumber: true,
+      ageGroup: true,
+      region: true,
+      email: true,
+      memo: true,
+      contractCount: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   });
 };
