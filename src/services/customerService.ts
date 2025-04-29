@@ -172,9 +172,9 @@ export const getCustomerDetailByKeyword = async (
 
   return {
     ...customer,
-    gender: customer.gender ? customer.gender.toLowerCase() : null, // ✅ 수정: gender 안전처리
-    ageGroup: customer.ageGroup ? customer.ageGroup.toLowerCase() : null, // ✅ 수정: ageGroup 안전처리
-    region: customer.region ? customer.region.toLowerCase() : null, // ✅ 수정: region 안전처리
+    gender: customer.gender ? customer.gender.toLowerCase() : null,
+    ageGroup: customer.ageGroup ? customer.ageGroup.toLowerCase() : null,
+    region: customer.region ? customer.region.toLowerCase() : null,
   };
 };
 
