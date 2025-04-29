@@ -62,7 +62,7 @@ export async function updateCar(id: number, data: Prisma.CarUpdateInput) {
 
     if (checkCarNumber) {
       // findFirst 결과가 존재하면 = 다른 차량이 동일한 번호를 이미 사용 중, 이 경우 중복 오류 발생 → 수정 불가
-      throw new Error('이미 등록된 차량번호입니다.');
+      throw new Error('이미 등록된 차량번호입니다');
     }
   }
 
