@@ -23,9 +23,9 @@ import { UnauthorizedError } from 'express-jwt';
 import BadRequestError from '../lib/errors/badRequestError';
 
 export const createUser = async (dto: CreateUserDTO) => {
-  const { email, employeeNumber, company, companyCode, password, ...rest } = dto;
+  const { email, employeeNumber, companyName, companyCode, password, ...rest } = dto;
   // Refactor? 함수화 : validateCompany
-  const validCompany = await companyRepository.findValidateCompany(company, companyCode);
+  const validCompany = await companyRepository.findValidateCompany(companyName, companyCode);
   if (!validCompany) {
     throw new NotFoundError('Company info is invalid.');
   }
@@ -104,7 +104,7 @@ export const getMyInfo = async (userId: number): Promise<UserProfileDTO> => {
   if (!userProfile) {
     throw new NotFoundError('존재하지 않는 유저입니다');
   }
-  return userProfile;
+  return new UserProfileDTO(userProfile);
 };
 
 export const updateMyInfo = async (
@@ -126,7 +126,7 @@ export const updateMyInfo = async (
   }
 
   const updated = await userRepository.updateAndGetUser(userId, dataWithoutCurrentPassword);
-  return updated;
+  return new UserProfileDTO(updated);
 };
 
 export const deleteMyAccount = async (userId: number): Promise<void> => {

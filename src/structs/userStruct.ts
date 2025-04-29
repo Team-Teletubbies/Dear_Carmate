@@ -39,7 +39,7 @@ export const createUserBodyStruct = object({
   password: password,
   passwordConfirmation: password,
   employeeNumber: size(nonempty(string()), 4, 20),
-  company: size(nonempty(string()), 1, 30),
+  companyName: size(nonempty(string()), 1, 30),
   companyCode: size(nonempty(string()), 1, 30),
 });
 

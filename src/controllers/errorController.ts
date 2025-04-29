@@ -90,13 +90,7 @@ export function globalErrorHandler(
   }
 
   // 500 오류
-  if (hasCode(err)) {
-    // 얘는 왜 따로 있나요?
-    console.error(err);
-    res.status(500).json({ message: 'Failed to process data' });
-    return;
-  }
-
+  console.log(err);
   res.status(500).json({ message: 'Internal server error' });
   return;
 }

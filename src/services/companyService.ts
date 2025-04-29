@@ -48,7 +48,7 @@ export const updateAndGetCompany = async (
 ): Promise<CompanyResponseDTO> => {
   const companyWithCount = await companyRepository.updateAndGetWithCount(id, data);
   if (!companyWithCount) {
-    throw new NotFoundError('Company not found.');
+    throw new NotFoundError('존재하지 않는 회사입니다');
   }
   const result = new CompanyResponseDTO(companyWithCount);
   return result;
@@ -56,4 +56,7 @@ export const updateAndGetCompany = async (
 
 export const deleteCompany = async (companyId: number): Promise<void> => {
   const deleted = await companyRepository.deleteById(companyId);
+  if (!deleted) {
+    throw new NotFoundError('존재하지 않는 회사입니다');
+  }
 };
