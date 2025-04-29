@@ -1,4 +1,5 @@
 import { StructError } from 'superstruct';
+import { UnauthorizedError as jwtUnauthorized } from 'express-jwt';
 import BadRequestError from '../lib/errors/badRequestError';
 import UnauthorizedError from '../lib/errors/unauthorizedError';
 import NotFoundError from '../lib/errors/notFoundError';
@@ -20,7 +21,12 @@ export function globalErrorHandler(
     return next(err);
   }
 
-  if (err instanceof StructError || err instanceof BadRequestError) {
+  // 400 오류
+  if (err instanceof StructError) {
+    res.status(400).json({ message: '잘못된 요청입니다' });
+  }
+
+  if (err instanceof BadRequestError) {
     res.status(400).json({ message: err.message });
     return;
   }
@@ -30,14 +36,15 @@ export function globalErrorHandler(
     return;
   }
 
-  if (hasCode(err)) {
-    console.error(err);
-    res.status(500).json({ message: 'Failed to process data' });
+  // 404 오류
+  if (err instanceof NotFoundError) {
+    res.status(404).json({ message: err.message });
     return;
   }
 
-  if (err instanceof NotFoundError) {
-    res.status(404).json({ message: err.message });
+  // 401 오류
+  if (hasCode(err) && (err.code === 'credentials_required' || err.code === 'invalid_token')) {
+    res.status(401).json({ message: '로그인이 필요합니다' });
     return;
   }
 
@@ -46,13 +53,23 @@ export function globalErrorHandler(
     return;
   }
 
+  // 403 오류
   if (err instanceof forbiddenError) {
     res.status(403).json({ message: err.message });
     return;
   }
 
+  // 409 오류
   if (err instanceof ConflictError) {
     res.status(409).json({ message: err.message });
+    return;
+  }
+
+  // 500 오류
+  if (hasCode(err)) {
+    // 얘는 왜 따로 있나요?
+    console.error(err);
+    res.status(500).json({ message: 'Failed to process data' });
     return;
   }
 

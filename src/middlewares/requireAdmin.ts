@@ -6,11 +6,11 @@ import * as userRepository from '../repositories/userRepository';
 export const requireAdmin: RequestHandler = asyncHandler(async (req, res, next) => {
   const userId = req.user?.userId;
   if (!userId) {
-    throw new UnauthorizedError('관리자만 가능합니다.');
+    throw new UnauthorizedError('로그인이 필요합니다');
   }
   const user = await userRepository.getById(userId);
   if (!user.isAdmin) {
-    throw new UnauthorizedError('관리자만 가능합니다.');
+    throw new UnauthorizedError('관리자 권한이 필요합니다');
   }
   return next();
 });
