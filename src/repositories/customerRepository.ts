@@ -106,8 +106,6 @@ export const findCustomerByKeyword = async (
       email: true,
       memo: true,
       contractCount: true,
-      createdAt: true,
-      updatedAt: true,
     },
   });
 };
