@@ -159,6 +159,8 @@ export const getCustomersService = async (
   };
 };
 
+//상세 조회 추가
+
 export const getCustomerDetailByKeyword = async (
   companyId: number,
   searchBy: 'name' | 'email',
