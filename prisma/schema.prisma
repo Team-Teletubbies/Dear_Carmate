@@ -143,7 +143,7 @@ model Alarm {
 
 model ContractDocument {
   id         Int      @id @default(autoincrement())
-  contractId Int
+  contractId Int?
   companyId  Int
   fileName   String
   filePath   String
@@ -151,8 +151,8 @@ model ContractDocument {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  company  Company  @relation(fields: [companyId], references: [id])
-  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  company  Company   @relation(fields: [companyId], references: [id])
+  contract Contract? @relation(fields: [contractId], references: [id], onDelete: Cascade)
 }
 
 enum Gender {

@@ -3,7 +3,7 @@ import {
   findContractDocumentById,
 } from '../repositories/contractDocumentRepository';
 import {
-  ContractDocumnetTotalResponseDTO,
+  ContractDocumentTotalResponseDTO,
   DownloadContractDocumentResponseDTO,
   GetConstractDocumentListDTO,
   UploadContractDocumentResponseDTO,
@@ -15,6 +15,7 @@ import {
   DraftContractForDocumentItem,
 } from '../types/contractDocumentType';
 import NotFoundError from '../lib/errors/notFoundError';
+import forbiddenError from '../lib/errors/forbiddenError';
 import fs from 'fs';
 import path from 'path';
 import { ContractDocumentStructKey } from '../structs/contractDocumentStruct';
@@ -23,6 +24,7 @@ import {
   findContractDocuments,
   countContract,
   findDraftContracts,
+  contractFindUserId,
 } from '../repositories/contractRepository';
 import { Prisma } from '@prisma/client';
 
@@ -34,12 +36,20 @@ export const uploadContractDocument = async (
 };
 
 export const downloadContractDocument = async (
+  userId: number,
   id: number,
 ): Promise<DownloadContractDocumentResponseDTO> => {
   const document = await findContractDocumentById(id);
 
   if (!document) {
     throw new NotFoundError('계약서를 찾을 수 없습니다.');
+  }
+
+  if (document.contractId !== null) {
+    const contract = await contractFindUserId(document.contractId);
+    if (!contract || contract.userId !== userId) {
+      throw new forbiddenError('담당자만 수정할 수 있습니다.');
+    }
   }
 
   if (!fs.existsSync(document.filePath)) {
@@ -53,14 +63,19 @@ export const downloadContractDocument = async (
 };
 
 export const getContractDocumentList = async (
-  dto: GetConstractDocumentListDTO,
-): Promise<ContractDocumnetTotalResponseDTO> => {
-  const { page, pageSize, searchBy, keyword } = dto;
+  baseData: GetConstractDocumentListDTO,
+): Promise<ContractDocumentTotalResponseDTO> => {
+  const { page, pageSize, searchBy, keyword, companyId } = baseData;
 
   const skip = (page - 1) * pageSize;
   const take = pageSize;
 
-  const where = buildWhereCondition(searchBy, keyword);
+  const searchData = buildWhereCondition(searchBy, keyword);
+
+  const where = {
+    user: { companyId },
+    ...searchData,
+  };
 
   const [items, totalItemCount] = await Promise.all([
     findContractDocuments(where, skip, take),
@@ -70,7 +85,7 @@ export const getContractDocumentList = async (
   const data = items.map((item: ContractForDocumentItem) => new ContractDocumentItem(item));
   const totalPages = Math.ceil(totalItemCount / pageSize);
 
-  return new ContractDocumnetTotalResponseDTO(page, totalPages, totalItemCount, data);
+  return new ContractDocumentTotalResponseDTO(page, totalPages, totalItemCount, data);
 };
 
 const buildWhereCondition = (
@@ -89,8 +104,10 @@ const buildWhereCondition = (
   };
 };
 
-export const getDraftContractDocuments = async () => {
-  const drafts = await findDraftContracts();
+export const getDraftContractDocuments = async (
+  companyId: number,
+): Promise<DraftContractDocumentItem[]> => {
+  const drafts = await findDraftContracts(companyId);
   return drafts.map(
     (contract: DraftContractForDocumentItem) => new DraftContractDocumentItem(contract),
   );

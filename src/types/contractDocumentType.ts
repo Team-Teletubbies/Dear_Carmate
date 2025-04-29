@@ -1,6 +1,6 @@
 export interface ContractDocument {
   id: number;
-  contractId: number;
+  contractId: number | null;
   companyId: number;
   fileName: string;
   filePath: string;
@@ -9,7 +9,10 @@ export interface ContractDocument {
   updatedAt: Date;
 }
 export type contractDocuments = Pick<ContractDocument, 'id' | 'fileName'>;
-export type UploadContractDocument = Omit<ContractDocument, 'id' | 'createdAt' | 'updatedAt'>;
+export type UploadContractDocument = Omit<
+  ContractDocument,
+  'id' | 'createdAt' | 'updatedAt' | 'contractId'
+>;
 
 export class DocumentSummary {
   constructor(
@@ -20,7 +23,7 @@ export class DocumentSummary {
 export class ContractDocumentItem {
   id: number;
   contractName: string;
-  resolutionDate: Date | null;
+  resolutionDate: Date | '';
   documentsCount: number;
   manager: string;
   carNumber: string;
@@ -32,8 +35,7 @@ export class ContractDocumentItem {
     const modelName = contract.car.model.name;
     const customerName = contract.customer.name;
     this.contractName = `${modelName} - ${customerName} 고객님`;
-
-    this.resolutionDate = contract.resolutionDate;
+    this.resolutionDate = contract.resolutionDate ? contract.resolutionDate : '';
     this.documentsCount = contract.contractDocuments.length ?? 0;
     this.manager = contract.user.name;
     this.carNumber = contract.car.carNumber;
