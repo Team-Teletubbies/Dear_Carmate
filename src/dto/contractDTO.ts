@@ -1,6 +1,7 @@
 import { ContractParticipant, Meeting, MinimalContract } from '../types/contractType';
 import { toClientStatus } from '../lib/utils/statusMap';
-import { Contract } from '@prisma/client';
+import { Contract, ContractStatus } from '@prisma/client';
+import { formatLocalDateTime } from '../lib/utils/formatLocalDateTime';
 export interface CreateContractDTO {
   carId: number;
   customerId: number;
@@ -12,7 +13,7 @@ export interface CreateContractDTO {
 export class CreateContractResponseDTO {
   id: number;
   contractStatus: string;
-  resolutionDate: string | null;
+  resolutionDate: string | Record<string, never>;
   contractPrice: number;
   meetings: Meeting[];
   user: ContractParticipant;
@@ -21,15 +22,17 @@ export class CreateContractResponseDTO {
 
   constructor(contract: MinimalContract) {
     this.id = contract.id;
-    this.contractStatus = contract.contractStatus;
+    this.contractStatus = toClientStatus(contract.contractStatus);
     this.resolutionDate = contract.resolutionDate
-      ? new Date(contract.resolutionDate).toISOString()
-      : null;
+      ? formatLocalDateTime(new Date(contract.resolutionDate))
+      : '';
     this.contractPrice = contract.contractPrice;
-    this.meetings = contract.meeting.map((meet) => ({
-      date: new Date(meet.date).toISOString().slice(0, 10),
-      alarms: meet.alarms.map((alarm) => new Date(alarm).toISOString()),
-    }));
+    this.meetings = Array.isArray(contract.meeting)
+      ? contract.meeting.map((meet) => ({
+          date: new Date(meet.date).toISOString().slice(0, 10),
+          alarms: meet.alarms.map((alarm) => formatLocalDateTime(new Date(alarm))),
+        }))
+      : [];
     this.user = contract.user;
     this.customer = contract.customer;
     this.car = {
@@ -44,7 +47,7 @@ export class UpdateContractDTO {
   contractStatus: string;
   resolutionDate: string;
   contractPrice: number;
-  meetings: { date: string; alarms: string[] }[];
+  meetings: Meeting[];
   user: { id: number; name: string };
   customer: { id: number; name: string };
   car: { id: number; model: string };
@@ -59,12 +62,16 @@ export class UpdateContractDTO {
   ) {
     this.id = contract.id;
     this.contractStatus = toClientStatus(contract.contractStatus);
-    this.resolutionDate = contract.resolutionDate?.toISOString() ?? '';
+    this.resolutionDate = contract.resolutionDate
+      ? formatLocalDateTime(new Date(contract.resolutionDate))
+      : '';
     this.contractPrice = contract.contractPrice;
-    this.meetings = contract.meeting.map((meet) => ({
-      date: meet.date.toISOString().slice(0, 10),
-      alarms: meet.alarm.map((alarm) => alarm.time.toISOString()),
-    }));
+    this.meetings = Array.isArray(contract.meeting)
+      ? contract.meeting.map((meet) => ({
+          date: meet.date.toISOString().slice(0, 10),
+          alarms: meet.alarm.map((alarm) => formatLocalDateTime(new Date(alarm.time))),
+        }))
+      : [];
     this.user = {
       id: contract.user.id,
       name: contract.user.name,
@@ -82,7 +89,7 @@ export class UpdateContractDTO {
 
 export class ContractResponseDTO {
   id: number;
-  car: { id: number; model: { name: string } };
+  car: { id: number; model: string };
   customer: { id: number; name: string };
   user: { id: number; name: string };
   meetings: {
@@ -95,16 +102,18 @@ export class ContractResponseDTO {
 
   constructor(data: MinimalContract) {
     this.id = data.id;
-    this.car = { id: data.car.id, model: { name: data.car.model.name } };
+    this.car = { id: data.car.id, model: data.car.model.name };
     this.customer = { id: data.customer.id, name: data.customer.name };
     this.user = { id: data.user.id, name: data.user.name };
-    this.meetings = data.meeting.map((meet) => ({
-      date: new Date(meet.date).toISOString().slice(0, 10),
-      alarms: meet.alarms.map((alarm) => new Date(alarm).toISOString()),
-    }));
+    this.meetings = Array.isArray(data.meeting)
+      ? data.meeting.map((meet) => ({
+          date: new Date(meet.date).toISOString().slice(0, 10),
+          alarms: meet.alarms.map((alarm) => new Date(alarm).toISOString()),
+        }))
+      : [];
     this.contractPrice = data.contractPrice;
     this.resolutionDate = data.resolutionDate ? new Date(data.resolutionDate).toISOString() : '';
-    this.contractStatus = data.contractStatus;
+    this.contractStatus = toClientStatus(data.contractStatus);
   }
 }
 
