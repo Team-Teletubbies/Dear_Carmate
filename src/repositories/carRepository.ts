@@ -54,8 +54,8 @@ export async function deleteCar(id: number) {
 export async function getCarList(data: GetCarListDTO) {
   const { page, pageSize, searchBy = 'carNumber', keyword } = data;
   // searchBy = 'carNumber'로 기본값 설정(data.searchBy없을 때 에러 방지)
-  const serchByFields = ['carNumber', 'model', 'carStatus'] as const;
-  if (!serchByFields.includes(searchBy)) {
+  const searchByFields = ['carNumber', 'model', 'carStatus'] as const;
+  if (!searchByFields.includes(searchBy)) {
     throw new Error(`유효하지 않은 searchBy 입니다. : ${searchBy}`);
   }
 

@@ -15,13 +15,13 @@ import BadRequestError from '../lib/errors/badRequestError';
 
 async function validManufacturerAndModel(manufacturer: string, model: string, carNumber: string) {
   const manufacturerData = await carRepository.findManufacturerId(manufacturer);
-  if (!manufacturerData) throw new NotFoundError('존재하지 않는 제조사입니다.');
+  if (!manufacturerData) throw new NotFoundError('존재하지 않는 제조사입니다');
 
   const modelData = await carRepository.findModelId(model, manufacturerData.id);
-  if (!modelData) throw new NotFoundError('존재하지 않는 차량 모델입니다.');
+  if (!modelData) throw new NotFoundError('존재하지 않는 차량 모델입니다');
 
   const existingCarData = await carRepository.getCarByCarNumber(carNumber);
-  if (existingCarData) throw new BadRequestError('이미 등록된 차량 번호입니다.');
+  if (existingCarData) throw new BadRequestError('이미 등록된 차량 번호입니다');
 
   return { manufacturerData, modelData, existingCarData };
 }
@@ -67,7 +67,7 @@ export async function registerCar(
     model,
     carNumber,
   );
-  if (!carStatus) throw new Error('carStatus는 필수입니다.');
+  if (!carStatus) throw new Error('carStatus는 필수입니다');
 
   const carData = commonCarData(
     {
@@ -92,14 +92,14 @@ export async function updateCar(
   const { manufacturer, model, carNumber, carStatus, ...rest } = data;
 
   const existingCar = await carRepository.findCarById(id);
-  if (!existingCar) throw new NotFoundError('존재하지 않는 차량입니다.');
+  if (!existingCar) throw new NotFoundError('존재하지 않는 차량입니다');
 
   const { manufacturerData, modelData } = await validManufacturerAndModel(
     manufacturer as string,
     model as string,
     carNumber as string,
   );
-  if (!carStatus) throw new Error('carStatus는 필수입니다.');
+  if (!carStatus) throw new Error('carStatus는 필수입니다');
 
   const carData = commonCarData(
     {
@@ -118,7 +118,7 @@ export async function updateCar(
 
 export async function deleteCar(id: number): Promise<void> {
   const existingCar = await carRepository.findCarById(id);
-  if (!existingCar) throw new NotFoundError('존재하지 않는 차량입니다.');
+  if (!existingCar) throw new NotFoundError('존재하지 않는 차량입니다');
 
   await carRepository.deleteCar(id);
 }
@@ -149,12 +149,12 @@ export async function getCarList(
 
 export async function getCarById(id: number): Promise<carRegistUpdateDTO> {
   const car = await carRepository.getCarById(id);
-  if (!car) throw new NotFoundError('존재하지 않는 차량입니다.');
+  if (!car) throw new NotFoundError('존재하지 않는 차량입니다');
 
   return mapCarDTO({
     ...car,
     manufacturer: {
-      name: car.model.name,
+      name: car.model.manufacturer.name,
     },
     model: {
       name: car.model.name,
@@ -165,12 +165,14 @@ export async function getCarById(id: number): Promise<carRegistUpdateDTO> {
 
 export async function getManufacturerModelList() {
   const data = await carRepository.getManufacturerModelList();
-  if (!data) throw new NotFoundError('제조사 및 모델 정보가 없습니다.');
+  if (!data) throw new NotFoundError('제조사 및 모델 정보가 없습니다');
 
-  return data.map((m) => ({
+  const dataList = data.map((m) => ({
     manufacturer: m.name,
     model: m.models.map((model) => model.name),
   }));
+
+  return { data: dataList };
 }
 
 interface CsvUploadError {
