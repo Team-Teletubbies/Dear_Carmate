@@ -1,4 +1,4 @@
-import { Car, CarStatus, Prisma } from '@prisma/client';
+import { CarStatus, Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import { CarCsvRow, GetCarListDTO } from '../dto/carDTO';
 import { mapCarStatus } from '../structs/carStruct';

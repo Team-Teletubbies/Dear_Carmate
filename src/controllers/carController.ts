@@ -4,19 +4,14 @@ import { carFilterStruct, createCarBodyStruct, updateCarBodyStruct } from '../st
 import { create } from 'superstruct';
 import { SearchField } from '../dto/carDTO';
 import { IdParamsStruct } from '../structs/commonStruct';
-// import multer from 'multer';
 
 export const registerCar = async (req: Request, res: Response): Promise<void> => {
   const data = create(req.body, createCarBodyStruct);
 
-  // console.log('req.user:', req.user);
-
-  // if (!req.user) {
-  //   res.status(401).json({ message: '로그인 정보가 없습니다.' });
-  // }
-  // const companyId = (req.user as { companyId: number }).companyId;
-
-  const companyId = 1; // 임시로 companyId 지정
+  if (!req.user) {
+    res.status(401).json({ message: '로그인 정보가 없습니다.' });
+  }
+  const companyId = (req.user as { companyId: number }).companyId;
 
   if (!companyId) throw new Error('companyId는 필수입니다.');
 
@@ -28,14 +23,10 @@ export const updateCar = async (req: Request, res: Response): Promise<void> => {
   const { id } = create(req.params, IdParamsStruct);
   const data = create(req.body, updateCarBodyStruct);
 
-  // console.log('req.user:', req.user);
-
-  // if (!req.user) {
-  //   res.status(401).json({ message: '로그인 정보가 없습니다.' });
-  // }
-  // const companyId = (req.user as { companyId: number }).companyId;
-
-  const companyId = 1; // 임시로 companyId 지정
+  if (!req.user) {
+    res.status(401).json({ message: '로그인 정보가 없습니다.' });
+  }
+  const companyId = (req.user as { companyId: number }).companyId;
 
   if (!companyId) throw new Error('companyId는 필수입니다.');
   const updatedCar = await carService.updateCar(Number(id), data, companyId);

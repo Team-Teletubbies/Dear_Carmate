@@ -14,12 +14,12 @@ import { verifyAccessToken } from '../middlewares/verifyAccessToken';
 
 const carRouter = express.Router();
 
-carRouter.post('/', asyncHandler(registerCar));
-carRouter.patch('/:id', asyncHandler(updateCar));
-carRouter.delete('/:id', asyncHandler(deleteCar));
-carRouter.get('/', asyncHandler(getCarList));
-carRouter.get('/models', asyncHandler(getManufacturerModelList));
-carRouter.get('/:id', asyncHandler(getCarDetail));
+carRouter.post('/', verifyAccessToken, asyncHandler(registerCar));
+carRouter.patch('/:id', verifyAccessToken, asyncHandler(updateCar));
+carRouter.delete('/:id', verifyAccessToken, asyncHandler(deleteCar));
+carRouter.get('/', verifyAccessToken, asyncHandler(getCarList));
+carRouter.get('/models', verifyAccessToken, asyncHandler(getManufacturerModelList));
+carRouter.get('/:id', verifyAccessToken, asyncHandler(getCarDetail));
 carRouter.post('/upload', upload.single('file'), verifyAccessToken, asyncHandler(carCsvUpload));
 
 export default carRouter;
