@@ -43,10 +43,6 @@ export const createUserBodyStruct = object({
   companyCode: size(nonempty(string()), 1, 30),
 });
 
-export const registerUserStruct = refine(createUserBodyStruct, 'passwordsMatch', (value) => {
-  return value.password === value.passwordConfirmation;
-});
-
 export const updateUserBodyStruct = object({
   employeeNumber: size(string(), 4, 20),
   phoneNumber: phoneNumber,
