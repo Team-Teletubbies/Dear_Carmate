@@ -6,6 +6,7 @@ import NotFoundError from '../lib/errors/notFoundError';
 import { Request, Response, NextFunction } from 'express';
 import forbiddenError from '../lib/errors/forbiddenError';
 import ConflictError from '../lib/errors/conflictError';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 export function defaultNotFoundHandler(req: Request, res: Response, next: NextFunction): void {
   res.status(404).json({ message: 'Not found' });
@@ -41,6 +42,28 @@ export function globalErrorHandler(
   if (err instanceof NotFoundError) {
     res.status(404).json({ message: err.message });
     return;
+  }
+
+  if (
+    err instanceof PrismaClientKnownRequestError &&
+    err.code === 'P2025' &&
+    err.meta !== undefined
+  ) {
+    let model = '';
+
+    switch (err.meta.modelName) {
+      case 'User':
+        model = '유저';
+        break;
+      case 'Company':
+        model = '회사';
+        break;
+      default:
+        model = 'unknown';
+        break;
+    }
+
+    res.status(404).json({ message: `존재하지 않는 ${model}입니다.` });
   }
 
   // 401 오류

@@ -16,8 +16,8 @@ export const create = async (input: CreateUserInput): Promise<User> => {
   return await prisma.user.create({ data: input });
 };
 
-export const getWithCompanyCode = async (id: number): Promise<UserWithCompanyCode> => {
-  return await prisma.user.findUniqueOrThrow({
+export const getWithCompanyCode = async (id: number): Promise<UserWithCompanyCode | null> => {
+  return await prisma.user.findUnique({
     where: { id },
     select: {
       id: true,
@@ -88,8 +88,8 @@ export const findForLoginByEmail = async (
   return user;
 };
 
-export const getById = async (id: number): Promise<User> => {
-  return await prisma.user.findUniqueOrThrow({ where: { id } });
+export const getById = async (id: number): Promise<User | null> => {
+  return await prisma.user.findUnique({ where: { id } });
 };
 
 export const setRedisRefreshToken = async (userId: number, refreshToken: string): Promise<void> => {
