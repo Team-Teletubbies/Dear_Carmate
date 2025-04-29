@@ -24,6 +24,7 @@ export function globalErrorHandler(
   // 400 오류
   if (err instanceof StructError) {
     res.status(400).json({ message: '잘못된 요청입니다' });
+    return;
   }
 
   if (err instanceof BadRequestError) {

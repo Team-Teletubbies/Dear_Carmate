@@ -12,9 +12,9 @@ import {
 import BadRequestError from '../lib/errors/badRequestError';
 import { assert, create } from 'superstruct';
 import {
+  createUserBodyStruct,
   loginBodyStruct,
   refreshTokenBodyStruct,
-  registerUserStruct,
   updateUserBodyStruct,
   userFilterStruct,
 } from '../structs/userStruct';
@@ -23,8 +23,10 @@ import UnauthorizedError from '../lib/errors/unauthorizedError';
 import { IdParamsStruct } from '../structs/commonStruct';
 
 export const createUser = async (req: Request, res: Response): Promise<void> => {
-  assert(req.body, registerUserStruct);
-  // Todo: 여기서 오류 시 어떤 오류 던지는지, 잘 잡히는지 체크
+  assert(req.body, createUserBodyStruct);
+  if (req.body.password !== req.body.passwordConfirmation) {
+    throw new BadRequestError('비밀번호와 비밀번호 확인이 일치하지 않습니다');
+  }
   const { passwordConfirmation, ...rest } = req.body;
   const dto: CreateUserDTO = rest;
   const user = await userService.createUser(dto);
