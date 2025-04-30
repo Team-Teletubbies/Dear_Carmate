@@ -54,7 +54,7 @@ export async function uploadImage(req: Request, res: Response): Promise<void> {
     throw new BadRequestError('파일이 없습니다.');
   }
 
-  const filePath = path.join(host, STATIC_PATH, req.file.filename); // 이미지가 클라이언트에서 접근 가능한 상대 URL 경로를 만들어주는 역할
-  const fileUrl = `http://${filePath.replace(/\\/g, '/')}`; // 업로드된 이미지를 클라이언트가 접근할 수 있도록 정적 URL 형태로 가공해 응답으로 내려줌
+  const filePath = path.join(host, STATIC_PATH, req.file.filename);
+  const fileUrl = `http://${encodeURI(filePath.replace(/\\/g, '/'))}`;
   res.status(201).json({ fileUrl });
 }
