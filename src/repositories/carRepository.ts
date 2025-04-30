@@ -35,10 +35,39 @@ export async function findCarById(id: number) {
 }
 
 export async function updateCar(id: number, data: Prisma.CarUpdateInput) {
-  return await prisma.car.update({
+  const currentCar = await prisma.car.findUniqueOrThrow({
+    // currentCar.carNumber: 현재 DB에 저장된 이 차량의 기존 차량 번호
+    // 현재 차량의 carNumber만 가져온다 (존재 검사는 서비스에서 이미 끝났음)
     where: {
       id,
     },
+    select: {
+      carNumber: true,
+    },
+  });
+
+  const reqCarNumber = data.carNumber as string; // reqCarNumber: 사용자가 요청(JSON body)에서 보낸 새로운 차량 번호
+
+  if (reqCarNumber && reqCarNumber !== currentCar.carNumber) {
+    // 사용자가 carNumber를 아예 안 보낸 경우 → 검증 안 함 (수정 안 하니까)
+    // 보냈지만 기존 값과 같다면 → 그대로 허용 (중복 아님)
+    // 보냈고, 기존 값과 다르다면 → 중복 검사 실행
+    // carNumber가 변경되는 경우만 중복 검사
+    const checkCarNumber = await prisma.car.findFirst({
+      where: {
+        carNumber: reqCarNumber,
+        NOT: { id }, // 자기 자신(id)을 확인하는 것을 제외하여 중복처리 막을 수 있음
+      },
+    });
+
+    if (checkCarNumber) {
+      // findFirst 결과가 존재하면 = 다른 차량이 동일한 번호를 이미 사용 중, 이 경우 중복 오류 발생 → 수정 불가
+      throw new Error('이미 등록된 차량번호입니다');
+    }
+  }
+
+  return await prisma.car.update({
+    where: { id },
     data,
   });
 }
@@ -54,8 +83,8 @@ export async function deleteCar(id: number) {
 export async function getCarList(data: GetCarListDTO) {
   const { page, pageSize, searchBy = 'carNumber', keyword } = data;
   // searchBy = 'carNumber'로 기본값 설정(data.searchBy없을 때 에러 방지)
-  const serchByFields = ['carNumber', 'model', 'carStatus'] as const;
-  if (!serchByFields.includes(searchBy)) {
+  const searchByFields = ['carNumber', 'model', 'carStatus'] as const;
+  if (!searchByFields.includes(searchBy)) {
     throw new Error(`유효하지 않은 searchBy 입니다. : ${searchBy}`);
   }
 

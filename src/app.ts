@@ -12,6 +12,7 @@ import path from 'path';
 import { PUBLIC_PATH, STATIC_PATH } from './lib/constants';
 import imageRouter from './routers/imageRouter';
 import dashboardRouter from './routers/dashboardRouter';
+import { multerErrorHandler } from './lib/multerError';
 
 const app: express.Application = express();
 app.use(express.json());
@@ -28,6 +29,7 @@ app.use('/auth', authRouter);
 app.use('/images', imageRouter);
 app.use('/dashboard', dashboardRouter);
 
+app.use(multerErrorHandler);
 app.use(defaultNotFoundHandler);
 app.use(globalErrorHandler);
 

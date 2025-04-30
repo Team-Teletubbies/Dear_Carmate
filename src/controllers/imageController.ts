@@ -1,12 +1,12 @@
 import multer from 'multer';
-import { PUBLIC_PATH, STATIC_PATH } from '../lib/constants';
+import { LIMIT_FILE_SIZE, PUBLIC_PATH, STATIC_PATH } from '../lib/constants';
 import path from 'path';
 import BadRequestError from '../lib/errors/badRequestError';
 import { Request, Response } from 'express';
 import fs from 'fs';
 
 const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif']; // 허용할 파일 형식
-const MAX_FILE_SIZE = 1 * 1024 * 1024; // 용량 5 MB
+const MAX_FILE_SIZE = LIMIT_FILE_SIZE; // 용량 5 MB
 
 const uploadDir = path.join(__dirname, '../../public'); // 업로드 된 파일을 받아줄 public 폴더가 없다면 생성해줌
 if (!fs.existsSync(uploadDir)) {
@@ -39,10 +39,7 @@ export const upload = multer({
       const error = new BadRequestError('허용되지 않는 파일 형식입니다.');
       return cb(error);
     }
-    if (file.size > MAX_FILE_SIZE) {
-      const error = new BadRequestError('허용된 파일 크기를 초과하였습니다.');
-      return cb(error);
-    }
+
     cb(null, true);
   },
 });
