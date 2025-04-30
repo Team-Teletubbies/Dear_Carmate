@@ -6,6 +6,7 @@ import {
   updateContractInDB,
   deleteContractData,
   listDetails,
+  updateMultipleContractDocumentIds,
 } from '../repositories/contractRepository';
 import {
   CreateContractResponseDTO,
@@ -140,6 +141,11 @@ export const updateContractData = async (input: UpdateContractType): Promise<Upd
     basic,
     meetings: meetingList,
   });
+
+  if (contractDocuments && contractDocuments.length > 0) {
+    const documnetIds = contractDocuments.map((doc) => doc.id);
+    await updateMultipleContractDocumentIds(documnetIds, contractId);
+  }
 
   return new UpdateContractDTO(contract);
 };

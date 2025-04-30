@@ -186,3 +186,17 @@ export const contractFindUserId = async (contractId: number) => {
     select: { userId: true },
   });
 };
+
+export const updateMultipleContractDocumentIds = async (
+  documentIds: number[],
+  contractId: number,
+): Promise<void> => {
+  await Promise.all(
+    documentIds.map((id) =>
+      prisma.contractDocument.update({
+        where: { id },
+        data: { contractId },
+      }),
+    ),
+  );
+};
