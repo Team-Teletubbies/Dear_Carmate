@@ -22,7 +22,7 @@ import { redis } from '../lib/auth/redis';
 import { UnauthorizedError } from 'express-jwt';
 import BadRequestError from '../lib/errors/badRequestError';
 
-export const createUser = async (dto: CreateUserDTO) => {
+export const createUser = async (dto: CreateUserDTO): Promise<UserProfileDTO> => {
   const { email, employeeNumber, companyName, companyCode, password, ...rest } = dto;
   // Refactor? 함수화 : validateCompany
   const validCompany = await companyRepository.findValidateCompany(companyName, companyCode);
@@ -49,10 +49,10 @@ export const createUser = async (dto: CreateUserDTO) => {
   if (!userWithCompanyCode) {
     throw new NotFoundError('존재하지 않는 유저입니다');
   }
-  return userWithCompanyCode;
+  return new UserProfileDTO(userWithCompanyCode);
 };
 
-export const getUserList = async (dto: GetUserListDTO) => {
+export const getUserList = async (dto: GetUserListDTO): Promise<GetUserListResponseDTO> => {
   const input = { ...dto, searchBy: dto.searchBy ?? 'name' };
   const userList = await userRepository.getUserList(input);
   const { page, pageSize, searchBy, keyword } = input;
