@@ -33,5 +33,5 @@ export const updateCompany = async (req: Request, res: Response) => {
 export const deleteCompany = async (req: Request, res: Response) => {
   const { id: companyId } = create(req.params, IdParamsStruct);
   await companyService.deleteCompany(companyId);
-  res.status(204).send();
+  res.status(200).json({ message: '회사 삭제 성공' });
 };

@@ -6,6 +6,7 @@ import NotFoundError from '../lib/errors/notFoundError';
 import { Request, Response, NextFunction } from 'express';
 import forbiddenError from '../lib/errors/forbiddenError';
 import ConflictError from '../lib/errors/conflictError';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 export function defaultNotFoundHandler(req: Request, res: Response, next: NextFunction): void {
   res.status(404).json({ message: 'Not found' });
@@ -43,6 +44,28 @@ export function globalErrorHandler(
     return;
   }
 
+  if (
+    err instanceof PrismaClientKnownRequestError &&
+    err.code === 'P2025' &&
+    err.meta !== undefined
+  ) {
+    let model = '';
+
+    switch (err.meta.modelName) {
+      case 'User':
+        model = '유저';
+        break;
+      case 'Company':
+        model = '회사';
+        break;
+      default:
+        model = 'unknown';
+        break;
+    }
+
+    res.status(404).json({ message: `존재하지 않는 ${model}입니다.` });
+  }
+
   // 401 오류
   if (hasCode(err) && (err.code === 'credentials_required' || err.code === 'invalid_token')) {
     res.status(401).json({ message: '로그인이 필요합니다' });
@@ -67,13 +90,7 @@ export function globalErrorHandler(
   }
 
   // 500 오류
-  if (hasCode(err)) {
-    // 얘는 왜 따로 있나요?
-    console.error(err);
-    res.status(500).json({ message: 'Failed to process data' });
-    return;
-  }
-
+  console.log(err);
   res.status(500).json({ message: 'Internal server error' });
   return;
 }

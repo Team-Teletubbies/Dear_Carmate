@@ -16,8 +16,8 @@ export const create = async (input: CreateUserInput): Promise<User> => {
   return await prisma.user.create({ data: input });
 };
 
-export const getWithCompanyCode = async (id: number): Promise<UserWithCompanyCode> => {
-  return await prisma.user.findUniqueOrThrow({
+export const getWithCompanyCode = async (id: number): Promise<UserWithCompanyCode | null> => {
+  return await prisma.user.findUnique({
     where: { id },
     select: {
       id: true,
@@ -46,7 +46,11 @@ export const getByEmployeeNumber = async (employeeNumber: string): Promise<User 
 
 export const getUserList = async (input: GetUserListInput): Promise<UserListItem[]> => {
   const { keyword, searchBy, page, pageSize } = input;
-  const where = keyword ? { [searchBy]: { contains: keyword, mode: 'insensitive' } } : undefined;
+  const where = keyword
+    ? searchBy === 'companyName'
+      ? { company: { is: { companyName: { contains: keyword, mode: 'insensitive' as const } } } }
+      : { [searchBy]: { contains: keyword, mode: 'insensitive' } }
+    : undefined;
   const userList = await prisma.user.findMany({
     where,
     take: pageSize,
@@ -64,7 +68,11 @@ export const getUserList = async (input: GetUserListInput): Promise<UserListItem
 };
 
 export const countByKeyword = async (searchBy: string, keyword?: string): Promise<number> => {
-  const where = keyword ? { [searchBy]: { contains: keyword, mode: 'insensitive' } } : undefined;
+  const where = keyword
+    ? searchBy === 'companyName'
+      ? { company: { is: { companyName: { contains: keyword, mode: 'insensitive' as const } } } }
+      : { [searchBy]: { contains: keyword, mode: 'insensitive' } }
+    : undefined;
   return prisma.user.count({ where });
 };
 
@@ -88,8 +96,8 @@ export const findForLoginByEmail = async (
   return user;
 };
 
-export const getById = async (id: number): Promise<User> => {
-  return await prisma.user.findUniqueOrThrow({ where: { id } });
+export const getById = async (id: number): Promise<User | null> => {
+  return await prisma.user.findUnique({ where: { id } });
 };
 
 export const setRedisRefreshToken = async (userId: number, refreshToken: string): Promise<void> => {
@@ -104,7 +112,7 @@ export const getRedisRefreshToken = async (userId: number): Promise<string | nul
 export const updateAndGetUser = async (
   userId: number,
   data: updateMyInfoInput,
-): Promise<UserProfileDTO> => {
+): Promise<UserWithCompanyCode> => {
   const where = { id: userId };
   const [_, updatedWithCompany] = await prisma.$transaction([
     prisma.user.update({ where, data }),

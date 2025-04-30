@@ -23,9 +23,9 @@ import { UnauthorizedError } from 'express-jwt';
 import BadRequestError from '../lib/errors/badRequestError';
 
 export const createUser = async (dto: CreateUserDTO) => {
-  const { email, employeeNumber, company, companyCode, password, ...rest } = dto;
+  const { email, employeeNumber, companyName, companyCode, password, ...rest } = dto;
   // Refactor? 함수화 : validateCompany
-  const validCompany = await companyRepository.findValidateCompany(company, companyCode);
+  const validCompany = await companyRepository.findValidateCompany(companyName, companyCode);
   if (!validCompany) {
     throw new NotFoundError('Company info is invalid.');
   }
@@ -34,7 +34,7 @@ export const createUser = async (dto: CreateUserDTO) => {
   const existingEmail = await userRepository.getByEmail(email);
   const existingEmployeeNumber = await userRepository.getByEmployeeNumber(employeeNumber);
   if (existingEmail || existingEmployeeNumber) {
-    throw new ConflictError('Email or EmployeeNumber already exists.');
+    throw new ConflictError('이미 존재하는 이메일 또는 사원번호 입니다');
   }
   const hashedPassword = await hashPassword(password);
   const input: CreateUserInput = {
@@ -45,7 +45,10 @@ export const createUser = async (dto: CreateUserDTO) => {
     companyId,
   };
   const user = await userRepository.create(input);
-  const userWithCompanyCode: UserResponseDTO = await userRepository.getWithCompanyCode(user.id);
+  const userWithCompanyCode = await userRepository.getWithCompanyCode(user.id);
+  if (!userWithCompanyCode) {
+    throw new NotFoundError('존재하지 않는 유저입니다');
+  }
   return userWithCompanyCode;
 };
 
@@ -86,6 +89,9 @@ export const refreshToken = async (dto: RefreshTokenDTO): Promise<RefreshTokenRe
     throw new BadRequestError('잘못된 요청입니다.');
   }
   const user = await userRepository.getById(userId);
+  if (!user) {
+    throw new NotFoundError('존재하지 않는 유저입니다');
+  }
   const companyId = user.companyId;
   const accessToken = createToken({ userId, companyId });
   const newRefreshToken = createToken({ userId, companyId }, 'refresh');
@@ -94,8 +100,11 @@ export const refreshToken = async (dto: RefreshTokenDTO): Promise<RefreshTokenRe
 };
 
 export const getMyInfo = async (userId: number): Promise<UserProfileDTO> => {
-  const userProfile: UserProfileDTO = await userRepository.getWithCompanyCode(userId);
-  return userProfile;
+  const userProfile = await userRepository.getWithCompanyCode(userId);
+  if (!userProfile) {
+    throw new NotFoundError('존재하지 않는 유저입니다');
+  }
+  return new UserProfileDTO(userProfile);
 };
 
 export const updateMyInfo = async (
@@ -105,6 +114,9 @@ export const updateMyInfo = async (
   const { currentPassword, ...dataWithoutCurrentPassword } = data;
   if (data.password) {
     const user = await userRepository.getById(userId);
+    if (!user) {
+      throw new NotFoundError('존재하지 않는 유저입니다');
+    }
     const isValidPassword = await bcrypt.compare(currentPassword, user.password);
     if (!isValidPassword) {
       throw new BadRequestError('현재 비밀번호가 맞지 않습니다');
@@ -114,7 +126,7 @@ export const updateMyInfo = async (
   }
 
   const updated = await userRepository.updateAndGetUser(userId, dataWithoutCurrentPassword);
-  return updated;
+  return new UserProfileDTO(updated);
 };
 
 export const deleteMyAccount = async (userId: number): Promise<void> => {
@@ -127,6 +139,6 @@ export const deleteMyAccount = async (userId: number): Promise<void> => {
 export const deleteUser = async (userId: number): Promise<void> => {
   const deleted = await userRepository.deleteById(userId);
   if (!deleted) {
-    throw new NotFoundError('유저를 찾지 못했습니다');
+    throw new NotFoundError('존재하지 않는 유저입니다');
   }
 };

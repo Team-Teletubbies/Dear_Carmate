@@ -8,7 +8,7 @@ export interface CreateUserDTO {
   employeeNumber: string;
   phoneNumber: string;
   password: string;
-  company: string;
+  companyName: string;
   companyCode: string;
 }
 
@@ -104,4 +104,38 @@ export interface RefreshTokenResponseDTO {
   accessToken: string;
 }
 
-export type UserProfileDTO = UserWithCompanyCode;
+// export type UserProfileDTO = UserWithCompanyCode;
+// export interface UserWithCompanyCode {
+//   id: number;
+//   name: string;
+//   email: string;
+//   employeeNumber: string;
+//   phoneNumber: string;
+//   imageUrl: string | null;
+//   isAdmin: boolean;
+//   company: {
+//     companyCode: string;
+//   };
+// }
+
+export class UserProfileDTO {
+  id: number;
+  name: string;
+  email: string;
+  employeeNumber: string;
+  phoneNumber: string;
+  imageUrl: string;
+  isAdmin: boolean;
+  company: { companyCode: string };
+
+  constructor(user: UserWithCompanyCode) {
+    this.id = user.id;
+    this.name = user.name;
+    this.email = user.email;
+    this.employeeNumber = user.employeeNumber;
+    this.phoneNumber = user.phoneNumber;
+    this.imageUrl = user.imageUrl ?? '';
+    this.isAdmin = user.isAdmin;
+    this.company = user.company;
+  }
+}
