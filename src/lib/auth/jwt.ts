@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 
 export const createToken = (data: TokenPayload, type?: 'access' | 'refresh'): string => {
   const options = {
-    expiresIn: type === 'refresh' ? '2w' : '10h',
+    expiresIn: type === 'refresh' ? '2w' : '1h',
     algorithm: 'HS256' as const,
   };
 
