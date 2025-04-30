@@ -6,17 +6,19 @@ import {
   getContractDocumentLists,
   getDrafts,
 } from '../controllers/contractDocumentController';
+import { verifyAccessToken } from '../middlewares/verifyAccessToken';
 
 export const contractDocumentRouter = express.Router();
 
 contractDocumentRouter.post(
   '/upload',
+  verifyAccessToken,
   upload.array('contractDocuments'),
   uploadContractDocumentController,
 );
 
-contractDocumentRouter.get('/:id/download', downloadContractDocumentController);
+contractDocumentRouter.get('/:id/download', verifyAccessToken, downloadContractDocumentController);
 
-contractDocumentRouter.get('/', getContractDocumentLists);
+contractDocumentRouter.get('/', verifyAccessToken, getContractDocumentLists);
 
-contractDocumentRouter.get('/draft', getDrafts);
+contractDocumentRouter.get('/draft', verifyAccessToken, getDrafts);

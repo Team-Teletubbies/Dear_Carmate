@@ -14,6 +14,7 @@ export interface GetConstractDocumentListDTO {
   pageSize: number;
   searchBy?: ContractDocumentStructKey;
   keyword?: string;
+  companyId: number;
 }
 
 export class ContractDocumentListItemDTO {
@@ -34,7 +35,7 @@ export class DownloadContractDocumentResponseDTO {
   }
 }
 
-export class ContractDocumnetTotalResponseDTO {
+export class ContractDocumentTotalResponseDTO {
   constructor(
     public currentPage: number,
     public totalPages: number,

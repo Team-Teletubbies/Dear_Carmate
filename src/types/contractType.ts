@@ -1,5 +1,5 @@
 import { statusMap } from '../lib/utils/statusMap';
-import { Prisma } from '@prisma/client';
+import { ContractStatus, Prisma } from '@prisma/client';
 
 export interface ContractParticipant {
   id: number;
@@ -20,7 +20,7 @@ export interface Meeting {
 
 export type MinimalContract = {
   id: number;
-  contractStatus: string;
+  contractStatus: ContractStatus;
   resolutionDate: string | Date | null;
   contractPrice: number;
   meeting: {

@@ -1,7 +1,7 @@
 import { prisma } from '../lib/prisma';
-import { ContractStatus, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { CreateContractDTO } from '../dto/contractDTO';
-import { ContractStructKey } from '../structs/contractStruct';
+
 import { ContractQueryParams, ContractWithRelations, MinimalContract } from '../types/contractType';
 
 export const findContractDocuments = async (
@@ -28,10 +28,12 @@ export const countContract = async (where: Prisma.ContractWhereInput = {}): Prom
   return await prisma.contract.count({ where });
 };
 
-export const findDraftContracts = async () => {
+export const findDraftContracts = async (companyId: number) => {
   return await prisma.contract.findMany({
     where: {
-      resolutionDate: null,
+      user: {
+        companyId,
+      },
     },
     include: {
       car: { include: { model: true } },
@@ -175,5 +177,12 @@ export const listDetails = async ({
       meeting: true,
       contractDocuments: true,
     },
+  });
+};
+
+export const contractFindUserId = async (contractId: number) => {
+  return await prisma.contract.findUnique({
+    where: { id: contractId },
+    select: { userId: true },
   });
 };

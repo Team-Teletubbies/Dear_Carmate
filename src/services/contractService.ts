@@ -129,10 +129,12 @@ export const updateContractData = async (input: UpdateContractType): Promise<Upd
     };
   }
 
-  const meetingList = meetings?.map((meet) => ({
-    date: new Date(meet.date),
-    alarm: (meet.alarms ?? []).map((alarm) => ({ time: new Date(alarm) })),
-  }));
+  const meetingList = meetings
+    ? meetings.map((meet) => ({
+        date: new Date(meet.date),
+        alarm: (meet.alarms ?? []).map((alarm) => ({ time: new Date(alarm) })),
+      }))
+    : [];
 
   const contract = await updateContractInDB(contractId, {
     basic,

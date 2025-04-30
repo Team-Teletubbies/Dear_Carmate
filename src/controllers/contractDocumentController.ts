@@ -11,23 +11,23 @@ import fs from 'fs';
 import { create } from 'superstruct';
 import { contractDocumentFilterStruct } from '../structs/contractDocumentStruct';
 import BadRequestError from '../lib/errors/badRequestError';
+import UnauthorizedError from '../lib/errors/unauthorizedError';
 
 export const uploadContractDocumentController = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const files = req.files as Express.Multer.File[];
-    const { contractId, companyId } = req.body;
+    const user = req.user;
 
-    if (!files || !contractId || !companyId) {
+    if (!files) {
       throw new NotFoundError('필수 정보가 누락되었습니다.');
     }
 
-    const baseData = {
-      contractId: Number(contractId),
-      companyId: Number(companyId),
-    };
+    if (!user) {
+      throw new UnauthorizedError('로그인이 필요합니다.');
+    }
 
     const toUploadData = (file: Express.Multer.File) => ({
-      ...baseData,
+      companyId: user.companyId,
       fileName: file.originalname,
       filePath: file.path,
       fileSize: file.size,
@@ -45,9 +45,13 @@ export const uploadContractDocumentController = asyncHandler(
 export const downloadContractDocumentController = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const id = parseInt(req.params.id);
+    const user = req.user;
 
-    console.log(id);
-    const { filePath, fileName } = await downloadContractDocument(id);
+    if (!user) {
+      throw new UnauthorizedError('로그인이 필요합니다.');
+    }
+
+    const { filePath, fileName } = await downloadContractDocument(user.userId, id);
 
     res.setHeader('Content-Disposition', `attachment; filename ="${fileName}`);
     res.setHeader('Content-Type', 'application/octet-stream');
@@ -64,31 +68,38 @@ export const downloadContractDocumentController = asyncHandler(
   },
 );
 
-export const getContractDocument = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
-    const data = create(req.params, contractDocumentFilterStruct);
-
-    if (!data) {
-      throw new BadRequestError('잘못된 요청 입니다.');
-    }
-  },
-);
-
 export const getContractDocumentLists = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const data = create(req.query, contractDocumentFilterStruct);
+    const user = req.user;
+
+    if (!user) {
+      throw new UnauthorizedError('로그인이 필요합니다.');
+    }
 
     if (!data) {
       throw new BadRequestError('잘못된 요청 입니다.');
     }
 
-    const result = await getContractDocumentList(data);
+    const baseData = {
+      page: Number(data.page),
+      pageSize: Number(data.pageSize),
+      keyword: data.keyword,
+      searchBy: data.searchBy,
+      companyId: Number(user.companyId),
+    };
 
+    const result = await getContractDocumentList(baseData);
+    console.log('조회 결과:', result);
     res.json(result);
   },
 );
 
 export const getDrafts = asyncHandler(async (req: Request, res: Response) => {
-  const data = await getDraftContractDocuments();
+  const user = req.user;
+  if (!user) {
+    throw new UnauthorizedError('로그인이 필요합니다.');
+  }
+  const data = await getDraftContractDocuments(user.companyId);
   res.json(data);
 });
