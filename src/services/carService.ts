@@ -11,6 +11,7 @@ import NotFoundError from '../lib/errors/notFoundError';
 import { mapCarStatus } from '../structs/carStruct';
 import fs from 'fs';
 import csv from 'csv-parser';
+import BadRequestError from '../lib/errors/badRequestError';
 
 async function validManufacturerAndModel(manufacturer: string, model: string) {
   const manufacturerData = await carRepository.findManufacturerId(manufacturer);
@@ -22,17 +23,11 @@ async function validManufacturerAndModel(manufacturer: string, model: string) {
   return { manufacturerData, modelData };
 }
 
-function commonCarData(
-  rest: Partial<CarType>,
-  manufacturerId: number,
-  modelId: number,
-  companyId: number,
-) {
+function commonCarData(rest: Partial<CarType>, modelId: number, companyId: number) {
   const data: any = {
     ...rest,
     explanation: rest.explanation ?? null,
     accidentDetails: rest.accidentDetails ?? null,
-    manufacturerId,
     model: {
       connect: { id: modelId },
     },
@@ -66,7 +61,6 @@ export async function registerCar(
       ...rest,
       carStatus: mapCarStatus(carStatus) as CarType['carStatus'],
     },
-    manufacturerData.id,
     modelData.id,
     companyId,
   );
@@ -97,7 +91,6 @@ export async function updateCar(
 
       carStatus: mapCarStatus(carStatus) as CarType['carStatus'],
     },
-    manufacturerData.id,
     modelData.id,
     companyId,
   );
@@ -227,5 +220,5 @@ export async function carCsvUpload(filePath: string, companyId: number): Promise
 
   await endPromise; // CSV 파일 처리 완료를 기다림
   console.log('CSV 파일 처리 완료');
-  return errors; // ✅ 실패한 row 목록 반환
+  return errors; // 실패한 row 목록 반환
 }

@@ -119,7 +119,6 @@ async function main() {
       {
         carNumber: '12가12345',
         companyId: allCompanies[0].id,
-        manufacturerId: kia.id,
         modelId: allModels.find((m) => m.name === 'K5')!.id,
         manufacturingYear: 2021,
         mileage: 15000,
@@ -131,7 +130,6 @@ async function main() {
       {
         carNumber: '34나56789',
         companyId: allCompanies[1].id,
-        manufacturerId: kia.id,
         modelId: allModels.find((m) => m.name === 'Sonata')!.id,
         manufacturingYear: 2019,
         mileage: 30000,
@@ -143,7 +141,6 @@ async function main() {
       {
         carNumber: '56다90123',
         companyId: allCompanies[2].id,
-        manufacturerId: tesla.id,
         modelId: allModels.find((m) => m.name === 'Model 3')!.id,
         manufacturingYear: 2023,
         mileage: 5000,

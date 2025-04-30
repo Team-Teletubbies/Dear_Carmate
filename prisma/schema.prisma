@@ -63,7 +63,6 @@ model Customer {
 model Car {
   id                Int       @id @default(autoincrement())
   companyId         Int
-  manufacturerId    Int
   modelId           Int
   carNumber         String    @unique
   manufacturingYear Int

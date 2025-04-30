@@ -89,6 +89,35 @@ export function globalErrorHandler(
     return;
   }
 
+  if (
+    err instanceof PrismaClientKnownRequestError &&
+    err.code === 'P2002' &&
+    err.meta !== undefined
+  ) {
+    const targets = Array.isArray(err.meta.target) ? err.meta.target : [err.meta.target];
+
+    const translatedFields = targets.map((field) => {
+      switch (field) {
+        case 'carNumber':
+          return '차량번호';
+        case 'modelId':
+          return '차량모델';
+        case 'companyId':
+          return '회사 ID';
+        case 'userId':
+          return '유저 ID';
+        case 'customerId':
+          return '고객 ID';
+        default:
+          return field;
+      }
+    });
+
+    const model = translatedFields.join(', ');
+
+    res.status(409).json({ message: `이미 존재하는 ${model}입니다.` });
+  }
+
   // 500 오류
   console.log(err);
   res.status(500).json({ message: 'Internal server error' });
