@@ -27,7 +27,6 @@ export const uploadContractDocumentController = asyncHandler(
     }
 
     const toUploadData = (file: Express.Multer.File) => ({
-      companyId: user.companyId,
       fileName: file.originalname,
       filePath: file.path,
       fileSize: file.size,

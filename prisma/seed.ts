@@ -131,7 +131,7 @@ async function main() {
       {
         carNumber: '34나56789',
         companyId: allCompanies[1].id,
-        manufacturerId: hyundai.id,
+        manufacturerId: kia.id,
         modelId: allModels.find((m) => m.name === 'Sonata')!.id,
         manufacturingYear: 2019,
         mileage: 30000,
@@ -158,12 +158,13 @@ async function main() {
   const allCustomers = await prisma.customer.findMany();
   const allCars = await prisma.car.findMany();
 
-  // 6. Contract
+  // 6. Contract (✅ companyId 추가됨)
   const contract1 = await prisma.contract.create({
     data: {
       userId: allUsers[0].id,
       carId: allCars[0].id,
       customerId: allCustomers[0].id,
+      companyId: allCompanies[0].id,
       contractPrice: 2200,
       resolutionDate: null,
     },
@@ -173,6 +174,7 @@ async function main() {
       userId: allUsers[1].id,
       carId: allCars[1].id,
       customerId: allCustomers[1].id,
+      companyId: allCompanies[1].id,
       contractPrice: 1800,
       resolutionDate: null,
     },
@@ -182,6 +184,7 @@ async function main() {
       userId: allUsers[2].id,
       carId: allCars[2].id,
       customerId: allCustomers[2].id,
+      companyId: allCompanies[2].id,
       contractPrice: 5200,
       resolutionDate: new Date(),
     },
@@ -207,26 +210,23 @@ async function main() {
     ],
   });
 
-  // 9. ContractDocument
+  // 9. ContractDocument (✅ companyId 제거됨)
   await prisma.contractDocument.createMany({
     data: [
       {
         contractId: contract1.id,
-        companyId: allCompanies[0].id,
         fileName: '계약서1.pdf',
         filePath: '/docs/contract1.pdf',
         fileSize: 2048,
       },
       {
         contractId: contract2.id,
-        companyId: allCompanies[1].id,
         fileName: '계약서2.pdf',
         filePath: '/docs/contract2.pdf',
         fileSize: 3072,
       },
       {
         contractId: contract3.id,
-        companyId: allCompanies[2].id,
         fileName: '계약서3.pdf',
         filePath: '/docs/contract3.pdf',
         fileSize: 1024,
