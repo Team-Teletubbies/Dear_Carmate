@@ -4,7 +4,6 @@ import { Gender, AgeGroup, Region, Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import NotFoundError from '../lib/errors/notFoundError';
 import { getCustomers } from '../repositories/customerRepository';
-import { ageGroupToLabel, regionToLabel, genderToLabel } from '../types/customerType';
 import { parse } from 'csv-parse/sync';
 
 function toGenderEnum(label: string): Gender {
@@ -147,9 +146,9 @@ export const getCustomersService = async (
   //Enum to Label로 변환
   const parsedCustomers = customers.map((customer) => ({
     ...customer,
-    gender: genderToLabel[customer.gender],
-    ageGroup: customer.ageGroup ? ageGroupToLabel[customer.ageGroup] : null,
-    region: customer.region ? regionToLabel[customer.region] : null,
+    gender: customer.gender.toLowerCase(),
+    ageGroup: customer.ageGroup ? customer.ageGroup.toLowerCase() : null,
+    region: customer.region ? customer.region.toLowerCase() : null,
   }));
 
   return {
@@ -157,6 +156,27 @@ export const getCustomersService = async (
     totalPages,
     totalItemCount: totalCount,
     data: parsedCustomers,
+  };
+};
+
+//상세 조회 추가
+
+export const getCustomerDetailByKeyword = async (
+  companyId: number,
+  searchBy: 'name' | 'email',
+  keyword: string,
+) => {
+  const customer = await customerRepo.findCustomerByKeyword(companyId, searchBy, keyword);
+
+  if (!customer) {
+    throw new NotFoundError('고객을 찾을 수 없습니다.');
+  }
+
+  return {
+    ...customer,
+    gender: customer.gender ? customer.gender.toLowerCase() : null,
+    ageGroup: customer.ageGroup ? customer.ageGroup.toLowerCase() : null,
+    region: customer.region ? customer.region.toLowerCase() : null,
   };
 };
 
