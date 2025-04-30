@@ -50,16 +50,46 @@ export const registerCar = async (req: Request, res: Response): Promise<void> =>
   res.status(201).json(registerCars);
 };
 
+// export const updateCar = async (req: Request, res: Response): Promise<void> => {
+//   const { id } = create(req.params, IdParamsStruct);
+//   const data = create(req.body, updateCarBodyStruct);
+
+//   if (!req.user) {
+//     res.status(401).json({ message: '로그인이 필요합니다' });
+//   }
+//   const companyId = (req.user as { companyId: number }).companyId;
+
+//   if (!companyId) throw new Error('companyId는 필수입니다');
+//   const updatedCar = await carService.updateCar(Number(id), data, companyId);
+//   res.status(200).json(updatedCar);
+// };
+
 export const updateCar = async (req: Request, res: Response): Promise<void> => {
-  const { id } = create(req.params, IdParamsStruct);
-  const data = create(req.body, updateCarBodyStruct);
+  let id: number;
+  let data: any;
+
+  try {
+    // params와 body 유효성 검사
+    id = create(req.params, IdParamsStruct).id;
+    data = create(req.body, updateCarBodyStruct);
+  } catch (error) {
+    const structError = error as StructError;
+    const errorMessage = mapCreateCarError(structError);
+    res.status(400).json({ message: errorMessage });
+    return;
+  }
 
   if (!req.user) {
     res.status(401).json({ message: '로그인이 필요합니다' });
+    return;
   }
+
   const companyId = (req.user as { companyId: number }).companyId;
 
-  if (!companyId) throw new Error('companyId는 필수입니다');
+  if (!companyId) {
+    throw new Error('companyId는 필수입니다');
+  }
+
   const updatedCar = await carService.updateCar(Number(id), data, companyId);
   res.status(200).json(updatedCar);
 };
