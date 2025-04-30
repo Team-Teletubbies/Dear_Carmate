@@ -29,8 +29,8 @@ app.use('/auth', authRouter);
 app.use('/images', imageRouter);
 app.use('/dashboard', dashboardRouter);
 
-app.use(multerErrorHandler);
 app.use(defaultNotFoundHandler);
+app.use(multerErrorHandler);
 app.use(globalErrorHandler);
 
 app.listen(3000, () => {
