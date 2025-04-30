@@ -52,10 +52,6 @@ export const updateUserBodyStruct = object({
   imageUrl: nullable(string()),
 });
 
-// export const updateUserStruct = refine(updateUserBodyStruct, 'passwordMatch', (value) => {
-//   return value.password === value.passwordConfirmation;
-// });
-
 export const loginBodyStruct = object({
   email: Email,
   password: password,

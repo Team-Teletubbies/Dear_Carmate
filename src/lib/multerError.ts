@@ -19,6 +19,9 @@ export const multerErrorHandler: ErrorRequestHandler = (err, req, res, next): vo
     });
     return;
   }
-
-  next(err);
+  if (err instanceof MulterError) {
+    const statusCode = (err as any).statusCode || 500;
+    const message = err.message || '서버 내부 오류가 발생했습니다.';
+    next(err);
+  }
 };
