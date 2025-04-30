@@ -69,7 +69,6 @@ export const updateCar = async (req: Request, res: Response): Promise<void> => {
   let data: any;
 
   try {
-    // params와 body 유효성 검사
     id = create(req.params, IdParamsStruct).id;
     data = create(req.body, updateCarBodyStruct);
   } catch (error) {
