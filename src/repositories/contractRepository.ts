@@ -2,7 +2,7 @@ import { prisma } from '../lib/prisma';
 import { Prisma } from '@prisma/client';
 import { CreateContractDTO } from '../dto/contractDTO';
 
-import { ContractQueryParams, ContractWithRelations, MinimalContract } from '../types/contractType';
+import { ContractQueryParams, ContractWithRelations } from '../types/contractType';
 
 export const findContractDocuments = async (
   where: Prisma.ContractWhereInput = {},
@@ -31,9 +31,7 @@ export const countContract = async (where: Prisma.ContractWhereInput = {}): Prom
 export const findDraftContracts = async (companyId: number) => {
   return await prisma.contract.findMany({
     where: {
-      user: {
-        companyId,
-      },
+      companyId,
     },
     include: {
       car: { include: { model: true } },
@@ -46,6 +44,7 @@ export const createContract = async ({
   carId,
   customerId,
   userId,
+  companyId,
   meetings,
 }: CreateContractDTO) => {
   const car = await prisma.car.findUniqueOrThrow({
@@ -58,6 +57,7 @@ export const createContract = async ({
       carId: carId,
       customerId: customerId,
       userId,
+      companyId,
       contractStatus: 'CAR_INSPECTION',
       resolutionDate: null,
       contractPrice: car.price,

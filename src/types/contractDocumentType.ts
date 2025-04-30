@@ -1,7 +1,6 @@
 export interface ContractDocument {
   id: number;
   contractId: number | null;
-  companyId: number;
   fileName: string;
   filePath: string;
   fileSize: number;

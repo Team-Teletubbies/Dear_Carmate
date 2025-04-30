@@ -31,6 +31,7 @@ export const createContract = asyncHandler(async (req: Request, res: Response) =
     carId,
     customerId,
     userId: user.userId,
+    companyId: user.companyId,
     contractPrice: 0,
     meetings: meetings.map((meet) => ({
       date: meet.date,
