@@ -16,7 +16,7 @@ const userSearchKey = ['companyName', 'name', 'email'] as const;
 export type UserSearchKey = (typeof userSearchKey)[number];
 const Email = define<string>(
   'Email',
-  (value) => typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+  (value) => typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value),
 );
 
 export const userFilterStruct = object({
@@ -24,8 +24,8 @@ export const userFilterStruct = object({
   searchBy: optional(enums(userSearchKey)),
 });
 
-const phoneNumber = refine(size(nonempty(string()), 1, 20), 'phoneNumber', (value) =>
-  value.includes('-'),
+const phoneNumber = refine(size(nonempty(string()), 9, 20), 'phoneNumber', (value) =>
+  /^0\d{1,2}-\d{3,4}-\d{4}$/.test(value),
 );
 
 const password = refine(size(nonempty(string()), 8, 16), 'password', (value) =>
@@ -49,12 +49,8 @@ export const updateUserBodyStruct = object({
   currentPassword: password,
   password: optional(password),
   passwordConfirmation: optional(password),
-  imageUrl: nullable(string()),
+  imageUrl: nullable(size(string(), 0, 2048)),
 });
-
-// export const updateUserStruct = refine(updateUserBodyStruct, 'passwordMatch', (value) => {
-//   return value.password === value.passwordConfirmation;
-// });
 
 export const loginBodyStruct = object({
   email: Email,
