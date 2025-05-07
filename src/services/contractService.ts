@@ -104,7 +104,7 @@ export const updateContractData = async (input: UpdateContractType): Promise<Upd
   const {
     contractId,
     editorUserId,
-    contractStatus,
+    status,
     resolutionDate,
     contractPrice,
     meetings,
@@ -120,7 +120,7 @@ export const updateContractData = async (input: UpdateContractType): Promise<Upd
   if (dbContract.userId !== editorUserId) throw new ForbiddenError('담당자만 수정 가능합니다.');
 
   const basic: Prisma.ContractUpdateInput = {};
-  if (contractStatus) basic.contractStatus = toDBStatus(contractStatus);
+  if (status) basic.contractStatus = toDBStatus(status);
   if (resolutionDate) basic.resolutionDate = new Date(resolutionDate);
   if (contractPrice !== undefined) basic.contractPrice = contractPrice;
   if (userId) basic.user = { connect: { id: userId } };
