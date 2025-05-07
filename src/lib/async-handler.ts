@@ -4,7 +4,6 @@ import { AuthenticatedRequest } from '../types/express';
 export function asyncHandler<TReq extends Request = Request>(
   handler: (req: TReq, res: Response, next: NextFunction) => Promise<void>,
 ): RequestHandler {
-  //RequestHandler 추가
   return async function (req: Request, res: Response, next: NextFunction) {
     try {
       await handler(req as TReq, res, next);
