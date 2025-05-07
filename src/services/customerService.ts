@@ -4,6 +4,7 @@ import { Gender, AgeGroup, Region, Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import NotFoundError from '../lib/errors/notFoundError';
 import { getCustomers } from '../repositories/customerRepository';
+import fs from 'fs';
 import { parse } from 'csv-parse/sync';
 
 function toGenderEnum(label: string): Gender {
@@ -174,7 +175,7 @@ export const getCustomerDetailByKeyword = async (
 
   return {
     ...customer,
-    gender: customer.gender ? customer.gender.toLowerCase() : null,
+    gender: customer.gender ? customer.gender.toLowerCase() : '',
     ageGroup: customer.ageGroup ? customer.ageGroup.toLowerCase() : null,
     region: customer.region ? customer.region.toLowerCase() : null,
   };
@@ -192,26 +193,32 @@ type CustomerCSVRecord = {
   memo?: string;
 };
 
-export const bulkUploadCustomers = async (companyId: number, buffer: Buffer) => {
-  const csvText = buffer.toString('utf-8');
+export const bulkUploadCustomers = async (companyId: number, filePath: string) => {
+  const csvText = fs.readFileSync(filePath, 'utf-8').replace(/^\uFEFF/, ''); // BOM 제거
+
   const records = parse(csvText, {
     columns: true,
     skip_empty_lines: true,
     trim: true,
   });
 
-  const customers = (records as CustomerCSVRecord[]).map((record) => ({
-    name: record.name,
-    gender: toGenderEnum(record.gender),
-    phoneNumber: record.phoneNumber,
-    ageGroup: toAgeGroupEnum(record.ageGroup),
-    region: toRegionEnum(record.region),
-    email: record.email,
-    memo: record.memo,
-    companyId,
-  }));
+  const customers = (records as CustomerCSVRecord[])
+    .map((r) => ({
+      name: r.name,
+      gender: toGenderEnum(r.gender),
+      phoneNumber: r.phoneNumber,
+      ageGroup: r.ageGroup ? toAgeGroupEnum(r.ageGroup) : undefined,
+      region: r.region ? toRegionEnum(r.region) : undefined,
+      email: r.email,
+      memo: r.memo,
+      companyId,
+    }))
+    .filter((c) => c.name && c.gender); // 최소 필드 체크
 
-  await prisma.customer.createMany({ data: customers, skipDuplicates: true });
+  const result = await prisma.customer.createMany({
+    data: customers,
+    skipDuplicates: true,
+  });
 
-  return '성공적으로 업로드 되었습니다.';
+  return `성공적으로 ${result.count}명의 고객을 업로드했습니다.`;
 };

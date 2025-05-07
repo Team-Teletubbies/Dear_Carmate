@@ -25,7 +25,7 @@ type CustomerForResponse = {
 function toLowerCaseCustomer(customer: CustomerForResponse) {
   return {
     ...customer,
-    gender: customer.gender ? customer.gender.toLowerCase() : null,
+    gender: customer.gender ? customer.gender.toLowerCase() : '',
     ageGroup: customer.ageGroup ? customer.ageGroup.toLowerCase() : null,
     region: customer.region ? customer.region.toLowerCase() : null,
   };
@@ -110,10 +110,9 @@ export const getCustomerDetail = async (req: AuthenticatedRequest, res: Response
 
 export const bulkUploadCustomer = async (req: AuthenticatedRequest, res: Response) => {
   const companyId = (req.user as { companyId: number }).companyId;
-  const fileBuffer = req.file?.buffer;
 
-  if (!fileBuffer) throw new BadRequestError('CSV 파일을 업로드해주세요');
+  if (!req.file?.path) throw new BadRequestError('CSV 파일을 업로드해주세요');
 
-  const message = await customerService.bulkUploadCustomers(companyId, fileBuffer);
+  const message = await customerService.bulkUploadCustomers(companyId, req.file.path);
   res.status(200).json({ message });
 };

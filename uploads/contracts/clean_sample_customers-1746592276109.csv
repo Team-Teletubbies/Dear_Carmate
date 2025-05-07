@@ -1,0 +1,5 @@
+﻿name,gender,phoneNumber,ageGroup,region,email,memo
+홍길동,남성,01012345678,20대,서울,hong@example.com,우수 고객
+김영희,여성,01098765432,30대,부산,kim@example.com,이메일 수신 동의
+박철수,남성,01056781234,40대,대전,park@example.com,단골 고객
+이수진,여성,01024682468,10대,인천,sue@example.com,
