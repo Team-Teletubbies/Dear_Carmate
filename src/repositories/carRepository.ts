@@ -3,38 +3,38 @@ import { prisma } from '../lib/prisma';
 import { CarCsvRow, GetCarListDTO } from '../dto/carDTO';
 import { mapCarStatus } from '../structs/carStruct';
 
-export async function createCar(data: Prisma.CarCreateInput) {
+export const createCar = async function (data: Prisma.CarCreateInput) {
   return await prisma.car.create({
     data,
   });
-}
+};
 
-export async function findManufacturerId(name: string) {
+export const findManufacturerId = async function (name: string) {
   return await prisma.manufacturer.findFirst({
     where: {
       name,
     },
   });
-}
+};
 
-export async function findModelId(name: string, manufacturerId: number) {
+export const findModelId = async function (name: string, manufacturerId: number) {
   return await prisma.carModel.findFirst({
     where: {
       name,
       manufacturerId,
     },
   });
-}
+};
 
-export async function findCarById(id: number) {
+export const findCarById = async function (id: number) {
   return await prisma.car.findUnique({
     where: {
       id,
     },
   });
-}
+};
 
-export async function updateCar(id: number, data: Prisma.CarUpdateInput) {
+export const updateCar = async function (id: number, data: Prisma.CarUpdateInput) {
   const currentCar = await prisma.car.findUniqueOrThrow({
     where: {
       id,
@@ -59,17 +59,17 @@ export async function updateCar(id: number, data: Prisma.CarUpdateInput) {
     where: { id },
     data,
   });
-}
+};
 
-export async function deleteCar(id: number) {
+export const deleteCar = async function (id: number) {
   return await prisma.car.delete({
     where: {
       id,
     },
   });
-}
+};
 
-export async function getCarList(data: GetCarListDTO) {
+export const getCarList = async function (data: GetCarListDTO) {
   const { page, pageSize, searchBy = 'carNumber', keyword } = data;
   const searchByFields = ['carNumber', 'model', 'carStatus'] as const;
   if (!searchByFields.includes(searchBy)) {
@@ -119,9 +119,9 @@ export async function getCarList(data: GetCarListDTO) {
     totalCount,
     carList,
   };
-}
+};
 
-export async function getCarById(id: number) {
+export const getCarById = async function (id: number) {
   return await prisma.car.findUnique({
     where: {
       id,
@@ -134,9 +134,9 @@ export async function getCarById(id: number) {
       },
     },
   });
-}
+};
 
-export async function getManufacturerModelList() {
+export const getManufacturerModelList = async function () {
   return await prisma.manufacturer.findMany({
     include: {
       models: {
@@ -144,13 +144,13 @@ export async function getManufacturerModelList() {
       },
     },
   });
-}
+};
 
-export async function getCarByCarNumber(carNumber: string) {
+export const getCarByCarNumber = async function (carNumber: string) {
   return await prisma.car.findUnique({
     where: { carNumber },
   });
-}
+};
 
 async function upsertManufacturer(row: CarCsvRow) {
   const normalizedName = row.manufacturer.trim().toUpperCase();
@@ -211,7 +211,7 @@ async function upsertModel(row: CarCsvRow) {
   }
 }
 
-export async function carCsvUpload(row: CarCsvRow, companyId: number) {
+export const carCsvUpload = async function (row: CarCsvRow, companyId: number) {
   const manufacturer = await upsertManufacturer(row);
   const model = await upsertModel(row);
   const existing = await prisma.car.findUnique({
@@ -247,4 +247,4 @@ export async function carCsvUpload(row: CarCsvRow, companyId: number) {
       },
     },
   });
-}
+};

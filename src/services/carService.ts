@@ -10,7 +10,6 @@ import NotFoundError from '../lib/errors/notFoundError';
 import { mapCarStatus } from '../structs/carStruct';
 import fs from 'fs';
 import csv from 'csv-parser';
-import BadRequestError from '../lib/errors/badRequestError';
 
 async function validManufacturerAndModel(manufacturer: string, model: string) {
   const manufacturerData = await carRepository.findManufacturerId(manufacturer);
@@ -46,7 +45,7 @@ function carResponseDTO(car: any, manufacturerData: any, modelData: any): carReg
   });
 }
 
-export async function registerCar(
+export const registerCar = async function (
   data: CarRegisterRequestDTO,
   companyId: number,
 ): Promise<carRegistUpdateDTO> {
@@ -66,9 +65,9 @@ export async function registerCar(
   const createdCar = await carRepository.createCar(carData);
 
   return carResponseDTO(createdCar, manufacturerData, modelData);
-}
+};
 
-export async function updateCar(
+export const updateCar = async function (
   id: number,
   data: Partial<carRegistUpdateDTO>,
   companyId: number,
@@ -96,16 +95,16 @@ export async function updateCar(
   const updatedCar = await carRepository.updateCar(id, carData);
 
   return carResponseDTO(updatedCar, manufacturerData, modelData);
-}
+};
 
-export async function deleteCar(id: number): Promise<void> {
+export const deleteCar = async function (id: number): Promise<void> {
   const existingCar = await carRepository.findCarById(id);
   if (!existingCar) throw new NotFoundError('존재하지 않는 차량입니다');
 
   await carRepository.deleteCar(id);
-}
+};
 
-export async function getCarList(
+export const getCarList = async function (
   data: GetCarListDTO,
 ): Promise<{ totalCount: number; cars: carRegistUpdateDTO[] }> {
   const { totalCount, carList } = await carRepository.getCarList(data);
@@ -127,9 +126,9 @@ export async function getCarList(
     totalCount,
     cars,
   };
-}
+};
 
-export async function getCarById(id: number): Promise<carRegistUpdateDTO> {
+export const getCarById = async function (id: number): Promise<carRegistUpdateDTO> {
   const car = await carRepository.getCarById(id);
   if (!car) throw new NotFoundError('존재하지 않는 차량입니다');
 
@@ -143,9 +142,9 @@ export async function getCarById(id: number): Promise<carRegistUpdateDTO> {
       type: car.model.type,
     },
   });
-}
+};
 
-export async function getManufacturerModelList() {
+export const getManufacturerModelList = async function () {
   const data = await carRepository.getManufacturerModelList();
   if (!data) throw new NotFoundError('제조사 및 모델 정보가 없습니다');
 
@@ -155,14 +154,17 @@ export async function getManufacturerModelList() {
   }));
 
   return { data: dataList };
-}
+};
 
 interface CsvUploadError {
   row: CarCsvRow;
   error: string;
 }
 
-export async function carCsvUpload(filePath: string, companyId: number): Promise<CsvUploadError[]> {
+export const carCsvUpload = async function (
+  filePath: string,
+  companyId: number,
+): Promise<CsvUploadError[]> {
   const concurrencyLimit = 5;
   let running = 0;
   let resolveEnd: () => void;
@@ -215,4 +217,4 @@ export async function carCsvUpload(filePath: string, companyId: number): Promise
   await endPromise;
   console.log('CSV 파일 처리 완료');
   return errors;
-}
+};

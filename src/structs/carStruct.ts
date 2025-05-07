@@ -17,17 +17,15 @@ import {
 import { PageParamsStruct } from './commonStruct';
 
 const statuses = ['possession', 'contractProceeding', 'contractCompleted'] as const;
-type StatusType = (typeof statuses)[number]; // 'possession' | 'contractProceeding' | 'contractCompleted' 리터럴 유니언 타입을 생성
-
+type StatusType = (typeof statuses)[number];
 function toPrismaCarStatus(status: string): string {
   return status.replace(/([A-Z])/g, '_$1').toUpperCase();
 }
 
 export function mapCarStatus(status: string): string {
-  const normalizedCarStatus = status ?? 'possession'; // possession 기본값 설정
+  const normalizedCarStatus = status ?? 'possession';
 
   if (!statuses.includes(status as StatusType)) {
-    // request data와 검증
     throw new Error(`Invalid carStatus: ${status}`);
   }
   return toPrismaCarStatus(normalizedCarStatus);
