@@ -13,7 +13,7 @@ export interface CreateContractDTO {
 
 export class CreateContractResponseDTO {
   id: number;
-  contractStatus: string;
+  status: string;
   resolutionDate: string | Record<string, never>;
   contractPrice: number;
   meetings: Meeting[];
@@ -23,7 +23,7 @@ export class CreateContractResponseDTO {
 
   constructor(contract: MinimalContract) {
     this.id = contract.id;
-    this.contractStatus = toClientStatus(contract.contractStatus);
+    this.status = toClientStatus(contract.contractStatus);
     this.resolutionDate = contract.resolutionDate
       ? formatLocalDateTime(new Date(contract.resolutionDate))
       : '';
@@ -45,7 +45,7 @@ export class CreateContractResponseDTO {
 
 export class UpdateContractDTO {
   id: number;
-  contractStatus: string;
+  status: string;
   resolutionDate: string;
   contractPrice: number;
   meetings: Meeting[];
@@ -62,7 +62,7 @@ export class UpdateContractDTO {
     },
   ) {
     this.id = contract.id;
-    this.contractStatus = toClientStatus(contract.contractStatus);
+    this.status = toClientStatus(contract.contractStatus);
     this.resolutionDate = contract.resolutionDate
       ? formatLocalDateTime(new Date(contract.resolutionDate))
       : '';
@@ -99,7 +99,7 @@ export class ContractResponseDTO {
   }[];
   contractPrice: number;
   resolutionDate: string;
-  contractStatus: string;
+  status: string;
 
   constructor(data: MinimalContract) {
     this.id = data.id;
@@ -114,7 +114,7 @@ export class ContractResponseDTO {
       : [];
     this.contractPrice = data.contractPrice;
     this.resolutionDate = data.resolutionDate ? new Date(data.resolutionDate).toISOString() : '';
-    this.contractStatus = toClientStatus(data.contractStatus);
+    this.status = toClientStatus(data.contractStatus);
   }
 }
 
