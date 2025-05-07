@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import NotFoundError from '../lib/errors/notFoundError';
 import {
   uploadContractDocument,
@@ -11,19 +11,15 @@ import fs from 'fs';
 import { create } from 'superstruct';
 import { contractDocumentFilterStruct } from '../structs/contractDocumentStruct';
 import BadRequestError from '../lib/errors/badRequestError';
-import UnauthorizedError from '../lib/errors/unauthorizedError';
+import { AuthenticatedRequest } from '../types/express';
 
 export const uploadContractDocumentController = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const files = req.files as Express.Multer.File[];
     const user = req.user;
 
     if (!files) {
       throw new NotFoundError('필수 정보가 누락되었습니다.');
-    }
-
-    if (!user) {
-      throw new UnauthorizedError('로그인이 필요합니다.');
     }
 
     const toUploadData = (file: Express.Multer.File) => ({
@@ -42,13 +38,9 @@ export const uploadContractDocumentController = asyncHandler(
 );
 
 export const downloadContractDocumentController = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const id = parseInt(req.params.id);
     const user = req.user;
-
-    if (!user) {
-      throw new UnauthorizedError('로그인이 필요합니다.');
-    }
 
     const { filePath, fileName } = await downloadContractDocument(user.userId, id);
 
@@ -68,14 +60,9 @@ export const downloadContractDocumentController = asyncHandler(
 );
 
 export const getContractDocumentLists = asyncHandler(
-  async (req: Request, res: Response): Promise<void> => {
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const data = create(req.query, contractDocumentFilterStruct);
     const user = req.user;
-
-    if (!user) {
-      throw new UnauthorizedError('로그인이 필요합니다.');
-    }
-
     if (!data) {
       throw new BadRequestError('잘못된 요청 입니다.');
     }
@@ -94,11 +81,8 @@ export const getContractDocumentLists = asyncHandler(
   },
 );
 
-export const getDrafts = asyncHandler(async (req: Request, res: Response) => {
+export const getDrafts = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const user = req.user;
-  if (!user) {
-    throw new UnauthorizedError('로그인이 필요합니다.');
-  }
   const data = await getDraftContractDocuments(user.companyId);
   res.json(data);
 });

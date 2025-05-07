@@ -9,8 +9,27 @@ import {
 import { create, StructError } from 'superstruct';
 import { SearchField } from '../dto/carDTO';
 import { IdParamsStruct } from '../structs/commonStruct';
+import { AuthenticatedRequest } from '../types/express';
 
+<<<<<<< HEAD
 export const registerCar = async (req: Request, res: Response): Promise<void> => {
+=======
+// export const registerCar = async (req: Request, res: Response): Promise<void> => {
+//   const data = create(req.body, createCarBodyStruct);
+
+//   if (!req.user) {
+//     res.status(401).json({ message: '로그인이 필요합니다' });
+//   }
+//   const companyId = (req.user as { companyId: number }).companyId;
+
+//   if (!companyId) throw new Error('companyId는 필수입니다.');
+
+//   const registerCars = await carService.registerCar(data, companyId);
+//   res.status(201).json(registerCars);
+// };
+
+export const registerCar = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+>>>>>>> 00efa7e (fix: req.user가 필수인 AuthenticatedRequest 추가)
   let data;
   try {
     data = create(req.body, createCarBodyStruct);
@@ -21,13 +40,35 @@ export const registerCar = async (req: Request, res: Response): Promise<void> =>
     return;
   }
 
+<<<<<<< HEAD
   const companyId = (req.user as { companyId: number }).companyId;
+=======
+  const companyId = req.user.companyId;
+>>>>>>> 00efa7e (fix: req.user가 필수인 AuthenticatedRequest 추가)
 
   const registerCars = await carService.registerCar(data, companyId);
   res.status(201).json(registerCars);
 };
 
+<<<<<<< HEAD
 export const updateCar = async (req: Request, res: Response): Promise<void> => {
+=======
+// export const updateCar = async (req: Request, res: Response): Promise<void> => {
+//   const { id } = create(req.params, IdParamsStruct);
+//   const data = create(req.body, updateCarBodyStruct);
+
+//   if (!req.user) {
+//     res.status(401).json({ message: '로그인이 필요합니다' });
+//   }
+//   const companyId = (req.user as { companyId: number }).companyId;
+
+//   if (!companyId) throw new Error('companyId는 필수입니다');
+//   const updatedCar = await carService.updateCar(Number(id), data, companyId);
+//   res.status(200).json(updatedCar);
+// };
+
+export const updateCar = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+>>>>>>> 00efa7e (fix: req.user가 필수인 AuthenticatedRequest 추가)
   let id: number;
   let data: any;
 
@@ -41,20 +82,24 @@ export const updateCar = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
+<<<<<<< HEAD
   const companyId = (req.user as { companyId: number }).companyId;
+=======
+  const companyId = req.user.companyId;
+>>>>>>> 00efa7e (fix: req.user가 필수인 AuthenticatedRequest 추가)
 
   const updatedCar = await carService.updateCar(Number(id), data, companyId);
   res.status(200).json(updatedCar);
 };
 
-export const deleteCar = async (req: Request, res: Response): Promise<void> => {
+export const deleteCar = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { id } = create(req.params, IdParamsStruct);
 
   await carService.deleteCar(Number(id));
   res.status(200).send({ message: '차량 삭제 성공' });
 };
 
-export const getCarList = async (req: Request, res: Response): Promise<void> => {
+export const getCarList = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { page, pageSize, searchBy, keyword } = create(req.query, carFilterStruct);
 
   const carList = await carService.getCarList({
@@ -72,23 +117,41 @@ export const getCarList = async (req: Request, res: Response): Promise<void> => 
   });
 };
 
-export const getCarDetail = async (req: Request, res: Response): Promise<void> => {
+export const getCarDetail = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { id } = create(req.params, IdParamsStruct);
 
   const car = await carService.getCarById(Number(id));
   res.status(200).json(car);
 };
 
+<<<<<<< HEAD
 export const getManufacturerModelList = async (req: Request, res: Response): Promise<void> => {
+=======
+export const getManufacturerModelList = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+>>>>>>> 00efa7e (fix: req.user가 필수인 AuthenticatedRequest 추가)
   const data = await carService.getManufacturerModelList();
   res.status(200).json(data);
 };
 
+<<<<<<< HEAD
 export const carCsvUpload = async (req: Request, res: Response): Promise<void> => {
   const path = req.file!.path;
 
   const companyId = (req.user as { companyId: number }).companyId;
 
+=======
+export const carCsvUpload = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  const path = req.file?.path;
+  if (!path) {
+    res.status(400).json({ message: '파일이 없습니다' });
+    return;
+  }
+
+  const companyId = req.user.companyId;
+>>>>>>> 00efa7e (fix: req.user가 필수인 AuthenticatedRequest 추가)
   await carService.carCsvUpload(path, companyId);
   res.json({ message: 'CSV 업로드 및 차량 등록 완료' });
 };
