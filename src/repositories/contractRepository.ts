@@ -161,25 +161,6 @@ export const deleteContractData = async (id: number) => {
   return prisma.contract.delete({ where: { id } });
 };
 
-export const listDetails = async ({
-  where,
-}: ContractQueryParams): Promise<ContractWithRelations[]> => {
-  return prisma.contract.findMany({
-    where,
-    include: {
-      user: true,
-      customer: true,
-      car: {
-        include: {
-          model: true,
-        },
-      },
-      meeting: true,
-      contractDocuments: true,
-    },
-  });
-};
-
 export const contractFindUserId = async (contractId: number) => {
   return await prisma.contract.findUnique({
     where: { id: contractId },
