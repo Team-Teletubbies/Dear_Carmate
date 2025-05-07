@@ -56,13 +56,14 @@ export const deleteCar = async (req: AuthenticatedRequest, res: Response): Promi
 };
 
 export const getCarList = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-  const { page, pageSize, searchBy, keyword } = create(req.query, carFilterStruct);
+  const { page, pageSize, searchBy, keyword, status } = create(req.query, carFilterStruct);
 
   const carList = await carService.getCarList({
     page,
     pageSize,
     searchBy: searchBy as SearchField,
     keyword,
+    status,
   });
 
   res.status(200).json({

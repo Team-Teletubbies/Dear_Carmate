@@ -62,9 +62,10 @@ export interface CarRegisterRequestDTO {
   accidentDetails: string | null;
 }
 
-export type SearchField = 'carNumber' | 'model' | 'carStatus';
+export type SearchField = 'carNumber' | 'model';
 
 export interface GetCarListDTO extends GetCompanyListDTO {
+  status?: 'possession' | 'contractProceeding' | 'contractCompleted';
   searchBy?: SearchField;
 }
 
