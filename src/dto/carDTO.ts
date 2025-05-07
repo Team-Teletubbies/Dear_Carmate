@@ -1,8 +1,8 @@
 import { CarStatus } from '@prisma/client';
 import { GetCompanyListDTO } from './companyDto';
 
-export function fromEnumStyle(value: string): string {
-  return value.toLowerCase().replace(/_([a-z])/g, (_, g) => g.toUpperCase());
+export function fromEnumStyle(value: string | undefined): string {
+  return value!.toLowerCase().replace(/_([a-z])/g, (_, g) => g.toUpperCase());
 }
 
 export interface carRegistUpdateDTO {
@@ -13,7 +13,7 @@ export interface carRegistUpdateDTO {
   mileage: number;
   manufacturingYear: number;
   price: number;
-  carStatus: CarStatus;
+  status: 'possession' | 'contractProceeding' | 'contractCompleted';
   accidentCount: number;
   explanation: string | null;
   accidentDetails: string | null;
@@ -28,7 +28,7 @@ export function mapCarDTO(car: {
   mileage: number;
   manufacturingYear: number;
   price: number;
-  carStatus: CarStatus;
+  status: CarStatus;
   accidentCount: number;
   explanation: string | null;
   accidentDetails: string | null;
@@ -42,7 +42,7 @@ export function mapCarDTO(car: {
     mileage: car.mileage,
     manufacturingYear: car.manufacturingYear,
     price: car.price,
-    carStatus: fromEnumStyle(car.carStatus) as carRegistUpdateDTO['carStatus'],
+    status: fromEnumStyle(car.status) as carRegistUpdateDTO['status'],
     accidentCount: car.accidentCount,
     explanation: car.explanation,
     accidentDetails: car.accidentDetails,

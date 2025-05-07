@@ -1,5 +1,4 @@
 import { StructError } from 'superstruct';
-import { UnauthorizedError as jwtUnauthorized } from 'express-jwt';
 import BadRequestError from '../lib/errors/badRequestError';
 import UnauthorizedError from '../lib/errors/unauthorizedError';
 import NotFoundError from '../lib/errors/notFoundError';
@@ -57,6 +56,9 @@ export function globalErrorHandler(
         break;
       case 'Company':
         model = '회사';
+        break;
+      case 'Car':
+        model = '차량';
         break;
       default:
         model = 'unknown';

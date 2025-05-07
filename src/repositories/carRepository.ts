@@ -57,7 +57,7 @@ export const updateCar = async function (id: number, data: Prisma.CarUpdateInput
 
   return await prisma.car.update({
     where: { id },
-    data,
+    data: {},
   });
 };
 
