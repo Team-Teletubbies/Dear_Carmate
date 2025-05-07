@@ -84,8 +84,8 @@ export const login = async (dto: LoginDTO): Promise<LoginResponseDTO> => {
 
 export const refreshToken = async (dto: RefreshTokenDTO): Promise<RefreshTokenResponseDTO> => {
   const { userId, refreshToken } = dto;
-  const original = await userRepository.getRedisRefreshToken(userId);
-  if (!original || original !== refreshToken) {
+  const original = await userRepository.getRedisRefreshToken(refreshToken);
+  if (!original || original !== userId) {
     throw new BadRequestError('잘못된 요청입니다.');
   }
   const user = await userRepository.getById(userId);
