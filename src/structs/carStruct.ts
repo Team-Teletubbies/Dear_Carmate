@@ -18,17 +18,19 @@ import { PageParamsStruct } from './commonStruct';
 
 const statuses = ['possession', 'contractProceeding', 'contractCompleted'] as const;
 type StatusType = (typeof statuses)[number];
-function toPrismaCarStatus(status: string): string {
+
+function toPrismaCarStatus(status: StatusType): string {
   return status.replace(/([A-Z])/g, '_$1').toUpperCase();
 }
 
 export function mapCarStatus(status: string): string {
-  const normalizedCarStatus = status ?? 'possession';
-
-  if (!statuses.includes(status as StatusType)) {
+  const lower = status.toLowerCase();
+  const match = statuses.find((s) => s.toLowerCase() === lower);
+  if (!match) {
     throw new Error(`Invalid carStatus: ${status}`);
   }
-  return toPrismaCarStatus(normalizedCarStatus);
+
+  return toPrismaCarStatus(match as StatusType);
 }
 
 const carSearchKeys = ['carNumber', 'model', 'carStatus'] as const;

@@ -57,7 +57,7 @@ export const updateCar = async function (id: number, data: Prisma.CarUpdateInput
 
   return await prisma.car.update({
     where: { id },
-    data,
+    data: {},
   });
 };
 
@@ -70,8 +70,8 @@ export const deleteCar = async function (id: number) {
 };
 
 export const getCarList = async function (data: GetCarListDTO) {
-  const { page, pageSize, searchBy = 'carNumber', keyword } = data;
-  const searchByFields = ['carNumber', 'model', 'carStatus'] as const;
+  const { page, pageSize, searchBy = 'carNumber', keyword, status } = data;
+  const searchByFields = ['carNumber', 'model'] as const;
   if (!searchByFields.includes(searchBy)) {
     throw new Error(`유효하지 않은 searchBy 입니다. : ${searchBy}`);
   }
@@ -88,17 +88,13 @@ export const getCarList = async function (data: GetCarListDTO) {
           name: { contains: keyword, mode: 'insensitive' },
         };
         break;
-      case 'carStatus':
-        const prismaCarStatus = mapCarStatus(keyword);
-        if (prismaCarStatus) {
-          where.carStatus = prismaCarStatus as CarStatus;
-        } else {
-          throw new Error(`Invalid car status: ${keyword}`);
-        }
-        break;
       default:
         break;
     }
+  }
+
+  if (status) {
+    where.carStatus = mapCarStatus(status) as CarStatus;
   }
 
   const totalCount = await prisma.car.count({ where });

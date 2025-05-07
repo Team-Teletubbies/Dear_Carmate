@@ -34,12 +34,17 @@ function commonCarData(rest: Partial<carRegistUpdateDTO>, modelId: number, compa
     },
   };
 
+  if (rest.status) {
+    data.carStatus = mapCarStatus(rest.status);
+  }
+  delete data.status;
   return data;
 }
 
 function carResponseDTO(car: any, manufacturerData: any, modelData: any): carRegistUpdateDTO {
   return mapCarDTO({
     ...car,
+    status: car.carStatus,
     manufacturer: { name: manufacturerData.name },
     model: { name: modelData.name, type: modelData.type },
   });
@@ -57,7 +62,7 @@ export const registerCar = async function (
   const carData = commonCarData(
     {
       ...rest,
-      carStatus: mapCarStatus(carStatus) as carRegistUpdateDTO['carStatus'],
+      status: mapCarStatus(carStatus) as carRegistUpdateDTO['status'],
     },
     modelData.id,
     companyId,
@@ -72,22 +77,24 @@ export const updateCar = async function (
   data: Partial<carRegistUpdateDTO>,
   companyId: number,
 ): Promise<carRegistUpdateDTO> {
-  const { manufacturer, model, carStatus, ...rest } = data;
+  const { manufacturer, model, status, ...rest } = data;
 
   const existingCar = await carRepository.findCarById(id);
   if (!existingCar) throw new NotFoundError('존재하지 않는 차량입니다');
+
+  if (!manufacturer || !model) {
+    throw new Error('manufacturer와 model은 필수입니다');
+  }
 
   const { manufacturerData, modelData } = await validManufacturerAndModel(
     manufacturer as string,
     model as string,
   );
-  if (!carStatus) throw new Error('carStatus는 필수입니다');
 
   const carData = commonCarData(
     {
       ...rest,
-
-      carStatus: mapCarStatus(carStatus) as carRegistUpdateDTO['carStatus'],
+      ...(status && { carStatus: mapCarStatus(status) }),
     },
     modelData.id,
     companyId,
@@ -112,6 +119,7 @@ export const getCarList = async function (
   const cars = carList.map((car) =>
     mapCarDTO({
       ...car,
+      status: car.carStatus,
       manufacturer: {
         name: car.model.manufacturer.name,
       },
@@ -134,6 +142,7 @@ export const getCarById = async function (id: number): Promise<carRegistUpdateDT
 
   return mapCarDTO({
     ...car,
+    status: car.carStatus,
     manufacturer: {
       name: car.model.manufacturer.name,
     },
