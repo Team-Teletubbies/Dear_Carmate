@@ -203,14 +203,14 @@ export const bulkUploadCustomers = async (companyId: number, filePath: string) =
   });
 
   const customers = (records as CustomerCSVRecord[])
-    .map((r) => ({
-      name: r.name,
-      gender: toGenderEnum(r.gender),
-      phoneNumber: r.phoneNumber,
-      ageGroup: r.ageGroup ? toAgeGroupEnum(r.ageGroup) : undefined,
-      region: r.region ? toRegionEnum(r.region) : undefined,
-      email: r.email,
-      memo: r.memo,
+    .map((record) => ({
+      name: record.name,
+      gender: toGenderEnum(record.gender),
+      phoneNumber: record.phoneNumber,
+      ageGroup: record.ageGroup ? toAgeGroupEnum(record.ageGroup) : undefined,
+      region: record.region ? toRegionEnum(record.region) : undefined,
+      email: record.email,
+      memo: record.memo,
       companyId,
     }))
     .filter((c) => c.name && c.gender); // 최소 필드 체크
