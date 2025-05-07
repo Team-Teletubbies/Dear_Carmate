@@ -194,7 +194,7 @@ type CustomerCSVRecord = {
 };
 
 export const bulkUploadCustomers = async (companyId: number, filePath: string) => {
-  const csvText = fs.readFileSync(filePath, 'utf-8').replace(/^\uFEFF/, ''); // BOM 제거
+  const csvText = fs.readFileSync(filePath, 'utf-8').replace(/^\uFEFF/, '');
 
   const records = parse(csvText, {
     columns: true,
@@ -213,7 +213,7 @@ export const bulkUploadCustomers = async (companyId: number, filePath: string) =
       memo: record.memo,
       companyId,
     }))
-    .filter((c) => c.name && c.gender); // 최소 필드 체크
+    .filter((c) => c.name && c.gender);
 
   const result = await prisma.customer.createMany({
     data: customers,
