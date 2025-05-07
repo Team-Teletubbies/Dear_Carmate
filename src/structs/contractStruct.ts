@@ -36,7 +36,7 @@ const contractStatusKey = [
 
 export const updateContractBodyStruct = partial(
   object({
-    contractStatus: enums(contractStatusKey),
+    status: enums(contractStatusKey),
     resolutionDate: string(),
     contractPrice: integer(),
     meetings: optional(array(meetingStruct)),
