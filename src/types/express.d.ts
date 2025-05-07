@@ -13,5 +13,5 @@ declare global {
 }
 
 export type AuthenticatedRequest<T extends Request = Request> = T & {
-  user: UserType;
+  user: { userId: number; companyId: number };
 };
