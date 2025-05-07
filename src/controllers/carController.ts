@@ -23,10 +23,6 @@ export const registerCar = async (req: Request, res: Response): Promise<void> =>
 
   const companyId = (req.user as { companyId: number }).companyId;
 
-  if (!companyId) {
-    throw new Error('companyId는 필수입니다.');
-  }
-
   const registerCars = await carService.registerCar(data, companyId);
   res.status(201).json(registerCars);
 };
@@ -46,10 +42,6 @@ export const updateCar = async (req: Request, res: Response): Promise<void> => {
   }
 
   const companyId = (req.user as { companyId: number }).companyId;
-
-  if (!companyId) {
-    throw new Error('companyId는 필수입니다');
-  }
 
   const updatedCar = await carService.updateCar(Number(id), data, companyId);
   res.status(200).json(updatedCar);
@@ -93,17 +85,10 @@ export const getManufacturerModelList = async (req: Request, res: Response): Pro
 };
 
 export const carCsvUpload = async (req: Request, res: Response): Promise<void> => {
-  const path = req.file?.path;
-  if (!path) {
-    res.status(400).json({ message: '파일이 없습니다' });
-    return;
-  }
+  const path = req.file!.path;
 
-  const companyId = req.user?.companyId;
-  if (!companyId) {
-    res.status(400).json({ message: '회사 ID가 없습니다' });
-    return;
-  }
+  const companyId = (req.user as { companyId: number }).companyId;
+
   await carService.carCsvUpload(path, companyId);
   res.json({ message: 'CSV 업로드 및 차량 등록 완료' });
 };

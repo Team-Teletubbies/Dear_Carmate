@@ -214,6 +214,13 @@ async function upsertModel(row: CarCsvRow) {
 export async function carCsvUpload(row: CarCsvRow, companyId: number) {
   const manufacturer = await upsertManufacturer(row);
   const model = await upsertModel(row);
+  const existing = await prisma.car.findUnique({
+    where: { carNumber: row.carNumber },
+  });
+
+  if (existing) {
+    throw new Error(`이미 등록된 차량번호입니다: ${row.carNumber}`);
+  }
 
   return await prisma.car.create({
     data: {
