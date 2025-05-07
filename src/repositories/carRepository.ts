@@ -244,3 +244,14 @@ export const carCsvUpload = async function (row: CarCsvRow, companyId: number) {
     },
   });
 };
+
+export const getCarListForContract = async (
+  companyId: number,
+): Promise<{ id: number; carNumber: string; model: { name: string } }[]> => {
+  return prisma.car.findMany({
+    where: { companyId },
+    include: {
+      model: true,
+    },
+  });
+};

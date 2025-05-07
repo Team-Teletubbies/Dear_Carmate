@@ -5,7 +5,6 @@ import {
   findContractById,
   updateContractInDB,
   deleteContractData,
-  listDetails,
   updateMultipleContractDocumentIds,
 } from '../repositories/contractRepository';
 import {
@@ -26,6 +25,9 @@ import { Prisma, ContractStatus } from '@prisma/client';
 import ForbiddenError from '../lib/errors/forbiddenError';
 import NotFoundError from '../lib/errors/notFoundError';
 import { toDBStatus } from '../lib/utils/statusMap';
+import { getCarListForContract } from '../repositories/carRepository';
+import { getCustomerListForContract } from '../repositories/customerRepository';
+import { getUserListForContract } from '../repositories/userRepository';
 
 export const createContractData = async (
   data: CreateContractDTO,
@@ -188,29 +190,31 @@ export const detailList = async (data: {
   companyId: number;
   lastSegment: Segment;
 }): Promise<ContractListItem[]> => {
-  const baseInclude = { user: true, meeting: true, contractDocuments: true };
+  const { companyId, lastSegment } = data;
 
-  const enumMap: Record<Segment, Prisma.ContractInclude> = {
-    cars: { ...baseInclude, car: { include: { model: true } }, customer: true },
-    customers: { ...baseInclude, customer: true },
-    users: { ...baseInclude, user: true },
-  };
+  switch (data.lastSegment) {
+    case 'cars': {
+      const cars = await getCarListForContract(companyId);
+      return cars.map((car) => ({
+        id: car.id,
+        data: `${car.model.name}(${car.carNumber})`,
+      }));
+    }
 
-  const include = enumMap[data.lastSegment];
+    case 'customers': {
+      const customers = await getCustomerListForContract(companyId);
+      return customers.map((customer) => ({
+        id: customer.id,
+        data: `${customer.name}(${customer.email})`,
+      }));
+    }
 
-  const formatter: (contract: ContractWithRelations) => ContractListItem =
-    formatMap[data.lastSegment];
-
-  const queryParams: ContractQueryParams = {
-    where: {
-      user: {
-        companyId: data.companyId,
-      },
-    },
-    include,
-  };
-
-  const contracts = await listDetails(queryParams);
-
-  return contracts.map(formatter);
+    case 'users': {
+      const users = await getUserListForContract(companyId);
+      return users.map((user) => ({
+        id: user.id,
+        data: `${user.name}(${user.email})`,
+      }));
+    }
+  }
 };
