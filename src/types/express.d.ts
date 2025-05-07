@@ -1,4 +1,5 @@
 import Express from 'express';
+import { Request } from 'express';
 
 declare global {
   namespace Express {
@@ -10,3 +11,7 @@ declare global {
     }
   }
 }
+
+export type AuthenticatedRequest<T extends Request = Request> = T & {
+  user: { userId: number; companyId: number };
+};

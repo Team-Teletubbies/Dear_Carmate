@@ -3,6 +3,7 @@ import * as customerService from '../services/customerService';
 import BadRequestError from '../lib/errors/badRequestError';
 import { Customer, Gender, AgeGroup, Region } from '@prisma/client';
 import { toGenderEnum, toAgeGroupEnum, toRegionEnum } from '../types/customerType';
+import { AuthenticatedRequest } from '../types/express';
 
 // 응답용 타입 지정...........
 type CustomerForResponse = {
@@ -31,13 +32,13 @@ function toLowerCaseCustomer(customer: CustomerForResponse) {
 }
 
 //기존
-export const createCustomer = async (req: Request, res: Response) => {
+export const createCustomer = async (req: AuthenticatedRequest, res: Response) => {
   const companyId = (req.user as { companyId: number }).companyId;
   const customer = await customerService.createCustomer(companyId, req.body);
   res.status(201).json(toLowerCaseCustomer(customer));
 };
 
-export const updateCustomer = async (req: Request, res: Response) => {
+export const updateCustomer = async (req: AuthenticatedRequest, res: Response) => {
   const companyId = (req.user as { companyId: number }).companyId;
   const customerId = Number(req.params.id);
 
@@ -60,7 +61,7 @@ export const updateCustomer = async (req: Request, res: Response) => {
   res.status(200).json(toLowerCaseCustomer(updated));
 };
 
-export const deleteCustomer = async (req: Request, res: Response) => {
+export const deleteCustomer = async (req: AuthenticatedRequest, res: Response) => {
   const companyId = (req.user as { companyId: number }).companyId;
   const customerId = Number(req.params.id);
 
@@ -68,7 +69,7 @@ export const deleteCustomer = async (req: Request, res: Response) => {
   res.status(200).json({ message: '고객 삭제 성공' });
 };
 
-export const getCustomer = async (req: Request, res: Response) => {
+export const getCustomer = async (req: AuthenticatedRequest, res: Response) => {
   const companyId = (req.user as { companyId: number }).companyId;
 
   const page = Number(req.query.page) || 1;
@@ -93,7 +94,7 @@ export const getCustomer = async (req: Request, res: Response) => {
   res.status(200).json(loweredResult);
 };
 
-export const getCustomerDetail = async (req: Request, res: Response) => {
+export const getCustomerDetail = async (req: AuthenticatedRequest, res: Response) => {
   const companyId = (req.user as { companyId: number }).companyId;
   const searchBy = req.query.searchBy as 'name' | 'email';
   const keyword = req.query.keyword as string;
@@ -107,7 +108,7 @@ export const getCustomerDetail = async (req: Request, res: Response) => {
   res.status(200).json(customer);
 };
 
-export const bulkUploadCustomer = async (req: Request, res: Response) => {
+export const bulkUploadCustomer = async (req: AuthenticatedRequest, res: Response) => {
   const companyId = (req.user as { companyId: number }).companyId;
   const fileBuffer = req.file?.buffer;
 

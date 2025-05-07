@@ -11,6 +11,7 @@ import {
 import { asyncHandler } from '../lib/async-handler';
 import upload from '../middlewares/uploadMiddleware';
 import { verifyAccessToken } from '../middlewares/verifyAccessToken';
+import { AuthenticatedRequest } from '../types/express';
 
 const carRouter = express.Router();
 
