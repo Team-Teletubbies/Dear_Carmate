@@ -46,8 +46,8 @@ const STATUS_VALUES = {
   carInspection: ContractStatus.CAR_INSPECTION,
   priceNegotiation: ContractStatus.PRICE_NEGOTIATION,
   contractDraft: ContractStatus.CONTRACT_DRAFT,
-  contractSuccess: ContractStatus.CONTRACT_SUCCESSFUL,
-  contractFailure: ContractStatus.CONTRACT_FAILED,
+  contractSuccessful: ContractStatus.CONTRACT_SUCCESSFUL,
+  contractFailed: ContractStatus.CONTRACT_FAILED,
 } as const;
 
 export const getGroupedContractByStatus = async ({
