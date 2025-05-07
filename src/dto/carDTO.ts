@@ -65,7 +65,6 @@ export interface CarRegisterRequestDTO {
 export type SearchField = 'carNumber' | 'model' | 'carStatus';
 
 export interface GetCarListDTO extends GetCompanyListDTO {
-  // 현재 사용되는 DTO이용, 나중에 중복코드 리팩토링 시 변경?!
   searchBy?: SearchField;
 }
 
