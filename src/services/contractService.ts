@@ -18,7 +18,6 @@ import {
   MinimalContract,
   GroupedContractSearchParams,
   UpdateContractType,
-  ContractQueryParams,
   ContractWithRelations,
 } from '../types/contractType';
 import { Prisma, ContractStatus } from '@prisma/client';
@@ -28,6 +27,7 @@ import { toDBStatus } from '../lib/utils/statusMap';
 import { getCarListForContract } from '../repositories/carRepository';
 import { getCustomerListForContract } from '../repositories/customerRepository';
 import { getUserListForContract } from '../repositories/userRepository';
+import { findContractDocumentIdByFileName } from '../repositories/contractDocumentRepository';
 
 export const createContractData = async (
   data: CreateContractDTO,
@@ -102,7 +102,7 @@ const buildWhereCondition = (
 
 export const updateContractData = async (input: UpdateContractType): Promise<UpdateContractDTO> => {
   const {
-    contractId,
+    id: contractId,
     editorUserId,
     status,
     resolutionDate,
@@ -126,10 +126,32 @@ export const updateContractData = async (input: UpdateContractType): Promise<Upd
   if (userId) basic.user = { connect: { id: userId } };
   if (customerId) basic.customer = { connect: { id: customerId } };
   if (carId) basic.car = { connect: { id: carId } };
+
   if (contractDocuments) {
-    basic.contractDocuments = {
-      set: contractDocuments.map((doc) => ({ id: doc.id })),
-    };
+    const documentIds = (
+      await Promise.all(
+        contractDocuments.map(async (doc) => {
+          if (doc.id !== undefined) {
+            return doc.id;
+          }
+
+          if (doc.fileName) {
+            const id = await findContractDocumentIdByFileName(doc.fileName);
+            return id;
+          }
+
+          return undefined;
+        }),
+      )
+    ).filter((id): id is number => id !== undefined);
+
+    if (documentIds.length > 0) {
+      basic.contractDocuments = {
+        set: documentIds.map((id) => ({ id })),
+      };
+
+      await updateMultipleContractDocumentIds(documentIds, contractId);
+    }
   }
 
   const meetingList = meetings
@@ -143,11 +165,6 @@ export const updateContractData = async (input: UpdateContractType): Promise<Upd
     basic,
     meetings: meetingList,
   });
-
-  if (contractDocuments && contractDocuments.length > 0) {
-    const documnetIds = contractDocuments.map((doc) => doc.id);
-    await updateMultipleContractDocumentIds(documnetIds, contractId);
-  }
 
   return new UpdateContractDTO(contract);
 };

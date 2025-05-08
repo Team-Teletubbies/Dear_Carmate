@@ -54,14 +54,14 @@ export interface BaseUpdateContractFields {
   resolutionDate?: string;
   contractPrice?: number;
   meetings?: Meeting[];
-  contractDocuments?: { id: number; fileName?: string }[];
+  contractDocuments?: { id?: number; fileName?: string }[];
   carId?: number;
   customerId?: number;
   userId?: number;
 }
 
 export interface UpdateContractType extends BaseUpdateContractFields {
-  contractId: number;
+  id: number;
   editorUserId: number;
 }
 
