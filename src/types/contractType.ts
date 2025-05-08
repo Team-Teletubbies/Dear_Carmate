@@ -50,18 +50,18 @@ export type GroupedContractSearchParams = {
 };
 
 export interface BaseUpdateContractFields {
-  contractStatus?: keyof typeof statusMap;
+  status?: keyof typeof statusMap;
   resolutionDate?: string;
   contractPrice?: number;
   meetings?: Meeting[];
-  contractDocuments?: { id: number; fileName?: string }[];
+  contractDocuments?: { id?: number; fileName?: string }[];
   carId?: number;
   customerId?: number;
   userId?: number;
 }
 
 export interface UpdateContractType extends BaseUpdateContractFields {
-  contractId: number;
+  id: number;
   editorUserId: number;
 }
 

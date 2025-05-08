@@ -109,3 +109,12 @@ export const findCustomerByKeyword = async (
     },
   });
 };
+
+export const getCustomerListForContract = async (
+  companyId: number,
+): Promise<{ id: number; name: string; email: string }[]> => {
+  return prisma.customer.findMany({
+    where: { companyId },
+    select: { id: true, name: true, email: true },
+  });
+};

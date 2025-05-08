@@ -5,7 +5,6 @@ import {
   findContractById,
   updateContractInDB,
   deleteContractData,
-  listDetails,
   updateMultipleContractDocumentIds,
 } from '../repositories/contractRepository';
 import {
@@ -19,13 +18,16 @@ import {
   MinimalContract,
   GroupedContractSearchParams,
   UpdateContractType,
-  ContractQueryParams,
   ContractWithRelations,
 } from '../types/contractType';
 import { Prisma, ContractStatus } from '@prisma/client';
 import ForbiddenError from '../lib/errors/forbiddenError';
 import NotFoundError from '../lib/errors/notFoundError';
 import { toDBStatus } from '../lib/utils/statusMap';
+import { getCarListForContract } from '../repositories/carRepository';
+import { getCustomerListForContract } from '../repositories/customerRepository';
+import { getUserListForContract } from '../repositories/userRepository';
+import { findContractDocumentIdByFileName } from '../repositories/contractDocumentRepository';
 
 export const createContractData = async (
   data: CreateContractDTO,
@@ -100,9 +102,9 @@ const buildWhereCondition = (
 
 export const updateContractData = async (input: UpdateContractType): Promise<UpdateContractDTO> => {
   const {
-    contractId,
+    id: contractId,
     editorUserId,
-    contractStatus,
+    status,
     resolutionDate,
     contractPrice,
     meetings,
@@ -118,16 +120,38 @@ export const updateContractData = async (input: UpdateContractType): Promise<Upd
   if (dbContract.userId !== editorUserId) throw new ForbiddenError('담당자만 수정 가능합니다.');
 
   const basic: Prisma.ContractUpdateInput = {};
-  if (contractStatus) basic.contractStatus = toDBStatus(contractStatus);
+  if (status) basic.contractStatus = toDBStatus(status);
   if (resolutionDate) basic.resolutionDate = new Date(resolutionDate);
   if (contractPrice !== undefined) basic.contractPrice = contractPrice;
   if (userId) basic.user = { connect: { id: userId } };
   if (customerId) basic.customer = { connect: { id: customerId } };
   if (carId) basic.car = { connect: { id: carId } };
+
   if (contractDocuments) {
-    basic.contractDocuments = {
-      set: contractDocuments.map((doc) => ({ id: doc.id })),
-    };
+    const documentIds = (
+      await Promise.all(
+        contractDocuments.map(async (doc) => {
+          if (doc.id !== undefined) {
+            return doc.id;
+          }
+
+          if (doc.fileName) {
+            const id = await findContractDocumentIdByFileName(doc.fileName);
+            return id;
+          }
+
+          return undefined;
+        }),
+      )
+    ).filter((id): id is number => id !== undefined);
+
+    if (documentIds.length > 0) {
+      basic.contractDocuments = {
+        set: documentIds.map((id) => ({ id })),
+      };
+
+      await updateMultipleContractDocumentIds(documentIds, contractId);
+    }
   }
 
   const meetingList = meetings
@@ -141,11 +165,6 @@ export const updateContractData = async (input: UpdateContractType): Promise<Upd
     basic,
     meetings: meetingList,
   });
-
-  if (contractDocuments && contractDocuments.length > 0) {
-    const documnetIds = contractDocuments.map((doc) => doc.id);
-    await updateMultipleContractDocumentIds(documnetIds, contractId);
-  }
 
   return new UpdateContractDTO(contract);
 };
@@ -188,29 +207,31 @@ export const detailList = async (data: {
   companyId: number;
   lastSegment: Segment;
 }): Promise<ContractListItem[]> => {
-  const baseInclude = { user: true, meeting: true, contractDocuments: true };
+  const { companyId, lastSegment } = data;
 
-  const enumMap: Record<Segment, Prisma.ContractInclude> = {
-    cars: { ...baseInclude, car: { include: { model: true } }, customer: true },
-    customers: { ...baseInclude, customer: true },
-    users: { ...baseInclude, user: true },
-  };
+  switch (data.lastSegment) {
+    case 'cars': {
+      const cars = await getCarListForContract(companyId);
+      return cars.map((car) => ({
+        id: car.id,
+        data: `${car.model.name}(${car.carNumber})`,
+      }));
+    }
 
-  const include = enumMap[data.lastSegment];
+    case 'customers': {
+      const customers = await getCustomerListForContract(companyId);
+      return customers.map((customer) => ({
+        id: customer.id,
+        data: `${customer.name}(${customer.email})`,
+      }));
+    }
 
-  const formatter: (contract: ContractWithRelations) => ContractListItem =
-    formatMap[data.lastSegment];
-
-  const queryParams: ContractQueryParams = {
-    where: {
-      user: {
-        companyId: data.companyId,
-      },
-    },
-    include,
-  };
-
-  const contracts = await listDetails(queryParams);
-
-  return contracts.map(formatter);
+    case 'users': {
+      const users = await getUserListForContract(companyId);
+      return users.map((user) => ({
+        id: user.id,
+        data: `${user.name}(${user.email})`,
+      }));
+    }
+  }
 };

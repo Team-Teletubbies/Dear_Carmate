@@ -12,30 +12,26 @@ import { create } from 'superstruct';
 import { contractDocumentFilterStruct } from '../structs/contractDocumentStruct';
 import BadRequestError from '../lib/errors/badRequestError';
 import { AuthenticatedRequest } from '../types/express';
-import UnauthorizedError from '../lib/errors/unauthorizedError';
 import { IdParamsStruct } from '../structs/commonStruct';
 
 export const uploadContractDocumentController = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const files = req.files as Express.Multer.File[];
+    const file = req.file as Express.Multer.File;
     const user = req.user;
 
-    if (!files) {
+    if (!file) {
       throw new NotFoundError('필수 정보가 누락되었습니다.');
     }
 
-    const toUploadData = (file: Express.Multer.File) => ({
+    const toUploadData = {
       fileName: file.originalname,
       filePath: file.path,
       fileSize: file.size,
-    });
+    };
 
-    const fileDTOs = await Promise.all(
-      files.map((file) => uploadContractDocument(toUploadData(file))),
-    );
+    const fileDTOs = await uploadContractDocument(toUploadData);
 
     res.status(201).json(fileDTOs);
-    return;
   },
 );
 

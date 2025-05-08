@@ -74,6 +74,7 @@ export const getContractDocumentList = async (
 
   const where = {
     user: { companyId },
+    contractDocuments: { some: {} },
     ...searchData,
   };
 

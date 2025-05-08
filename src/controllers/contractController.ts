@@ -62,15 +62,15 @@ export const getGroupedContracts = asyncHandler(
 );
 
 export const patchContracts = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const { id: contractId } = create(req.params, IdParamsStruct);
+  const { id } = create(req.params, IdParamsStruct);
   const data = create(req.body, updateContractBodyStruct);
   const user = req.user;
 
   const result = await updateContractData({
-    contractId,
+    id,
     editorUserId: user.userId,
     ...data,
-  }); //수정 필요
+  });
 
   res.status(200).json(result);
 });
