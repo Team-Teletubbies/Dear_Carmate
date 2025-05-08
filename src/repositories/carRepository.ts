@@ -69,14 +69,14 @@ export const deleteCar = async function (id: number) {
   });
 };
 
-export const getCarList = async function (data: GetCarListDTO) {
+export const getCarList = async function (data: GetCarListDTO, companyId: number) {
   const { page, pageSize, searchBy = 'carNumber', keyword, status } = data;
   const searchByFields = ['carNumber', 'model'] as const;
   if (!searchByFields.includes(searchBy)) {
     throw new Error(`유효하지 않은 searchBy 입니다. : ${searchBy}`);
   }
 
-  let where: Prisma.CarWhereInput = {};
+  let where: Prisma.CarWhereInput = { companyId };
 
   if (keyword) {
     switch (searchBy) {
