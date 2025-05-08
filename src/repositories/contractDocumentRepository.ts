@@ -29,7 +29,7 @@ export const updateMultipleContractDocumentIds = async (
   documnetIds: number[],
   contractId: number,
 ) => {
-  const result = await prisma.contractDocument.updateMany({
+  return await prisma.contractDocument.updateMany({
     where: {
       id: {
         in: documnetIds,
