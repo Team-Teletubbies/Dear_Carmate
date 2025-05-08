@@ -56,8 +56,8 @@ export const createContract = async ({
     data: {
       carId: carId,
       customerId: customerId,
-      userId,
-      companyId,
+      userId: userId,
+      companyId: companyId,
       contractStatus: 'CAR_INSPECTION',
       resolutionDate: null,
       contractPrice: car.price,
