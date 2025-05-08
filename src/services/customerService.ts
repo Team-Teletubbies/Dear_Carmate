@@ -33,11 +33,16 @@ export const updateCustomer = async (
   const customer = await customerRepo.getCustomerById(customerId, companyId);
   if (!customer) throw new NotFoundError('고객을 찾을 수 없습니다.');
 
-  return customerRepo.updateCustomer(
-    customerId,
-    companyId,
-    data as Prisma.CustomerUncheckedUpdateManyInput,
-  );
+  const { genderToLabel, ageGroupToLabel, regionToLabel, ...cleanData } = data as any;
+
+  const converted: Prisma.CustomerUncheckedUpdateManyInput = {
+    ...cleanData,
+    ...(cleanData.gender && { gender: toGenderEnum(cleanData.gender) }),
+    ...(cleanData.ageGroup && { ageGroup: toAgeGroupEnum(cleanData.ageGroup) }),
+    ...(cleanData.region && { region: toRegionEnum(cleanData.region) }),
+  };
+
+  return customerRepo.updateCustomer(customerId, companyId, converted);
 };
 
 export const deleteCustomer = async (customerId: number, companyId: number) => {
