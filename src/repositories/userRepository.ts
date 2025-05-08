@@ -8,7 +8,12 @@ import {
   UserWithPasswordAndCompany,
   updateMyInfoInput,
 } from '../types/userType';
-import { GetUserListDTO, updateMyInfoDTO, UserListItem, UserProfileDTO } from '../dto/userDTO';
+import {
+  GetUserListDTO,
+  updateMyInfoDTO,
+  UserListItem,
+  UserProfileResponseDTO,
+} from '../dto/userDTO';
 import { CreateUpdateCompanyDTO } from '../dto/companyDto';
 import { redis } from '../lib/auth/redis';
 import UnauthorizedError from '../lib/errors/unauthorizedError';

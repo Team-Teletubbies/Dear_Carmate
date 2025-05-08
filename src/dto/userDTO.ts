@@ -118,7 +118,7 @@ export interface RefreshTokenResponseDTO {
 //   };
 // }
 
-export class UserProfileDTO {
+export class UserProfileResponseDTO {
   id: number;
   name: string;
   email: string;
