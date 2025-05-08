@@ -10,3 +10,14 @@ export const createContractDocument = async (
 export const findContractDocumentById = async (id: number): Promise<ContractDocument | null> => {
   return await prisma.contractDocument.findUnique({ where: { id } });
 };
+
+export const findContractDocumentIdByFileName = async (
+  fileName: string,
+): Promise<number | undefined> => {
+  const found = await prisma.contractDocument.findFirst({
+    where: { fileName },
+    select: { id: true },
+  });
+
+  return found?.id;
+};

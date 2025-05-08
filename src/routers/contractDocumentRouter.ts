@@ -13,7 +13,7 @@ export const contractDocumentRouter = express.Router();
 contractDocumentRouter.post(
   '/upload',
   verifyAccessToken,
-  upload.array('contractDocuments'),
+  upload.single('file'),
   uploadContractDocumentController,
 );
 

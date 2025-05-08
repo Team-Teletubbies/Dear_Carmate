@@ -2,7 +2,6 @@ import { string, object, enums, optional, array, nonempty, integer, partial } fr
 import { PageParamsStruct } from './commonStruct';
 
 const contractStructKey = ['customerName', 'userName'] as const;
-const status = ['carInspection'];
 export type ContractStructKey = (typeof contractStructKey)[number];
 export const contractFilterStruct = object({
   ...PageParamsStruct.schema,
@@ -16,7 +15,7 @@ const meetingStruct = object({
 });
 
 const contractDocumentStruct = object({
-  id: integer(),
+  id: optional(integer()),
   fileName: optional(string()),
 });
 
@@ -36,14 +35,14 @@ const contractStatusKey = [
 
 export const updateContractBodyStruct = partial(
   object({
-    status: enums(contractStatusKey),
-    resolutionDate: string(),
-    contractPrice: integer(),
+    status: optional(enums(contractStatusKey)),
+    resolutionDate: optional(string()),
+    contractPrice: optional(integer()),
     meetings: optional(array(meetingStruct)),
     contractDocuments: optional(array(contractDocumentStruct)),
-    userId: integer(),
-    customerId: integer(),
-    carId: integer(),
+    userId: optional(integer()),
+    customerId: optional(integer()),
+    carId: optional(integer()),
     responsibleUserId: optional(integer()),
   }),
 );
