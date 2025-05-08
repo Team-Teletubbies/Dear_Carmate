@@ -15,9 +15,28 @@ export const findContractDocumentIdByFileName = async (
   fileName: string,
 ): Promise<number | undefined> => {
   const found = await prisma.contractDocument.findFirst({
-    where: { fileName },
+    where: { fileName: { equals: fileName.trim() }, contractId: null },
+    orderBy: {
+      createdAt: 'desc',
+    },
     select: { id: true },
   });
 
   return found?.id;
+};
+
+export const updateMultipleContractDocumentIds = async (
+  documnetIds: number[],
+  contractId: number,
+) => {
+  return await prisma.contractDocument.updateMany({
+    where: {
+      id: {
+        in: documnetIds,
+      },
+    },
+    data: {
+      contractId: contractId,
+    },
+  });
 };

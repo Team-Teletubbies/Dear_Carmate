@@ -23,8 +23,8 @@ export class ContractDocumentItem {
   id: number;
   contractName: string;
   resolutionDate: Date | '';
-  documentsCount: number;
-  manager: string;
+  documentCount: number;
+  userName: string;
   carNumber: string;
   documents: DocumentSummary[];
 
@@ -35,8 +35,8 @@ export class ContractDocumentItem {
     const customerName = contract.customer.name;
     this.contractName = `${modelName} - ${customerName} 고객님`;
     this.resolutionDate = contract.resolutionDate ? contract.resolutionDate : '';
-    this.documentsCount = contract.contractDocuments.length ?? 0;
-    this.manager = contract.user.name;
+    this.documentCount = contract.contractDocuments.length ?? 0;
+    this.userName = contract.user.name;
     this.carNumber = contract.car.carNumber;
     this.documents =
       contract.contractDocuments.map(

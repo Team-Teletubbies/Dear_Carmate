@@ -17,14 +17,13 @@ import { IdParamsStruct } from '../structs/commonStruct';
 export const uploadContractDocumentController = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const file = req.file as Express.Multer.File;
-    const user = req.user;
 
     if (!file) {
       throw new NotFoundError('필수 정보가 누락되었습니다.');
     }
 
     const toUploadData = {
-      fileName: file.originalname,
+      fileName: file.filename,
       filePath: file.path,
       fileSize: file.size,
     };
@@ -37,7 +36,7 @@ export const uploadContractDocumentController = asyncHandler(
 
 export const downloadContractDocumentController = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const id = create(req.params.id, IdParamsStruct);
+    const id = create({ id: Number(req.params.id) }, IdParamsStruct);
     const user = req.user;
 
     const { filePath, fileName } = await downloadContractDocument(user.userId, id.id);

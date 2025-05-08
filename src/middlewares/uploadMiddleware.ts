@@ -6,9 +6,12 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/contracts/');
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const baseName = path.basename(file.originalname, ext);
-    cb(null, `${baseName}-${Date.now()}${ext}`);
+    const originalBuffer = Buffer.from(file.originalname, 'latin1');
+    const decodedName = originalBuffer.toString('utf-8');
+
+    const ext = path.extname(decodedName);
+
+    cb(null, decodedName);
   },
 });
 

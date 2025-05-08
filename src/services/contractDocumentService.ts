@@ -51,13 +51,14 @@ export const downloadContractDocument = async (
       throw new forbiddenError('담당자만 수정할 수 있습니다.');
     }
   }
+  const resolvedPath = path.resolve(document.filePath);
 
-  if (!fs.existsSync(document.filePath)) {
+  if (!fs.existsSync(resolvedPath)) {
     throw new NotFoundError('파일이 존재하지 않습니다.');
   }
 
   return new DownloadContractDocumentResponseDTO({
-    filePath: path.resolve(document.filePath),
+    filePath: resolvedPath,
     fileName: document.fileName,
   });
 };

@@ -2,8 +2,6 @@ import { prisma } from '../lib/prisma';
 import { Prisma } from '@prisma/client';
 import { CreateContractDTO } from '../dto/contractDTO';
 
-import { ContractQueryParams, ContractWithRelations } from '../types/contractType';
-
 export const findContractDocuments = async (
   where: Prisma.ContractWhereInput = {},
   skip: number,
@@ -14,7 +12,7 @@ export const findContractDocuments = async (
     skip,
     take,
     include: {
-      user: true,
+      user: { select: { id: true, name: true } },
       car: { include: { model: true } },
       customer: true,
       contractDocuments: {
@@ -32,6 +30,9 @@ export const findDraftContracts = async (companyId: number) => {
   return await prisma.contract.findMany({
     where: {
       companyId,
+      contractDocuments: {
+        none: {},
+      },
     },
     include: {
       car: { include: { model: true } },
@@ -166,18 +167,4 @@ export const contractFindUserId = async (contractId: number) => {
     where: { id: contractId },
     select: { userId: true },
   });
-};
-
-export const updateMultipleContractDocumentIds = async (
-  documentIds: number[],
-  contractId: number,
-): Promise<void> => {
-  await Promise.all(
-    documentIds.map((id) =>
-      prisma.contractDocument.update({
-        where: { id },
-        data: { contractId },
-      }),
-    ),
-  );
 };

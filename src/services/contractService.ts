@@ -5,7 +5,6 @@ import {
   findContractById,
   updateContractInDB,
   deleteContractData,
-  updateMultipleContractDocumentIds,
 } from '../repositories/contractRepository';
 import {
   CreateContractResponseDTO,
@@ -27,7 +26,10 @@ import { toDBStatus } from '../lib/utils/statusMap';
 import { getCarListForContract } from '../repositories/carRepository';
 import { getCustomerListForContract } from '../repositories/customerRepository';
 import { getUserListForContract } from '../repositories/userRepository';
-import { findContractDocumentIdByFileName } from '../repositories/contractDocumentRepository';
+import {
+  findContractDocumentIdByFileName,
+  updateMultipleContractDocumentIds,
+} from '../repositories/contractDocumentRepository';
 
 export const createContractData = async (
   data: CreateContractDTO,
@@ -126,7 +128,6 @@ export const updateContractData = async (input: UpdateContractType): Promise<Upd
   if (userId) basic.user = { connect: { id: userId } };
   if (customerId) basic.customer = { connect: { id: customerId } };
   if (carId) basic.car = { connect: { id: carId } };
-
   if (contractDocuments) {
     const documentIds = (
       await Promise.all(
@@ -145,13 +146,9 @@ export const updateContractData = async (input: UpdateContractType): Promise<Upd
       )
     ).filter((id): id is number => id !== undefined);
 
-    if (documentIds.length > 0) {
-      basic.contractDocuments = {
-        set: documentIds.map((id) => ({ id })),
-      };
+    basic.contractDocuments = { set: documentIds.map((id) => ({ id })) };
 
-      await updateMultipleContractDocumentIds(documentIds, contractId);
-    }
+    await updateMultipleContractDocumentIds(documentIds, contractId);
   }
 
   const meetingList = meetings
@@ -183,25 +180,6 @@ export const delContract = async (id: number, userId: number): Promise<void> => 
 };
 
 type Segment = 'cars' | 'customers' | 'users';
-
-const formatMap: Record<Segment, (contract: ContractWithRelations) => ContractListItem> = {
-  cars: (contract) => {
-    const model = contract.car.model.name || '';
-    const carNumber = contract.car.carNumber || '';
-    return {
-      id: contract.id,
-      data: `${model}(${carNumber})`,
-    };
-  },
-  customers: (contract) => ({
-    id: contract.customer.id,
-    data: `${contract.customer.name}(${contract.customer.email})`,
-  }),
-  users: (contract) => ({
-    id: contract.user.id,
-    data: `${contract.user.name}(${contract.user.email})`,
-  }),
-};
 
 export const detailList = async (data: {
   companyId: number;
