@@ -113,8 +113,9 @@ export const deleteCar = async function (id: number): Promise<void> {
 
 export const getCarList = async function (
   data: GetCarListDTO,
+  companyId: number,
 ): Promise<{ totalCount: number; cars: carRegistUpdateDTO[] }> {
-  const { totalCount, carList } = await carRepository.getCarList(data);
+  const { totalCount, carList } = await carRepository.getCarList(data, companyId);
 
   const cars = carList.map((car) =>
     mapCarDTO({

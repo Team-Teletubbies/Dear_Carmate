@@ -58,13 +58,18 @@ export const deleteCar = async (req: AuthenticatedRequest, res: Response): Promi
 export const getCarList = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { page, pageSize, searchBy, keyword, status } = create(req.query, carFilterStruct);
 
-  const carList = await carService.getCarList({
-    page,
-    pageSize,
-    searchBy: searchBy as SearchField,
-    keyword,
-    status,
-  });
+  const companyId = req.user.companyId;
+
+  const carList = await carService.getCarList(
+    {
+      page,
+      pageSize,
+      searchBy: searchBy as SearchField,
+      keyword,
+      status,
+    },
+    companyId,
+  );
 
   res.status(200).json({
     currentPage: page,
