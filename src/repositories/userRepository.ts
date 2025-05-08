@@ -8,9 +8,15 @@ import {
   UserWithPasswordAndCompany,
   updateMyInfoInput,
 } from '../types/userType';
-import { GetUserListDTO, updateMyInfoDTO, UserListItem, UserProfileDTO } from '../dto/userDTO';
+import {
+  GetUserListDTO,
+  updateMyInfoDTO,
+  UserListItem,
+  UserProfileResponseDTO,
+} from '../dto/userDTO';
 import { CreateUpdateCompanyDTO } from '../dto/companyDto';
 import { redis } from '../lib/auth/redis';
+import UnauthorizedError from '../lib/errors/unauthorizedError';
 
 export const create = async (input: CreateUserInput): Promise<User> => {
   return await prisma.user.create({ data: input });
@@ -101,12 +107,16 @@ export const getById = async (id: number): Promise<User | null> => {
 };
 
 export const setRedisRefreshToken = async (userId: number, refreshToken: string): Promise<void> => {
-  await redis.set(`refresh:user:${userId}`, refreshToken, 'EX', 60 * 60 * 24 * 14);
+  await redis.set(`refresh:${refreshToken}`, userId, 'EX', 60 * 60 * 24 * 14);
 };
 
-export const getRedisRefreshToken = async (userId: number): Promise<string | null> => {
-  const refreshToken = await redis.get(`refresh:user:${userId}`);
-  return refreshToken;
+export const getRedisRefreshToken = async (refreshToken: string): Promise<number | null> => {
+  const redisKey = `refresh:${refreshToken}`;
+  const userId = await redis.getdel(redisKey);
+  if (!userId) {
+    throw new UnauthorizedError('재사용된 토큰이거나 유효하지 않은 토큰입니다');
+  }
+  return parseInt(userId);
 };
 
 export const updateAndGetUser = async (

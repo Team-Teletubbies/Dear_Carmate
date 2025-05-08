@@ -7,7 +7,7 @@ import {
   RefreshTokenDTO,
   RefreshTokenResponseDTO,
   updateMyInfoDTO,
-  UserProfileDTO,
+  UserProfileResponseDTO,
 } from '../dto/userDTO';
 import BadRequestError from '../lib/errors/badRequestError';
 import { assert, create } from 'superstruct';
@@ -54,7 +54,7 @@ export const refreshToken = async (req: AuthenticatedRequest, res: Response): Pr
 
 export const getMyInfo = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const { userId } = req.user;
-  const user: UserProfileDTO = await userService.getMyInfo(userId);
+  const user: UserProfileResponseDTO = await userService.getMyInfo(userId);
   res.status(200).json(user);
 };
 
@@ -66,7 +66,7 @@ export const updateMyInfo = async (req: AuthenticatedRequest, res: Response): Pr
   const { passwordConfirmation, ...rest } = req.body;
   const data: updateMyInfoDTO = rest;
   const { userId } = req.user;
-  const user: UserProfileDTO = await userService.updateMyInfo(userId, data);
+  const user: UserProfileResponseDTO = await userService.updateMyInfo(userId, data);
   res.status(200).json(user);
 };
 

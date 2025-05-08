@@ -22,8 +22,4 @@ userRouter
   .get(asyncHandler(getMyInfo))
   .patch(asyncHandler(updateMyInfo))
   .delete(asyncHandler(deleteMyAccount));
-userRouter
-  .route('/me')
-  .get(verifyAccessToken, asyncHandler(getMyInfo))
-  .patch(verifyAccessToken, asyncHandler(updateMyInfo));
 userRouter.delete('/:id', verifyAccessToken, requireAdmin, asyncHandler(deleteUser));
