@@ -8,10 +8,13 @@ import {
 } from '../services/contractService';
 import { CreateContractDTO } from '../dto/contractDTO';
 import { asyncHandler } from '../lib/async-handler';
-import UnauthorizedError from '../lib/errors/unauthorizedError';
 import BadRequestError from '../lib/errors/badRequestError';
-import { createContractBodyStruct, updateContractBodyStruct } from '../structs/contractStruct';
-import { create, number } from 'superstruct';
+import {
+  createContractBodyStruct,
+  updateContractBodyStruct,
+  contractFilterStruct,
+} from '../structs/contractStruct';
+import { create } from 'superstruct';
 import { GroupedContractSearchParams } from '../types/contractType';
 import { IdParamsStruct } from '../structs/commonStruct';
 import { AuthenticatedRequest } from '../types/express';
@@ -44,9 +47,8 @@ export const createContract = asyncHandler(async (req: AuthenticatedRequest, res
 
 export const getGroupedContracts = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { searchBy, keyword } = req.query;
+    const { searchBy, keyword } = create(req.query, contractFilterStruct);
     const companyId = req.user.companyId;
-
     const params: GroupedContractSearchParams = {
       companyId,
       searchBy: searchBy as 'customerName' | 'userName' | undefined,
@@ -60,12 +62,12 @@ export const getGroupedContracts = asyncHandler(
 );
 
 export const patchContracts = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  create(req.params, IdParamsStruct);
+  const { id } = create(req.params, IdParamsStruct);
   const data = create(req.body, updateContractBodyStruct);
   const user = req.user;
 
   const result = await updateContractData({
-    contractId: Number(req.params.id),
+    id,
     editorUserId: user.userId,
     ...data,
   });

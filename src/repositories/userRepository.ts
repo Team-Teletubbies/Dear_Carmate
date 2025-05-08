@@ -137,3 +137,12 @@ export const deleteById = async (userId: number): Promise<User> => {
   const deleted = await prisma.user.delete({ where: { id: userId } });
   return deleted;
 };
+
+export const getUserListForContract = async (
+  companyId: number,
+): Promise<{ id: number; name: string; email: string }[]> => {
+  return prisma.user.findMany({
+    where: { companyId },
+    select: { id: true, name: true, email: true },
+  });
+};

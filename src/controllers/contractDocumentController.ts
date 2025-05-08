@@ -12,39 +12,37 @@ import { create } from 'superstruct';
 import { contractDocumentFilterStruct } from '../structs/contractDocumentStruct';
 import BadRequestError from '../lib/errors/badRequestError';
 import { AuthenticatedRequest } from '../types/express';
+import { IdParamsStruct } from '../structs/commonStruct';
 
 export const uploadContractDocumentController = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const files = req.files as Express.Multer.File[];
+    const file = req.file as Express.Multer.File;
     const user = req.user;
 
-    if (!files) {
+    if (!file) {
       throw new NotFoundError('필수 정보가 누락되었습니다.');
     }
 
-    const toUploadData = (file: Express.Multer.File) => ({
+    const toUploadData = {
       fileName: file.originalname,
       filePath: file.path,
       fileSize: file.size,
-    });
+    };
 
-    const fileDTOs = await Promise.all(
-      files.map((file) => uploadContractDocument(toUploadData(file))),
-    );
+    const fileDTOs = await uploadContractDocument(toUploadData);
 
     res.status(201).json(fileDTOs);
-    return;
   },
 );
 
 export const downloadContractDocumentController = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const id = parseInt(req.params.id);
+    const id = create(req.params.id, IdParamsStruct);
     const user = req.user;
 
-    const { filePath, fileName } = await downloadContractDocument(user.userId, id);
+    const { filePath, fileName } = await downloadContractDocument(user.userId, id.id);
 
-    res.setHeader('Content-Disposition', `attachment; filename ="${fileName}`);
+    res.setHeader('Content-Disposition', `attachment; filename ="${fileName}"`);
     res.setHeader('Content-Type', 'application/octet-stream');
 
     const fileStream = fs.createReadStream(filePath);
@@ -76,7 +74,6 @@ export const getContractDocumentLists = asyncHandler(
     };
 
     const result = await getContractDocumentList(baseData);
-    console.log('조회 결과:', result);
     res.json(result);
   },
 );

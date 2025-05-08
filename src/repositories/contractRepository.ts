@@ -56,8 +56,8 @@ export const createContract = async ({
     data: {
       carId: carId,
       customerId: customerId,
-      userId,
-      companyId,
+      userId: userId,
+      companyId: companyId,
       contractStatus: 'CAR_INSPECTION',
       resolutionDate: null,
       contractPrice: car.price,
@@ -159,25 +159,6 @@ export const findContractById = async (contractId: number) => {
 
 export const deleteContractData = async (id: number) => {
   return prisma.contract.delete({ where: { id } });
-};
-
-export const listDetails = async ({
-  where,
-}: ContractQueryParams): Promise<ContractWithRelations[]> => {
-  return prisma.contract.findMany({
-    where,
-    include: {
-      user: true,
-      customer: true,
-      car: {
-        include: {
-          model: true,
-        },
-      },
-      meeting: true,
-      contractDocuments: true,
-    },
-  });
 };
 
 export const contractFindUserId = async (contractId: number) => {
