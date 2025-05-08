@@ -10,6 +10,7 @@ import {
   toAgeGroupEnum,
   toRegionEnum,
 } from '../lib/utils/customers/customerEnumConverter';
+import { toLabeledCustomer } from '../lib/utils/customers/customerMapper';
 import { parse } from 'csv-parse/sync';
 
 export const createCustomer = (companyId: number, data: CreateCustomerDTO) => {
@@ -71,12 +72,7 @@ export const getCustomersService = async (
   const totalPages = Math.ceil(totalCount / pageSize);
 
   //Enum to Label로 변환
-  const parsedCustomers = customers.map((customer) => ({
-    ...customer,
-    gender: customer.gender.toLowerCase(),
-    ageGroup: customer.ageGroup ? customer.ageGroup.toLowerCase() : null,
-    region: customer.region ? customer.region.toLowerCase() : null,
-  }));
+  const parsedCustomers = customers.map(toLabeledCustomer);
 
   return {
     currentPage: page,

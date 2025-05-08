@@ -68,6 +68,4 @@ export type CustomerForResponse = {
   email: string;
   memo: string | null;
   contractCount: number;
-  createdAt: Date;
-  updatedAt: Date;
 };

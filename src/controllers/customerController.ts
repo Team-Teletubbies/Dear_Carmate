@@ -7,7 +7,7 @@ import {
   toAgeGroupEnum,
   toRegionEnum,
 } from '../lib/utils/customers/customerEnumConverter';
-import { toLowerCaseCustomer } from '../lib/utils/customers/customerMapper';
+import { toLabeledCustomer } from '../lib/utils/customers/customerMapper';
 import { CustomerForResponse } from '../types/customerType';
 
 export const createCustomer = async (req: AuthenticatedRequest, res: Response) => {
@@ -24,7 +24,7 @@ export const createCustomer = async (req: AuthenticatedRequest, res: Response) =
 
   try {
     const customer = await customerService.createCustomer(companyId, converted);
-    res.status(201).json(toLowerCaseCustomer(customer));
+    res.status(201).json(toLabeledCustomer(customer));
   } catch (error) {
     console.error('고객 생성 중 에러:', error);
     res.status(500).json({ message: '고객 등록 중 오류가 발생했습니다.' });
@@ -51,7 +51,7 @@ export const updateCustomer = async (req: AuthenticatedRequest, res: Response) =
     return;
   }
 
-  res.status(200).json(toLowerCaseCustomer(updated));
+  res.status(200).json(toLabeledCustomer(updated));
 };
 
 export const deleteCustomer = async (req: AuthenticatedRequest, res: Response) => {
@@ -81,7 +81,7 @@ export const getCustomer = async (req: AuthenticatedRequest, res: Response) => {
 
   const loweredResult = {
     ...result,
-    data: result.data.map((customer) => toLowerCaseCustomer(customer as CustomerForResponse)),
+    data: result.data.map((customer) => toLabeledCustomer(customer)),
   };
 
   res.status(200).json(loweredResult);
@@ -98,7 +98,7 @@ export const getCustomerDetail = async (req: AuthenticatedRequest, res: Response
 
   const customer = await customerService.getCustomerDetailByKeyword(companyId, searchBy, keyword);
 
-  res.status(200).json(customer);
+  res.status(200).json(toLabeledCustomer(customer));
 };
 
 export const bulkUploadCustomer = async (req: AuthenticatedRequest, res: Response) => {
