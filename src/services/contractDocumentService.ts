@@ -52,8 +52,6 @@ export const downloadContractDocument = async (
     }
   }
   const resolvedPath = path.resolve(document.filePath);
-  console.log('📁 저장된 filePath:', document.filePath);
-  console.log('📂 절대 경로 resolvedPath:', resolvedPath);
 
   if (!fs.existsSync(resolvedPath)) {
     throw new NotFoundError('파일이 존재하지 않습니다.');

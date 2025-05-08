@@ -36,31 +36,23 @@ export const uploadContractDocumentController = asyncHandler(
 
 export const downloadContractDocumentController = asyncHandler(
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    try {
-      const id = create({ id: Number(req.params.id) }, IdParamsStruct);
-      const user = req.user;
+    const id = create({ id: Number(req.params.id) }, IdParamsStruct);
+    const user = req.user;
 
-      const { filePath, fileName } = await downloadContractDocument(user.userId, id.id);
+    const { filePath, fileName } = await downloadContractDocument(user.userId, id.id);
 
-      res.setHeader('Content-Disposition', `attachment; filename ="${fileName}"`);
-      res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Disposition', `attachment; filename ="${fileName}"`);
+    res.setHeader('Content-Type', 'application/octet-stream');
 
-      const fileStream = fs.createReadStream(filePath);
-      fileStream.pipe(res);
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
 
-      fileStream.on('error', (err) => {
-        console.error(err);
-        if (!res.headersSent) {
-          res.status(500).json({ message: '파일 다운로드 실패' });
-        }
-      });
-    } catch (error) {
-      console.error('파일 다운로드 중 에러 발생:', error);
-
+    fileStream.on('error', (err) => {
+      console.error(err);
       if (!res.headersSent) {
-        res.status(500).json({ message: '서버 내부 오류로 파일을 다운로드할 수 없습니다.' });
+        res.status(500).json({ message: '파일 다운로드 실패' });
       }
-    }
+    });
   },
 );
 
