@@ -1,41 +1,34 @@
 import { Request, Response } from 'express';
 import * as customerService from '../services/customerService';
 import BadRequestError from '../lib/errors/badRequestError';
-import { Customer, Gender, AgeGroup, Region } from '@prisma/client';
-import { toGenderEnum, toAgeGroupEnum, toRegionEnum } from '../types/customerType';
 import { AuthenticatedRequest } from '../types/express';
+import {
+  toGenderEnum,
+  toAgeGroupEnum,
+  toRegionEnum,
+} from '../lib/utils/customers/customerEnumConverter';
+import { toLowerCaseCustomer } from '../lib/utils/customers/customerMapper';
+import { CustomerForResponse } from '../types/customerType';
 
-// 응답용 타입 지정...........
-type CustomerForResponse = {
-  id: number;
-  companyId: number;
-  name: string;
-  gender: Gender | null;
-  phoneNumber: string;
-  ageGroup: AgeGroup | null;
-  region: Region | null;
-  email: string;
-  memo: string | null;
-  contractCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-// 공통적으로 소문자로 변환하는 함수를 추가......
-function toLowerCaseCustomer(customer: CustomerForResponse) {
-  return {
-    ...customer,
-    gender: customer.gender ? customer.gender.toLowerCase() : '',
-    ageGroup: customer.ageGroup ? customer.ageGroup.toLowerCase() : null,
-    region: customer.region ? customer.region.toLowerCase() : null,
-  };
-}
-
-//기존
 export const createCustomer = async (req: AuthenticatedRequest, res: Response) => {
   const companyId = (req.user as { companyId: number }).companyId;
-  const customer = await customerService.createCustomer(companyId, req.body);
-  res.status(201).json(toLowerCaseCustomer(customer));
+
+  const { gender, ageGroup, region, ...rest } = req.body;
+
+  const converted = {
+    ...rest,
+    ...(gender && { gender: toGenderEnum(gender) }),
+    ...(ageGroup && { ageGroup: toAgeGroupEnum(ageGroup) }),
+    ...(region && { region: toRegionEnum(region) }),
+  };
+
+  try {
+    const customer = await customerService.createCustomer(companyId, converted);
+    res.status(201).json(toLowerCaseCustomer(customer));
+  } catch (error) {
+    console.error('고객 생성 중 에러:', error);
+    res.status(500).json({ message: '고객 등록 중 오류가 발생했습니다.' });
+  }
 };
 
 export const updateCustomer = async (req: AuthenticatedRequest, res: Response) => {
