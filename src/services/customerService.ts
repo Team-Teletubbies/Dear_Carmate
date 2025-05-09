@@ -34,7 +34,6 @@ export const updateCustomer = async (
 
   const converted: Prisma.CustomerUncheckedUpdateManyInput = {
     ...cleanData,
-  };
 
   return customerRepo.updateCustomer(customerId, companyId, converted);
 };
