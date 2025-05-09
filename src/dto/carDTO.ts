@@ -1,11 +1,27 @@
 import { CarStatus } from '@prisma/client';
 import { GetCompanyListDTO } from './companyDto';
 
-export function fromEnumStyle(value: string | undefined): string {
-  return value!.toLowerCase().replace(/_([a-z])/g, (_, g) => g.toUpperCase());
+export function fromEnumStyle(value?: string): string {
+  if (!value) return '';
+  return value.toLowerCase().replace(/_([a-z])/g, (_, g) => g.toUpperCase());
 }
 
-export interface carRegistUpdateDTO {
+export type CarStatusDTO = 'possession' | 'contractProceeding' | 'contractCompleted';
+
+export interface CarRegisterRequestDTO {
+  manufacturer: string;
+  model: string;
+  carNumber: string;
+  mileage: number;
+  manufacturingYear: number;
+  price: number;
+  carStatus: CarStatusDTO;
+  accidentCount: number;
+  explanation: string | null;
+  accidentDetails: string | null;
+}
+
+export interface CarRegistUpdateDTO {
   id: number;
   carNumber: string;
   manufacturer: string;
@@ -13,7 +29,7 @@ export interface carRegistUpdateDTO {
   mileage: number;
   manufacturingYear: number;
   price: number;
-  status: 'possession' | 'contractProceeding' | 'contractCompleted';
+  status: CarStatusDTO;
   accidentCount: number;
   explanation: string | null;
   accidentDetails: string | null;
@@ -28,11 +44,11 @@ export function mapCarDTO(car: {
   mileage: number;
   manufacturingYear: number;
   price: number;
-  status: CarStatus;
+  carStatus: CarStatus;
   accidentCount: number;
   explanation: string | null;
   accidentDetails: string | null;
-}): carRegistUpdateDTO {
+}): CarRegistUpdateDTO {
   return {
     id: car.id,
     carNumber: car.carNumber,
@@ -42,30 +58,39 @@ export function mapCarDTO(car: {
     mileage: car.mileage,
     manufacturingYear: car.manufacturingYear,
     price: car.price,
-    status: fromEnumStyle(car.status) as carRegistUpdateDTO['status'],
+    // status: fromEnumStyle(car.carStatus) as CarRegistUpdateDTO['status'],
+    status: fromEnumStyle(car.carStatus) as CarStatusDTO,
+
     accidentCount: car.accidentCount,
     explanation: car.explanation,
     accidentDetails: car.accidentDetails,
   };
 }
 
-export interface CarRegisterRequestDTO {
-  manufacturer: string;
-  model: string;
+export interface CarWithModelAndManufacturerDTO {
+  id: number;
   carNumber: string;
-  mileage: number;
   manufacturingYear: number;
+  mileage: number;
   price: number;
-  carStatus: 'possession' | 'contractProceeding' | 'contractCompleted';
   accidentCount: number;
   explanation: string | null;
   accidentDetails: string | null;
+  carStatus: CarStatus;
+  model: {
+    id: number;
+    name: string;
+    type: string;
+    manufacturer: {
+      name: string;
+    };
+  };
 }
 
 export type SearchField = 'carNumber' | 'model';
 
-export interface GetCarListDTO extends GetCompanyListDTO {
-  status?: 'possession' | 'contractProceeding' | 'contractCompleted';
+export interface GetCarParamsDTO extends GetCompanyListDTO {
+  status?: CarStatusDTO;
   searchBy?: SearchField;
 }
 
@@ -81,4 +106,24 @@ export interface CarCsvRow {
   accidentCount: string;
   explanation: string | null;
   accidentDetails: string | null;
+}
+
+export interface ManufacturerDTO {
+  id: number;
+  name: string;
+}
+
+export interface ManufacturerModelDTO {
+  manufacturer: string;
+  model: string[];
+}
+
+export interface GetManufacturerModelListResponseDTO {
+  data: ManufacturerModelDTO[];
+}
+
+export interface momdelDTO {
+  id: number;
+  name: string;
+  type: String;
 }
