@@ -1,4 +1,14 @@
-import { string, object, enums, optional, array, nonempty, integer, partial } from 'superstruct';
+import {
+  string,
+  object,
+  enums,
+  optional,
+  array,
+  nonempty,
+  integer,
+  partial,
+  nullable,
+} from 'superstruct';
 import { PageParamsStruct } from './commonStruct';
 
 const contractStructKey = ['customerName', 'userName'] as const;
@@ -36,7 +46,7 @@ const contractStatusKey = [
 export const updateContractBodyStruct = partial(
   object({
     status: optional(enums(contractStatusKey)),
-    resolutionDate: optional(string()),
+    resolutionDate: optional(nullable(string())),
     contractPrice: optional(integer()),
     meetings: optional(array(meetingStruct)),
     contractDocuments: optional(array(contractDocumentStruct)),

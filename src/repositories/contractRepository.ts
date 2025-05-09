@@ -126,7 +126,7 @@ export const updateContractInDB = async (
     meetings?: { date: Date; alarm: { time: Date }[] }[];
   },
 ) => {
-  if (updateData.meetings) {
+  if (Array.isArray(updateData.meetings) && updateData.meetings.length > 0) {
     await prisma.meeting.deleteMany({ where: { contractId } });
 
     for (const meet of updateData.meetings) {
