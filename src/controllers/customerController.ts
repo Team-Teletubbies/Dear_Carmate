@@ -2,25 +2,16 @@ import { Request, Response } from 'express';
 import * as customerService from '../services/customerService';
 import BadRequestError from '../lib/errors/badRequestError';
 import { AuthenticatedRequest } from '../types/express';
-import {
-  toGenderEnum,
-  toAgeGroupEnum,
-  toRegionEnum,
-} from '../lib/utils/customers/customerEnumConverter';
 import { toLabeledCustomer } from '../lib/utils/customers/customerMapper';
-import { CustomerForResponse } from '../types/customerType';
+import {
+  convertCreateCustomerInput,
+  convertUpdateCustomerInput,
+} from '../lib/utils/customers/customerInputConverter';
 
 export const createCustomer = async (req: AuthenticatedRequest, res: Response) => {
   const companyId = (req.user as { companyId: number }).companyId;
 
-  const { gender, ageGroup, region, ...rest } = req.body;
-
-  const converted = {
-    ...rest,
-    ...(gender && { gender: toGenderEnum(gender) }),
-    ...(ageGroup && { ageGroup: toAgeGroupEnum(ageGroup) }),
-    ...(region && { region: toRegionEnum(region) }),
-  };
+  const converted = convertCreateCustomerInput(req.body);
 
   try {
     const customer = await customerService.createCustomer(companyId, converted);
@@ -35,16 +26,9 @@ export const updateCustomer = async (req: AuthenticatedRequest, res: Response) =
   const companyId = (req.user as { companyId: number }).companyId;
   const customerId = Number(req.params.id);
 
-  const { gender, ageGroup, region, ...rest } = req.body;
+  const converted = convertUpdateCustomerInput(req.body);
 
-  const convertedData = {
-    ...rest,
-    gender: gender ? toGenderEnum(gender) : undefined,
-    ageGroup: ageGroup ? toAgeGroupEnum(ageGroup) : undefined,
-    region: region ? toRegionEnum(region) : undefined,
-  };
-
-  const updated = await customerService.updateCustomer(customerId, companyId, convertedData);
+  const updated = await customerService.updateCustomer(customerId, companyId, converted);
 
   if (!updated || (typeof updated === 'object' && 'count' in updated)) {
     res.status(200).json({ message: '고객 정보가 업데이트 되었습니다.' });

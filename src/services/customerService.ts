@@ -17,9 +17,6 @@ export const createCustomer = (companyId: number, data: CreateCustomerDTO) => {
   const prismaData: Prisma.CustomerUncheckedCreateInput = {
     ...data,
     companyId,
-    gender: toGenderEnum(data.gender),
-    ageGroup: toAgeGroupEnum(data.ageGroup),
-    region: toRegionEnum(data.region),
   };
 
   return customerRepo.createCustomer(companyId, prismaData);
@@ -37,9 +34,6 @@ export const updateCustomer = async (
 
   const converted: Prisma.CustomerUncheckedUpdateManyInput = {
     ...cleanData,
-    ...(cleanData.gender && { gender: toGenderEnum(cleanData.gender) }),
-    ...(cleanData.ageGroup && { ageGroup: toAgeGroupEnum(cleanData.ageGroup) }),
-    ...(cleanData.region && { region: toRegionEnum(cleanData.region) }),
   };
 
   return customerRepo.updateCustomer(customerId, companyId, converted);
