@@ -1,11 +1,7 @@
 import { prisma } from '../lib/prisma';
-import {
-  GetCompanyListDTO,
-  CompanyListResponseDTO,
-  CreateUpdateCompanyDTO,
-} from '../dto/companyDto';
+import { GetCompanyListDTO, CreateUpdateCompanyDTO } from '../dto/companyDto';
 import { Company, CompanyWithCount } from '../types/companyType';
-import { Prisma } from '@prisma/client';
+import NotFoundError from '../lib/errors/notFoundError';
 
 export async function create(data: CreateUpdateCompanyDTO): Promise<Company> {
   return await prisma.company.create({ data });
@@ -60,27 +56,22 @@ export const updateAndGetWithCount = async (
   data: CreateUpdateCompanyDTO,
 ): Promise<CompanyWithCount | null> => {
   const where = { id: companyId };
-  const [_, updatedWithCount] = await prisma.$transaction([
-    prisma.company.update({ where, data }),
-    prisma.company.findUnique({
-      where,
-      select: {
-        id: true,
-        companyName: true,
-        companyCode: true,
-        _count: {
-          select: {
-            users: true,
-          },
+  return await prisma.company.update({
+    where,
+    data,
+    select: {
+      id: true,
+      companyName: true,
+      companyCode: true,
+      _count: {
+        select: {
+          users: true,
         },
       },
-    }),
-  ]);
-  return updatedWithCount;
+    },
+  });
 };
-// Todo: ErrorHandler에 Prisma unique 넘는 (code P2002) 넘는 애 필요
 
 export const deleteById = async (id: number): Promise<Company> => {
   return await prisma.company.delete({ where: { id } });
 };
-// Todo: delete 실패 시 prisma의 에러가 뜨는게 (ㅖ2025)그거 잡아야 함

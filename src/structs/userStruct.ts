@@ -6,13 +6,12 @@ import {
   refine,
   nonempty,
   size,
-  partial,
   define,
   nullable,
 } from 'superstruct';
 import { PageParamsStruct } from './commonStruct';
 
-const userSearchKey = ['companyName', 'name', 'email'] as const;
+export const userSearchKey = ['companyName', 'name', 'email'] as const;
 export type UserSearchKey = (typeof userSearchKey)[number];
 const Email = define<string>(
   'Email',

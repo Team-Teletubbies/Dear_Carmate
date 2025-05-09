@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import {
   UserWithCompanyCode,
@@ -8,18 +7,28 @@ import {
   UserWithPasswordAndCompany,
   updateMyInfoInput,
 } from '../types/userType';
-import {
-  GetUserListDTO,
-  updateMyInfoDTO,
-  UserListItem,
-  UserProfileResponseDTO,
-} from '../dto/userDTO';
-import { CreateUpdateCompanyDTO } from '../dto/companyDto';
+import { UserListItem } from '../dto/userDTO';
 import { redis } from '../lib/auth/redis';
 import UnauthorizedError from '../lib/errors/unauthorizedError';
 
-export const create = async (input: CreateUserInput): Promise<User> => {
-  return await prisma.user.create({ data: input });
+export const create = async (input: CreateUserInput): Promise<UserWithCompanyCode> => {
+  return await prisma.user.create({
+    data: input,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      employeeNumber: true,
+      phoneNumber: true,
+      imageUrl: true,
+      isAdmin: true,
+      company: {
+        select: {
+          companyCode: true,
+        },
+      },
+    },
+  });
 };
 
 export const getWithCompanyCode = async (id: number): Promise<UserWithCompanyCode | null> => {
@@ -102,8 +111,8 @@ export const findForLoginByEmail = async (
   return user;
 };
 
-export const getById = async (id: number): Promise<User | null> => {
-  return await prisma.user.findUnique({ where: { id } });
+export const getById = async (id: number): Promise<User> => {
+  return await prisma.user.findUniqueOrThrow({ where: { id } });
 };
 
 export const setRedisRefreshToken = async (userId: number, refreshToken: string): Promise<void> => {

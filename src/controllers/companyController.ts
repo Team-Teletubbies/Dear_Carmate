@@ -1,4 +1,4 @@
-import { Request, RequestHandler, Response } from 'express';
+import { Response } from 'express';
 import { CreateUpdateCompanyDTO, GetCompanyListDTO } from '../dto/companyDto';
 import * as companyService from '../services/companyService';
 import { assert, create } from 'superstruct';
@@ -8,7 +8,6 @@ import { AuthenticatedRequest } from '../types/express';
 
 export const createCompany = async (req: AuthenticatedRequest, res: Response) => {
   assert(req.body, createCompanyBodyStruct);
-  // Todo: superstruct가 던지는 에러 잘 잡히는지 확인 필요
   const { companyName, companyCode } = req.body;
   const dto: CreateUpdateCompanyDTO = {
     companyName,
