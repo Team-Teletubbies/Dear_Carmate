@@ -10,6 +10,7 @@ import {
   nullable,
 } from 'superstruct';
 import { PageParamsStruct } from './commonStruct';
+import { statusKeys } from '../lib/utils/statusMap';
 
 const contractStructKey = ['customerName', 'userName'] as const;
 export type ContractStructKey = (typeof contractStructKey)[number];
@@ -32,16 +33,10 @@ const contractDocumentStruct = object({
 export const createContractBodyStruct = object({
   carId: integer(),
   customerId: integer(),
-  meetings: optional(nonempty(array(meetingStruct))),
+  meetings: optional(array(meetingStruct)),
 });
 
-const contractStatusKey = [
-  'carInspection',
-  'priceNegotiation',
-  'contractDraft',
-  'contractSuccessful',
-  'contractFailed',
-] as const;
+const contractStatusKey = statusKeys;
 
 export const updateContractBodyStruct = partial(
   object({

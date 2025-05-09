@@ -249,9 +249,18 @@ export const getCarListForContract = async (
   companyId: number,
 ): Promise<{ id: number; carNumber: string; model: { name: string } }[]> => {
   return prisma.car.findMany({
-    where: { companyId },
+    where: { companyId, carStatus: CarStatus.POSSESSION },
     include: {
       model: true,
+    },
+  });
+};
+
+export const updateCarStatus = async (carId: number, status: CarStatus) => {
+  return prisma.car.update({
+    where: { id: carId },
+    data: {
+      carStatus: { set: status },
     },
   });
 };

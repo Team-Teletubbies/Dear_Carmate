@@ -9,27 +9,29 @@ import {
 import {
   CreateContractResponseDTO,
   CreateContractDTO,
-  GroupedContractsResponseDTO,
   UpdateContractDTO,
   ContractListItem,
+  buildGroupedContracts,
+  ContractResponseDTO,
 } from '../dto/contractDTO';
 import {
-  MinimalContract,
   GroupedContractSearchParams,
+  MeetingEntity,
   UpdateContractType,
-  ContractWithRelations,
 } from '../types/contractType';
-import { Prisma, ContractStatus } from '@prisma/client';
+import { CarStatus, Prisma } from '@prisma/client';
 import ForbiddenError from '../lib/errors/forbiddenError';
 import NotFoundError from '../lib/errors/notFoundError';
-import { toDBStatus } from '../lib/utils/statusMap';
-import { getCarListForContract } from '../repositories/carRepository';
+import { toDBStatus, statusMap } from '../lib/utils/statusMap';
+import { getCarListForContract, updateCarStatus } from '../repositories/carRepository';
 import { getCustomerListForContract } from '../repositories/customerRepository';
 import { getUserListForContract } from '../repositories/userRepository';
 import {
   findContractDocumentIdByFileName,
   updateMultipleContractDocumentIds,
 } from '../repositories/contractDocumentRepository';
+import { transformMeetingToPrisma } from '../lib/utils/meeting';
+import { Segment } from '../lib/utils/request';
 
 export const createContractData = async (
   data: CreateContractDTO,
@@ -38,28 +40,27 @@ export const createContractData = async (
 
   const transformed = {
     ...contract,
-    meeting: contract.meeting.map((meet) => ({
-      date: meet.date,
-      alarms: meet.alarm.map((alarm) => new Date(alarm.time).toISOString()),
-    })),
+    meeting: transformMeetingToPrisma(contract.meeting),
   };
+
+  const carId = contract.carId;
+  const carStatus: CarStatus = 'CONTRACT_PROCEEDING';
+
+  await updateCarStatus(carId, carStatus);
+
   return new CreateContractResponseDTO(transformed);
 };
 
-const STATUS_VALUES = {
-  carInspection: ContractStatus.CAR_INSPECTION,
-  priceNegotiation: ContractStatus.PRICE_NEGOTIATION,
-  contractDraft: ContractStatus.CONTRACT_DRAFT,
-  contractSuccessful: ContractStatus.CONTRACT_SUCCESSFUL,
-  contractFailed: ContractStatus.CONTRACT_FAILED,
-} as const;
+const STATUS_VALUES = statusMap;
 
 export const getGroupedContractByStatus = async ({
   companyId,
   searchBy,
   keyword,
-}: GroupedContractSearchParams): Promise<GroupedContractsResponseDTO> => {
-  const groupedData: Partial<Record<string, MinimalContract[]>> = {};
+}: GroupedContractSearchParams): Promise<
+  Record<string, { totalItemCount: number; data: ContractResponseDTO[] }>
+> => {
+  const groupedData: Partial<Record<string, ContractResponseDTO[]>> = {};
   const groupedCounts: Record<string, number> = {};
 
   for (const [key, status] of Object.entries(STATUS_VALUES)) {
@@ -74,19 +75,15 @@ export const getGroupedContractByStatus = async ({
       countGroupedContracts(where),
     ]);
 
-    const transformedContracts: MinimalContract[] = contracts.map((contract) => ({
-      ...contract,
-      meeting: contract.meeting.map((meet) => ({
-        date: meet.date,
-        alarms: meet.alarm.map((alarm) => new Date(alarm.time).toISOString()),
-      })),
-    }));
+    const transformedContracts: ContractResponseDTO[] = contracts.map((contract) => {
+      return new ContractResponseDTO(contract);
+    });
 
     groupedData[key] = transformedContracts;
     groupedCounts[key] = count;
   }
 
-  return new GroupedContractsResponseDTO(groupedData, groupedCounts);
+  return buildGroupedContracts(groupedData, groupedCounts);
 };
 
 const buildWhereCondition = (
@@ -150,17 +147,26 @@ export const updateContractData = async (input: UpdateContractType): Promise<Upd
     await updateMultipleContractDocumentIds(documentIds, contractId);
   }
 
-  const meetingList = meetings
-    ? meetings.map((meet) => ({
-        date: new Date(meet.date),
-        alarm: (meet.alarms ?? []).map((alarm) => ({ time: new Date(alarm) })),
-      }))
-    : [];
-
+  const meetingList = meetings ? transformMeetingToPrisma(meetings) : [];
   const contract = await updateContractInDB(contractId, {
     basic,
     meetings: meetingList,
   });
+
+  if (contract.contractStatus === 'CONTRACT_SUCCESSFUL') {
+    const carId = contract.carId;
+    const carStatus: CarStatus = 'CONTRACT_COMPLETED';
+
+    await updateCarStatus(carId, carStatus);
+  } else if (contract.contractStatus === 'CONTRACT_FAILED') {
+    const carId = contract.carId;
+    const carStatus: CarStatus = 'POSSESSION';
+    await updateCarStatus(carId, carStatus);
+  } else {
+    const carId = contract.carId;
+    const carStatus: CarStatus = 'CONTRACT_PROCEEDING';
+    await updateCarStatus(carId, carStatus);
+  }
 
   return new UpdateContractDTO(contract);
 };
@@ -174,17 +180,19 @@ export const delContract = async (id: number, userId: number): Promise<void> => 
     throw new ForbiddenError('담당자만 삭제가 가능합니다');
   }
 
-  await deleteContractData(id);
+  const contract = await deleteContractData(id);
+
+  const carId = contract.carId;
+  const carStatus: CarStatus = 'POSSESSION';
+  await updateCarStatus(carId, carStatus);
   return;
 };
-
-type Segment = 'cars' | 'customers' | 'users';
 
 export const detailList = async (data: {
   companyId: number;
   lastSegment: Segment;
 }): Promise<ContractListItem[]> => {
-  const { companyId, lastSegment } = data;
+  const { companyId } = data;
 
   switch (data.lastSegment) {
     case 'cars': {

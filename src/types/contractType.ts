@@ -13,20 +13,12 @@ export interface ContractCar {
   };
 }
 
-export interface Meeting {
-  date: string;
-  alarms?: string[];
-}
-
 export type MinimalContract = {
   id: number;
   contractStatus: ContractStatus;
   resolutionDate: string | Date | null;
   contractPrice: number;
-  meeting: {
-    date: string | Date;
-    alarms: string[];
-  }[];
+  meeting: MeetingEntity[];
   user: { id: number; name: string };
   customer: { id: number; name: string };
   car: { id: number; model: { name: string } };
@@ -37,7 +29,7 @@ export interface StatusContractItem {
   car: ContractCar;
   customer: ContractParticipant;
   user: ContractParticipant;
-  meetings: Meeting[];
+  meetings: MeetingDTO[];
   contractPrice: number;
   resolutionDate: string;
   contractStatus: string;
@@ -53,7 +45,7 @@ export interface BaseUpdateContractFields {
   status?: keyof typeof statusMap;
   resolutionDate?: string | null;
   contractPrice?: number;
-  meetings?: Meeting[];
+  meetings?: MeetingInput[];
   contractDocuments?: { id?: number; fileName?: string }[];
   carId?: number;
   customerId?: number;
@@ -98,3 +90,19 @@ export type ContractWithUser = Prisma.ContractGetPayload<{
     contractDocuments: true;
   };
 }>;
+
+export type MeetingDTO = {
+  date: string;
+  alarms: string[];
+}; // 김한솔: DB 전용
+
+export type MeetingInput = {
+  date: string | Date;
+  alarm?: { time: Date }[];
+  alarms?: string[];
+}; // 김한솔: 클라이언트 입력값
+
+export type MeetingEntity = {
+  date: Date;
+  alarm?: { time: Date }[];
+}; // 김한솔: 클라이언트 응답값
