@@ -30,7 +30,7 @@ export class CreateContractResponseDTO {
     this.contractPrice = contract.contractPrice;
     this.meetings = Array.isArray(contract.meeting)
       ? contract.meeting.map((meet) => ({
-          date: new Date(meet.date).toISOString().slice(0, 10),
+          date: new Date(meet.date).toISOString(),
           alarms: meet.alarms.map((alarm) => formatLocalDateTime(new Date(alarm))),
         }))
       : [];
@@ -69,7 +69,7 @@ export class UpdateContractDTO {
     this.contractPrice = contract.contractPrice;
     this.meetings = Array.isArray(contract.meeting)
       ? contract.meeting.map((meet) => ({
-          date: meet.date.toISOString().slice(0, 10),
+          date: meet.date.toISOString(),
           alarms: meet.alarm.map((alarm) => formatLocalDateTime(new Date(alarm.time))),
         }))
       : [];
@@ -108,7 +108,7 @@ export class ContractResponseDTO {
     this.user = { id: data.user.id, name: data.user.name };
     this.meetings = Array.isArray(data.meeting)
       ? data.meeting.map((meet) => ({
-          date: new Date(meet.date).toISOString().slice(0, 10),
+          date: new Date(meet.date).toISOString(),
           alarms: meet.alarms.map((alarm) => new Date(alarm).toISOString()),
         }))
       : [];
