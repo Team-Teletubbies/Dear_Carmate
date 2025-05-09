@@ -115,7 +115,6 @@ export const updateContractData = async (input: UpdateContractType): Promise<Upd
     customerId,
     userId,
   } = input;
-
   const dbContract = await findContractById(contractId);
   if (!dbContract) throw new NotFoundError('존재하지 않는 계약입니다.');
 
