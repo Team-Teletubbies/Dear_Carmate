@@ -1,5 +1,5 @@
 import multer from 'multer';
-import { LIMIT_FILE_SIZE, PUBLIC_PATH, STATIC_PATH } from '../lib/constants';
+import { LIMIT_FILE_SIZE, PUBLIC_PATH } from '../lib/constants';
 import path from 'path';
 import BadRequestError from '../lib/errors/badRequestError';
 import { Request, Response } from 'express';

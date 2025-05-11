@@ -9,7 +9,7 @@ import {
   mapCarDTO,
 } from '../dto/carDTO';
 import NotFoundError from '../lib/errors/notFoundError';
-import { mapCarStatus } from '../structs/carStruct';
+import { mapCarStatus } from '../lib/utils/carStatus';
 import fs from 'fs';
 import csv from 'csv-parser';
 
@@ -47,7 +47,6 @@ function carResponseDTO(car: any, manufacturerData: any, modelData: any): CarReg
   return mapCarDTO({
     ...car,
     status: car.carStatus,
-    // status: car.carStatus ?? 'POSSESSION',
     manufacturer: { name: manufacturerData.name },
     model: { name: modelData.name, type: modelData.type },
   });
@@ -60,7 +59,6 @@ export const registerCar = async function (
   const { manufacturer, model, carStatus, ...rest } = data;
 
   const { manufacturerData, modelData } = await validManufacturerAndModel(manufacturer, model);
-  // if (!carStatus) throw new Error('carStatus는 필수입니다');
   const carData = commonCarData(
     {
       ...rest,

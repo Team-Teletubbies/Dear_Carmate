@@ -58,7 +58,6 @@ export function mapCarDTO(car: {
     mileage: car.mileage,
     manufacturingYear: car.manufacturingYear,
     price: car.price,
-    // status: fromEnumStyle(car.carStatus) as CarRegistUpdateDTO['status'],
     status: fromEnumStyle(car.carStatus) as CarStatusDTO,
 
     accidentCount: car.accidentCount,

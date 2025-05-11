@@ -7,7 +7,7 @@ import {
   ManufacturerDTO,
   momdelDTO,
 } from '../dto/carDTO';
-import { mapCarStatus } from '../structs/carStruct';
+import { mapCarStatus } from '../lib/utils/carStatus';
 
 export const createCar = async function (
   data: Prisma.CarCreateInput,
