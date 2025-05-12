@@ -12,3 +12,196 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Company {
+  id          Int        @id @default(autoincrement())
+  companyName String     @unique
+  companyCode String     @unique
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  users       User[]
+  customers   Customer[]
+  cars        Car[]
+  contract    Contract[]
+}
+
+model User {
+  id             Int      @id @default(autoincrement())
+  companyId      Int
+  name           String
+  email          String   @unique
+  password       String
+  employeeNumber String   @unique
+  phoneNumber    String
+  imageUrl       String?
+  isAdmin        Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contracts Contract[]
+}
+
+model Customer {
+  id            Int       @id @default(autoincrement())
+  companyId     Int
+  name          String
+  gender        Gender
+  phoneNumber   String
+  ageGroup      AgeGroup?
+  region        Region?
+  email         String
+  memo          String?
+  contractCount Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contracts Contract[]
+}
+
+model Car {
+  id                Int       @id @default(autoincrement())
+  companyId         Int
+  modelId           Int
+  carNumber         String    @unique
+  manufacturingYear Int
+  mileage           Int
+  price             Int
+  accidentCount     Int
+  explanation       String
+  accidentDetails   String
+  carStatus         CarStatus @default(POSSESSION)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  model     CarModel   @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  contracts Contract[]
+}
+
+model Manufacturer {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  models CarModel[]
+}
+
+model CarModel {
+  id             Int      @id @default(autoincrement())
+  manufacturerId Int
+  name           String
+  type           String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  cars         Car[]
+
+  @@unique([name, manufacturerId, type])
+}
+
+model Contract {
+  id             Int            @id @default(autoincrement())
+  userId         Int
+  carId          Int
+  customerId     Int
+  companyId      Int
+  contractStatus ContractStatus @default(CAR_INSPECTION)
+  resolutionDate DateTime?
+  contractPrice  Int
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  car            Car            @relation(fields: [carId], references: [id], onDelete: Cascade)
+  customer       Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  company        Company        @relation(fields: [companyId], references: [id])
+
+  meeting           Meeting[]
+  contractDocuments ContractDocument[]
+}
+
+model Meeting {
+  id         Int      @id @default(autoincrement())
+  contractId Int
+  date       DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  alarm      Alarm[]
+}
+
+model Alarm {
+  id        Int      @id @default(autoincrement())
+  meetingId Int
+  time      DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+}
+
+model ContractDocument {
+  id         Int  @id @default(autoincrement())
+  contractId Int?
+
+  fileName  String
+  filePath  String
+  fileSize  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contract Contract? @relation(fields: [contractId], references: [id], onDelete: Cascade)
+}
+
+enum Gender {
+  MALE   @map("male")
+  FEMALE @map("female")
+}
+
+enum AgeGroup {
+  TEENAGER
+  TWENTIES
+  THIRTIES
+  FORTIES
+  FIFTIES
+  SIXTIES
+  SEVENTIES
+  EIGHTIES
+}
+
+enum Region {
+  SEOUL
+  BUSAN
+  DAEGU
+  INCHEON
+  GWANGJU
+  DAEJEON
+  ULSAN
+  SEJONG
+  GYEONGGI
+  GANGWON
+  CHUNGBUK
+  CHUNGNAM
+  JEONBUK
+  JEONNAM
+  GYEONGBUK
+  GYEONGNAM
+  JEJU
+}
+
+enum CarStatus {
+  POSSESSION          @map("possession")
+  CONTRACT_PROCEEDING @map("contractProceeding")
+  CONTRACT_COMPLETED  @map("contractCompleted")
+}
+
+enum ContractStatus {
+  CAR_INSPECTION      @map("car_inspection")
+  PRICE_NEGOTIATION   @map("price_negotiation")
+  CONTRACT_DRAFT      @map("contract_draft")
+  CONTRACT_SUCCESSFUL @map("contract_successful")
+  CONTRACT_FAILED     @map("contract_failed")
+}
