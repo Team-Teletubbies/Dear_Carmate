@@ -9,7 +9,7 @@ import { defaultNotFoundHandler, globalErrorHandler } from './controllers/errorC
 import cors from 'cors';
 import customerRouter from './routers/customerRouter';
 import path from 'path';
-import { PUBLIC_PATH, STATIC_PATH } from './lib/constants';
+import { PUBLIC_PATH, STATIC_PATH, PORT } from './lib/constants';
 import imageRouter from './routers/imageRouter';
 import dashboardRouter from './routers/dashboardRouter';
 import { multerErrorHandler } from './lib/multerError';
@@ -33,6 +33,6 @@ app.use(defaultNotFoundHandler);
 app.use(multerErrorHandler);
 app.use(globalErrorHandler);
 
-app.listen(3000, () => {
+app.listen(PORT || 3000, () => {
   console.log('Server is listening on port 3000');
 });
