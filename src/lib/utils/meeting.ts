@@ -1,6 +1,5 @@
 import { formatLocalDateTime } from './formatLocalDateTime';
-import { MeetingInput, MeetingDTO, MeetingEntity } from '../../types/contractType';
-import { Prisma } from '@prisma/client';
+import { MeetingInput, MeetingDTO } from '../../types/contractType';
 
 export const transformMeetingToDTO = (meetings: MeetingInput[]): MeetingDTO[] => {
   return (meetings ?? []).map((meet) => ({
@@ -11,13 +10,9 @@ export const transformMeetingToDTO = (meetings: MeetingInput[]): MeetingDTO[] =>
 
 export const transformMeetingToPrisma = (
   meetings: { date: string | Date; alarms?: string[] }[],
-): Prisma.MeetingCreateWithoutContractInput[] => {
-  return meetings.map((meet) => ({
+): { date: Date; alarm: { time: Date }[] }[] => {
+  return (meetings ?? []).map((meet) => ({
     date: new Date(meet.date),
-    alarm: {
-      create: (meet.alarms ?? []).map((alarm) => ({
-        time: new Date(alarm),
-      })),
-    },
+    alarm: (meet.alarms ?? []).map((alarm) => ({ time: new Date(alarm) })),
   }));
 };

@@ -72,10 +72,21 @@ export const createContract = async ({
       contractStatus: 'CAR_INSPECTION',
       resolutionDate: null,
       contractPrice: car.price,
-      ...(transformedMeetings.length > 0
+      ...(meetings && meetings.length > 0
         ? {
             meeting: {
-              create: transformedMeetings,
+              create: meetings.map((meeting) => ({
+                date: new Date(meeting.date),
+                ...(meeting.alarms && meeting.alarms.length > 0
+                  ? {
+                      alarm: {
+                        create: (meeting.alarms ?? []).map((alarm) => ({
+                          time: new Date(alarm),
+                        })),
+                      },
+                    }
+                  : {}),
+              })),
             },
           }
         : {}),
@@ -110,18 +121,11 @@ export const updateContractInDB = async (
   contractId: number,
   updateData: {
     basic: Prisma.ContractUpdateInput;
-    meetings?: Prisma.MeetingCreateWithoutContractInput[];
+    meetings?: { date: Date; alarm: { time: Date }[] }[];
   },
 ) => {
   if (Array.isArray(updateData.meetings) && updateData.meetings.length > 0) {
     await prisma.meeting.deleteMany({ where: { contractId } });
-
-    await prisma.meeting.createMany({
-      data: updateData.meetings.map((meet) => ({
-        contractId,
-        date: meet.date,
-      })),
-    });
 
     for (const meet of updateData.meetings) {
       await prisma.meeting.create({
