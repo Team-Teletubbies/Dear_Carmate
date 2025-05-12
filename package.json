@@ -9,7 +9,7 @@
     "dev": "nodemon --watch src src/app.ts"
   },
   "prisma": {
-     "seed": "node dist/prisma/seed.js"
+     "seed": "ts-node prisma/seed.ts"
   },
   "repository": {
     "type": "git",
