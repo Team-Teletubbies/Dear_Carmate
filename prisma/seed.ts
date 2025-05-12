@@ -1,242 +1,135 @@
 import { prisma } from '../src/lib/prisma';
+import bcrypt from 'bcrypt';
 
 async function main() {
-  // 1. Manufacturer + CarModel
-  const [kia, hyundai, tesla] = await Promise.all([
-    prisma.manufacturer.create({
-      data: {
-        name: 'KIA',
-        models: {
-          create: [
-            { name: 'K5', type: 'SEDAN' },
-            { name: 'K3', type: 'SEDAN' },
-            { name: 'Sportage', type: 'SUV' },
-          ],
-        },
-      },
-    }),
-    prisma.manufacturer.create({
-      data: {
-        name: 'Hyundai',
-        models: {
-          create: [
-            { name: 'Sonata', type: 'SEDAN' },
-            { name: 'Avante', type: 'SEDAN' },
-            { name: 'Tucson', type: 'SUV' },
-          ],
-        },
-      },
-    }),
-    prisma.manufacturer.create({
-      data: {
-        name: 'Tesla',
-        models: {
-          create: [
-            { name: 'Model S', type: 'SEDAN' },
-            { name: 'Model 3', type: 'SEDAN' },
-            { name: 'Model X', type: 'SUV' },
-          ],
-        },
-      },
-    }),
-  ]);
+  // 1. 관리자 비밀번호 해시
+  const plainPassword = 'admin1234';
+  const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
-  // 2. Company
-  const companies = await prisma.company.createMany({
-    data: [
-      { companyName: '주식회사 카플랜', companyCode: 'CPLAN123' },
-      { companyName: '오토랜드', companyCode: 'AUTO456' },
-      { companyName: '드림모터스', companyCode: 'DREAM789' },
-    ],
-  });
-
-  const allCompanies = await prisma.company.findMany();
-
-  // 3. User
-  const users = await prisma.user.createMany({
-    data: [
-      {
-        name: '김철수',
-        email: 'kim@test.com',
-        password: 'pass1234',
-        employeeNumber: 'EMP001',
-        phoneNumber: '010-1111-2222',
-        companyId: allCompanies[0].id,
-      },
-      {
-        name: '이영희',
-        email: 'lee@test.com',
-        password: 'pass5678',
-        employeeNumber: 'EMP002',
-        phoneNumber: '010-2222-3333',
-        companyId: allCompanies[1].id,
-      },
-      {
-        name: '박민준',
-        email: 'park@test.com',
-        password: 'pass9012',
-        employeeNumber: 'EMP003',
-        phoneNumber: '010-3333-4444',
-        companyId: allCompanies[2].id,
-      },
-    ],
-  });
-
-  const allUsers = await prisma.user.findMany();
-
-  // 4. Customer
-  await prisma.customer.createMany({
-    data: [
-      {
-        name: '고객1',
-        gender: 'MALE',
-        phoneNumber: '010-5555-1111',
-        email: 'cust1@example.com',
-        companyId: allCompanies[0].id,
-      },
-      {
-        name: '고객2',
-        gender: 'FEMALE',
-        phoneNumber: '010-5555-2222',
-        email: 'cust2@example.com',
-        companyId: allCompanies[1].id,
-      },
-      {
-        name: '고객3',
-        gender: 'MALE',
-        phoneNumber: '010-5555-3333',
-        email: 'cust3@example.com',
-        companyId: allCompanies[2].id,
-      },
-    ],
-  });
-
-  const allModels = await prisma.carModel.findMany();
-
-  // 5. Car
-  await prisma.car.createMany({
-    data: [
-      {
-        carNumber: '12가12345',
-        companyId: allCompanies[0].id,
-        modelId: allModels.find((m) => m.name === 'K5')!.id,
-        manufacturingYear: 2021,
-        mileage: 15000,
-        price: 2000,
-        accidentCount: 1,
-        explanation: '무사고에 가까움',
-        accidentDetails: '조수석 범퍼 교체',
-      },
-      {
-        carNumber: '34나56789',
-        companyId: allCompanies[1].id,
-        modelId: allModels.find((m) => m.name === 'Sonata')!.id,
-        manufacturingYear: 2019,
-        mileage: 30000,
-        price: 1500,
-        accidentCount: 2,
-        explanation: '경미한 사고 있음',
-        accidentDetails: '뒤 범퍼, 도장',
-      },
-      {
-        carNumber: '56다90123',
-        companyId: allCompanies[2].id,
-        modelId: allModels.find((m) => m.name === 'Model 3')!.id,
-        manufacturingYear: 2023,
-        mileage: 5000,
-        price: 5000,
-        accidentCount: 0,
-        explanation: '완전 무사고',
-        accidentDetails: '',
-      },
-    ],
-  });
-
-  const allCustomers = await prisma.customer.findMany();
-  const allCars = await prisma.car.findMany();
-
-  // 6. Contract (✅ companyId 추가됨)
-  const contract1 = await prisma.contract.create({
-    data: {
-      userId: allUsers[0].id,
-      carId: allCars[0].id,
-      customerId: allCustomers[0].id,
-      companyId: allCompanies[0].id,
-      contractPrice: 2200,
-      resolutionDate: null,
-    },
-  });
-  const contract2 = await prisma.contract.create({
-    data: {
-      userId: allUsers[1].id,
-      carId: allCars[1].id,
-      customerId: allCustomers[1].id,
-      companyId: allCompanies[1].id,
-      contractPrice: 1800,
-      resolutionDate: null,
-    },
-  });
-  const contract3 = await prisma.contract.create({
-    data: {
-      userId: allUsers[2].id,
-      carId: allCars[2].id,
-      customerId: allCustomers[2].id,
-      companyId: allCompanies[2].id,
-      contractPrice: 5200,
-      resolutionDate: new Date(),
+  // 2. 회사 생성
+  const company = await prisma.company.upsert({
+    where: { companyCode: 'COMP001' },
+    update: {},
+    create: {
+      companyName: '텔레토비 컴퍼니',
+      companyCode: 'COMP001',
     },
   });
 
-  // 7. Meeting
-  const meetings = await prisma.meeting.createMany({
-    data: [
-      { contractId: contract1.id, date: new Date() },
-      { contractId: contract2.id, date: new Date() },
-      { contractId: contract3.id, date: new Date() },
-    ],
+  // 3. 제조사 생성
+  const manufacturer = await prisma.manufacturer.upsert({
+    where: { name: '현대자동차' },
+    update: {},
+    create: {
+      name: '현대자동차',
+    },
   });
 
-  const allMeetings = await prisma.meeting.findMany();
-
-  // 8. Alarm
-  await prisma.alarm.createMany({
-    data: [
-      { meetingId: allMeetings[0].id, time: new Date() },
-      { meetingId: allMeetings[1].id, time: new Date() },
-      { meetingId: allMeetings[2].id, time: new Date() },
-    ],
+  // 4. 차종(CarModel) 생성
+  const model = await prisma.carModel.upsert({
+    where: {
+      name_manufacturerId_type: {
+        name: '그랜저',
+        manufacturerId: manufacturer.id,
+        type: '세단',
+      },
+    },
+    update: {},
+    create: {
+      name: '그랜저',
+      type: '세단',
+      manufacturerId: manufacturer.id,
+    },
   });
 
-  // 9. ContractDocument (✅ companyId 제거됨)
-  await prisma.contractDocument.createMany({
-    data: [
-      {
-        contractId: contract1.id,
-        fileName: '계약서1.pdf',
-        filePath: '/docs/contract1.pdf',
-        fileSize: 2048,
-      },
-      {
-        contractId: contract2.id,
-        fileName: '계약서2.pdf',
-        filePath: '/docs/contract2.pdf',
-        fileSize: 3072,
-      },
-      {
-        contractId: contract3.id,
-        fileName: '계약서3.pdf',
-        filePath: '/docs/contract3.pdf',
-        fileSize: 1024,
-      },
-    ],
+  // 5. 차량(Car) 생성
+  const car = await prisma.car.create({
+    data: {
+      companyId: company.id,
+      modelId: model.id,
+      carNumber: '12가3456',
+      manufacturingYear: 2020,
+      mileage: 50000,
+      price: 2500,
+      accidentCount: 1,
+      explanation: '깨끗한 차량입니다.',
+      accidentDetails: '조수석 경미한 접촉 사고',
+    },
   });
 
-  console.log('✅ Seed 완료!');
+  // 6. 관리자 계정(User) 생성
+  const user = await prisma.user.upsert({
+    where: { email: 'admin@example.com' },
+    update: {},
+    create: {
+      companyId: company.id,
+      name: '홍길동',
+      email: 'admin@example.com',
+      password: hashedPassword,
+      employeeNumber: 'EMP001',
+      phoneNumber: '010-1234-5678',
+      isAdmin: true,
+    },
+  });
+
+  // 7. 고객(Customer) 생성
+  const customer = await prisma.customer.create({
+    data: {
+      companyId: company.id,
+      name: '김철수',
+      gender: 'MALE',
+      phoneNumber: '010-1111-2222',
+      email: 'customer@example.com',
+      region: 'SEOUL',
+    },
+  });
+
+  // 8. 계약(Contract) 생성
+  const contract = await prisma.contract.create({
+    data: {
+      userId: user.id,
+      customerId: customer.id,
+      carId: car.id,
+      companyId: company.id,
+      contractPrice: 2300,
+      contractStatus: 'CAR_INSPECTION',
+    },
+  });
+
+  // 9. 미팅(Meeting) 생성
+  const meeting = await prisma.meeting.create({
+    data: {
+      contractId: contract.id,
+      date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3일 후
+    },
+  });
+
+  // 10. 알람(Alarm) 생성
+  await prisma.alarm.create({
+    data: {
+      meetingId: meeting.id,
+      time: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2일 후
+    },
+  });
+
+  // 11. 계약 문서(ContractDocument) 생성
+  await prisma.contractDocument.create({
+    data: {
+      contractId: contract.id,
+      fileName: '계약서.pdf',
+      filePath: '/docs/contract1.pdf',
+      fileSize: 2048,
+    },
+  });
+
+  console.log('✅ Seed complete.');
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error('❌ Seed error:', e);
     process.exit(1);
   })
-  .finally(() => prisma.$disconnect());
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
