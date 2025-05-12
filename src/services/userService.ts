@@ -8,34 +8,21 @@ import {
   RefreshTokenResponseDTO,
   updateMyInfoDTO,
   UserProfileResponseDTO,
-  UserResponseDTO,
 } from '../dto/userDTO';
 import * as userRepository from '../repositories/userRepository';
 import * as companyRepository from '../repositories/companyRepository';
 import NotFoundError from '../lib/errors/notFoundError';
 import { hashPassword } from '../lib/auth/hash';
 import ConflictError from '../lib/errors/conflictError';
-import { CreateUserInput, UserWithPasswordAndCompany } from '../types/userType';
+import { CreateUserInput } from '../types/userType';
 import bcrypt from 'bcrypt';
 import { createToken } from '../lib/auth/jwt';
-import { redis } from '../lib/auth/redis';
-import { UnauthorizedError } from 'express-jwt';
 import BadRequestError from '../lib/errors/badRequestError';
 
 export const createUser = async (dto: CreateUserDTO): Promise<UserProfileResponseDTO> => {
   const { email, employeeNumber, companyName, companyCode, password, ...rest } = dto;
-  // 정은 Refactor 함수화 : validateCompany
-  const validCompany = await companyRepository.findValidateCompany(companyName, companyCode);
-  if (!validCompany) {
-    throw new NotFoundError('Company info is invalid.');
-  }
-  const companyId = validCompany.id;
-  // 정은 Refactor 함수화 : checkDuplicateUser
-  const existingEmail = await userRepository.getByEmail(email);
-  const existingEmployeeNumber = await userRepository.getByEmployeeNumber(employeeNumber);
-  if (existingEmail || existingEmployeeNumber) {
-    throw new ConflictError('이미 존재하는 이메일 또는 사원번호 입니다');
-  }
+  const companyId = await validateCompany(companyName, companyCode);
+  await checkDuplicateUser(email, employeeNumber);
   const hashedPassword = await hashPassword(password);
   const input: CreateUserInput = {
     ...rest,
@@ -45,22 +32,16 @@ export const createUser = async (dto: CreateUserDTO): Promise<UserProfileRespons
     companyId,
   };
   const user = await userRepository.create(input);
-  const userWithCompanyCode = await userRepository.getWithCompanyCode(user.id);
-  if (!userWithCompanyCode) {
-    throw new NotFoundError('존재하지 않는 유저입니다');
-  }
-  return new UserProfileResponseDTO(userWithCompanyCode);
+  return new UserProfileResponseDTO(user);
 };
 
 export const getUserList = async (dto: GetUserListDTO): Promise<GetUserListResponseDTO> => {
-  const input = { ...dto, searchBy: dto.searchBy ?? 'name' };
-  const userList = await userRepository.getUserList(input);
-  const { page, pageSize, searchBy, keyword } = input;
-  const currentPage = page;
+  const searchBy = dto.searchBy ?? 'name';
+  const { page, pageSize, keyword } = dto;
+  const userList = await userRepository.getUserList({ ...dto, searchBy });
   const totalItemCount = await userRepository.countByKeyword(searchBy, keyword);
   const totalPages = Math.ceil(totalItemCount / pageSize);
-  const result = new GetUserListResponseDTO(userList, currentPage, totalPages, totalItemCount);
-  return result;
+  return new GetUserListResponseDTO(userList, page, totalPages, totalItemCount);
 };
 
 export const login = async (dto: LoginDTO): Promise<LoginResponseDTO> => {
@@ -75,11 +56,8 @@ export const login = async (dto: LoginDTO): Promise<LoginResponseDTO> => {
   }
   const userId = user.id;
   const companyId = user.company.id;
-  const accessToken = createToken({ userId, companyId });
-  const refreshToken = createToken({ userId, companyId }, 'refresh');
-  await userRepository.setRedisRefreshToken(userId, refreshToken);
-  const result = new LoginResponseDTO(user, { accessToken, refreshToken });
-  return result;
+  const tokens = await createTokens(userId, companyId);
+  return new LoginResponseDTO(user, tokens);
 };
 
 export const refreshToken = async (dto: RefreshTokenDTO): Promise<RefreshTokenResponseDTO> => {
@@ -93,10 +71,7 @@ export const refreshToken = async (dto: RefreshTokenDTO): Promise<RefreshTokenRe
     throw new NotFoundError('존재하지 않는 유저입니다');
   }
   const companyId = user.companyId;
-  const accessToken = createToken({ userId, companyId });
-  const newRefreshToken = createToken({ userId, companyId }, 'refresh');
-  await userRepository.setRedisRefreshToken(userId, newRefreshToken);
-  return { refreshToken: newRefreshToken, accessToken };
+  return await createTokens(userId, companyId);
 };
 
 export const getMyInfo = async (userId: number): Promise<UserProfileResponseDTO> => {
@@ -112,19 +87,15 @@ export const updateMyInfo = async (
   data: updateMyInfoDTO,
 ): Promise<UserProfileResponseDTO> => {
   const { currentPassword, ...dataWithoutCurrentPassword } = data;
+  const user = await userRepository.getById(userId);
+  const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+  if (!isValidPassword) {
+    throw new BadRequestError('현재 비밀번호가 맞지 않습니다');
+  }
   if (data.password) {
-    const user = await userRepository.getById(userId);
-    if (!user) {
-      throw new NotFoundError('존재하지 않는 유저입니다');
-    }
-    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
-    if (!isValidPassword) {
-      throw new BadRequestError('현재 비밀번호가 맞지 않습니다');
-    }
     const hashedPassword = await hashPassword(data.password);
     dataWithoutCurrentPassword.password = hashedPassword;
   }
-
   const updated = await userRepository.updateAndGetUser(userId, dataWithoutCurrentPassword);
   return new UserProfileResponseDTO(updated);
 };
@@ -141,4 +112,32 @@ export const deleteUser = async (userId: number): Promise<void> => {
   if (!deleted) {
     throw new NotFoundError('존재하지 않는 유저입니다');
   }
+};
+
+// userService 내에서 사용되는 함수
+
+const validateCompany = async (companyName: string, companyCode: string): Promise<number> => {
+  const validCompany = await companyRepository.findValidateCompany(companyName, companyCode);
+  if (!validCompany) {
+    throw new NotFoundError('Company info is invalid.');
+  }
+  return validCompany.id;
+};
+
+const checkDuplicateUser = async (email: string, employeeNumber: string) => {
+  const existingEmail = await userRepository.getByEmail(email);
+  const existingEmployeeNumber = await userRepository.getByEmployeeNumber(employeeNumber);
+  if (existingEmail || existingEmployeeNumber) {
+    throw new ConflictError('이미 존재하는 이메일 또는 사원번호 입니다');
+  }
+};
+
+const createTokens = async (
+  userId: number,
+  companyId: number,
+): Promise<{ refreshToken: string; accessToken: string }> => {
+  const accessToken = createToken({ userId, companyId });
+  const refreshToken = createToken({ userId, companyId }, 'refresh');
+  await userRepository.setRedisRefreshToken(userId, refreshToken);
+  return { refreshToken, accessToken };
 };
