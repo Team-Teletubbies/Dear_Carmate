@@ -104,20 +104,6 @@ export interface RefreshTokenResponseDTO {
   accessToken: string;
 }
 
-// export type UserProfileDTO = UserWithCompanyCode;
-// export interface UserWithCompanyCode {
-//   id: number;
-//   name: string;
-//   email: string;
-//   employeeNumber: string;
-//   phoneNumber: string;
-//   imageUrl: string | null;
-//   isAdmin: boolean;
-//   company: {
-//     companyCode: string;
-//   };
-// }
-
 export class UserProfileResponseDTO {
   id: number;
   name: string;

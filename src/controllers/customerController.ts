@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import * as customerService from '../services/customerService';
 import BadRequestError from '../lib/errors/badRequestError';
 import { AuthenticatedRequest } from '../types/express';

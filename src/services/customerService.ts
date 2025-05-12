@@ -34,7 +34,7 @@ export const updateCustomer = async (
 
   const converted: Prisma.CustomerUncheckedUpdateManyInput = {
     ...cleanData,
-
+  };
   return customerRepo.updateCustomer(customerId, companyId, converted);
 };
 
@@ -69,7 +69,6 @@ export const getCustomersService = async (
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  //Enum to Label로 변환
   const parsedCustomers = customers.map(toLabeledCustomer);
 
   return {
@@ -79,8 +78,6 @@ export const getCustomersService = async (
     data: parsedCustomers,
   };
 };
-
-//상세 조회 추가
 
 export const getCustomerDetailByKeyword = async (
   companyId: number,
@@ -100,8 +97,6 @@ export const getCustomerDetailByKeyword = async (
     region: customer.region ? customer.region.toLowerCase() : null,
   };
 };
-
-//대용량 업로드
 
 type CustomerCSVRecord = {
   name: string;

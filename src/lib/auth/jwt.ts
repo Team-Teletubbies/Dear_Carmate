@@ -1,6 +1,4 @@
-import { TokenPayload, UserWithPasswordAndCompany } from '../../types/userType';
-// import { JWT_SECRET } from '../constants';
-// Todo: constants 따로 지정할지
+import { TokenPayload } from '../../types/userType';
 import jwt from 'jsonwebtoken';
 
 export const createToken = (data: TokenPayload, type?: 'access' | 'refresh'): string => {

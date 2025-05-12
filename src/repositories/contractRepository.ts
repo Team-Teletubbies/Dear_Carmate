@@ -1,7 +1,7 @@
 import { prisma } from '../lib/prisma';
 import { Prisma } from '@prisma/client';
 import { CreateContractDTO } from '../dto/contractDTO';
-import { transformMeetingToDTO, transformMeetingToPrisma } from '../lib/utils/meeting';
+import { transformMeetingToPrisma } from '../lib/utils/meeting';
 
 const baseContractInclude = {
   user: { select: { id: true, name: true } },

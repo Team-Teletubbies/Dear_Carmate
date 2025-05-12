@@ -6,59 +6,69 @@ import {
   mapCreateCarError,
   updateCarBodyStruct,
 } from '../structs/carStruct';
-import { create, StructError } from 'superstruct';
-import { SearchField } from '../dto/carDTO';
+import { create, Struct, StructError } from 'superstruct';
+import { CarRegisterRequestDTO, CarRegistUpdateDTO, SearchField } from '../dto/carDTO';
 import { IdParamsStruct } from '../structs/commonStruct';
 import { AuthenticatedRequest } from '../types/express';
 
-export const registerCar = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-  let data;
+function validateOrThrow<T>(input: unknown, struct: Struct<T>): T {
   try {
-    data = create(req.body, createCarBodyStruct);
+    return create(input, struct);
   } catch (error) {
-    const structError = error as StructError;
-    const errorMessage = mapCreateCarError(structError);
-    res.status(400).json({ message: errorMessage });
+    const errorMessage = mapCreateCarError(error as StructError);
+    throw new Error(errorMessage);
+  }
+}
+
+function getIdParam(req: AuthenticatedRequest): number {
+  return create(req.params, IdParamsStruct).id;
+}
+
+function getCompanyId(req: AuthenticatedRequest): number {
+  return req.user.companyId;
+}
+
+export const registerCar = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  let data: CarRegisterRequestDTO;
+
+  try {
+    data = validateOrThrow<CarRegisterRequestDTO>(req.body, createCarBodyStruct);
+  } catch (error) {
+    const errorMessage = (error as Error).message;
+    res.status(400).json({ errorMessage });
     return;
   }
 
-  const companyId = req.user.companyId;
-
-  const registerCars = await carService.registerCar(data, companyId);
+  const registerCars = await carService.registerCar(data, getCompanyId(req));
   res.status(201).json(registerCars);
 };
 
 export const updateCar = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   let id: number;
-  let data: any;
+  let data: Partial<CarRegistUpdateDTO>;
 
   try {
-    id = create(req.params, IdParamsStruct).id;
-    data = create(req.body, updateCarBodyStruct);
+    id = getIdParam(req);
+    data = validateOrThrow<Partial<CarRegistUpdateDTO>>(req.body, updateCarBodyStruct);
   } catch (error) {
-    const structError = error as StructError;
-    const errorMessage = mapCreateCarError(structError);
+    const errorMessage = (error as Error).message;
     res.status(400).json({ message: errorMessage });
     return;
   }
 
-  const companyId = req.user.companyId;
-
-  const updatedCar = await carService.updateCar(Number(id), data, companyId);
+  const updatedCar = await carService.updateCar(Number(id), data, getCompanyId(req));
   res.status(200).json(updatedCar);
 };
 
 export const deleteCar = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-  const { id } = create(req.params, IdParamsStruct);
+  const id = getIdParam(req);
 
   await carService.deleteCar(Number(id));
   res.status(200).send({ message: '차량 삭제 성공' });
 };
 
 export const getCarList = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-  const { page, pageSize, searchBy, keyword, status } = create(req.query, carFilterStruct);
-
-  const companyId = req.user.companyId;
+  const { page, pageSize, searchBy, keyword, status } = validateOrThrow(req.query, carFilterStruct);
 
   const carList = await carService.getCarList(
     {
@@ -68,7 +78,7 @@ export const getCarList = async (req: AuthenticatedRequest, res: Response): Prom
       keyword,
       status,
     },
-    companyId,
+    getCompanyId(req),
   );
 
   res.status(200).json({
@@ -80,7 +90,7 @@ export const getCarList = async (req: AuthenticatedRequest, res: Response): Prom
 };
 
 export const getCarDetail = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-  const { id } = create(req.params, IdParamsStruct);
+  const id = getIdParam(req);
 
   const car = await carService.getCarById(Number(id));
   res.status(200).json(car);
@@ -97,8 +107,6 @@ export const getManufacturerModelList = async (
 export const carCsvUpload = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   const path = req.file!.path;
 
-  const companyId = req.user.companyId;
-
-  await carService.carCsvUpload(path, companyId);
+  await carService.carCsvUpload(path, getCompanyId(req));
   res.json({ message: 'CSV 업로드 및 차량 등록 완료' });
 };

@@ -114,8 +114,6 @@ export const deleteUser = async (userId: number): Promise<void> => {
   }
 };
 
-// userService 내에서 사용되는 함수
-
 const validateCompany = async (companyName: string, companyCode: string): Promise<number> => {
   const validCompany = await companyRepository.findValidateCompany(companyName, companyCode);
   if (!validCompany) {

@@ -1,7 +1,4 @@
-import { Prisma } from '@prisma/client';
 import { UserSearchKey } from '../structs/userStruct';
-
-// Entity
 
 export interface User {
   id: number;
@@ -16,8 +13,6 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
 }
-
-// Types
 
 export interface UserWithCompanyCode {
   id: number;

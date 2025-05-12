@@ -16,22 +16,7 @@ import {
 } from 'superstruct';
 import { PageParamsStruct } from './commonStruct';
 
-const statuses = ['possession', 'contractProceeding', 'contractCompleted'] as const;
-type StatusType = (typeof statuses)[number];
-
-function toPrismaCarStatus(status: StatusType): string {
-  return status.replace(/([A-Z])/g, '_$1').toUpperCase();
-}
-
-export function mapCarStatus(status: string): string {
-  const lower = status.toLowerCase();
-  const match = statuses.find((s) => s.toLowerCase() === lower);
-  if (!match) {
-    throw new Error(`Invalid carStatus: ${status}`);
-  }
-
-  return toPrismaCarStatus(match as StatusType);
-}
+export const statuses = ['possession', 'contractProceeding', 'contractCompleted'] as const;
 
 const carSearchKeys = ['carNumber', 'model', 'carStatus'] as const;
 

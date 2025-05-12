@@ -1,7 +1,6 @@
 import { prisma } from '../lib/prisma';
 import { GetCompanyListDTO, CreateUpdateCompanyDTO } from '../dto/companyDto';
 import { Company, CompanyWithCount } from '../types/companyType';
-import NotFoundError from '../lib/errors/notFoundError';
 
 export async function create(data: CreateUpdateCompanyDTO): Promise<Company> {
   return await prisma.company.create({ data });

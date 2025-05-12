@@ -1,5 +1,3 @@
-// Entity
-
 export interface Company {
   id: number;
   companyName: string;
@@ -7,8 +5,6 @@ export interface Company {
   createdAt: Date;
   updatedAt: Date;
 }
-
-//  Repo 용
 
 export type CompanyWithCount = Omit<Company, 'createdAt' | 'updatedAt'> & {
   _count: {
