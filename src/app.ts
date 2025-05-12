@@ -8,7 +8,6 @@ import { contractDocumentRouter } from './routers/contractDocumentRouter';
 import { defaultNotFoundHandler, globalErrorHandler } from './controllers/errorController';
 import cors from 'cors';
 import customerRouter from './routers/customerRouter';
-import path from 'path';
 import { PUBLIC_PATH, STATIC_PATH, PORT } from './lib/constants';
 import imageRouter from './routers/imageRouter';
 import dashboardRouter from './routers/dashboardRouter';
