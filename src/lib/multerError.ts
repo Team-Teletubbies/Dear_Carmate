@@ -1,6 +1,6 @@
 import { ErrorRequestHandler } from 'express';
 import { MulterError } from 'multer';
-import { LIMIT_FILE_SIZE } from '../lib/constants'; // 상수 파일 경로에 맞게 수정
+import { LIMIT_FILE_SIZE } from '../lib/constants';
 
 export const multerErrorHandler: ErrorRequestHandler = (err, req, res, next): void => {
   if (err instanceof MulterError) {

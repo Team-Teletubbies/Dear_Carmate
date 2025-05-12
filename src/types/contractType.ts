@@ -94,15 +94,15 @@ export type ContractWithUser = Prisma.ContractGetPayload<{
 export type MeetingDTO = {
   date: string;
   alarms: string[];
-}; // 김한솔: DB 전용
+};
 
 export type MeetingInput = {
   date: string | Date;
   alarm?: { time: Date }[];
   alarms?: string[];
-}; // 김한솔: 클라이언트 입력값
+};
 
 export type MeetingEntity = {
   date: Date;
   alarm?: { time: Date }[];
-}; // 김한솔: 클라이언트 응답값
+};

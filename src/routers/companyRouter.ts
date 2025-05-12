@@ -8,8 +8,6 @@ import {
 } from '../controllers/companyController';
 import { verifyAccessToken } from '../middlewares/verifyAccessToken';
 import { requireAdmin } from '../middlewares/requireAdmin';
-// Todo: withAsync
-// Todo: 인증인가 미들웨어들
 export const companyRouter = express.Router();
 import { asyncHandler } from '../lib/async-handler';
 

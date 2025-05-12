@@ -1,6 +1,5 @@
 import { Company, CompanyWithCount } from '../types/companyType';
 
-// Request
 export interface CreateUpdateCompanyDTO {
   companyName: string;
   companyCode: string;
@@ -12,8 +11,6 @@ export interface GetCompanyListDTO {
   searchBy?: string;
   keyword?: string;
 }
-
-// Response
 
 export class CompanyResponseDTO {
   id: number;
