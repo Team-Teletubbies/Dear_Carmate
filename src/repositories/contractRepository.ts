@@ -1,6 +1,14 @@
 import { prisma } from '../lib/prisma';
 import { Prisma } from '@prisma/client';
 import { CreateContractDTO } from '../dto/contractDTO';
+import { transformMeetingToDTO, transformMeetingToPrisma } from '../lib/utils/meeting';
+
+const baseContractInclude = {
+  user: { select: { id: true, name: true } },
+  customer: true,
+  car: { include: { model: true } },
+  meeting: { include: { alarm: true } },
+};
 
 export const findContractDocuments = async (
   where: Prisma.ContractWhereInput = {},
@@ -53,6 +61,8 @@ export const createContract = async ({
     select: { price: true },
   });
 
+  const transformedMeetings = transformMeetingToPrisma(meetings ?? []);
+
   const contract = await prisma.contract.create({
     data: {
       carId: carId,
@@ -62,22 +72,28 @@ export const createContract = async ({
       contractStatus: 'CAR_INSPECTION',
       resolutionDate: null,
       contractPrice: car.price,
-      meeting: {
-        create: meetings.map((meeting) => ({
-          date: new Date(meeting.date),
-          alarm: {
-            create: meeting.alarms?.map((alarm) => ({
-              time: new Date(alarm),
-            })),
-          },
-        })),
-      },
+      ...(meetings && meetings.length > 0
+        ? {
+            meeting: {
+              create: meetings.map((meeting) => ({
+                date: new Date(meeting.date),
+                ...(meeting.alarms && meeting.alarms.length > 0
+                  ? {
+                      alarm: {
+                        create: (meeting.alarms ?? []).map((alarm) => ({
+                          time: new Date(alarm),
+                        })),
+                      },
+                    }
+                  : {}),
+              })),
+            },
+          }
+        : {}),
     },
     include: {
-      meeting: { include: { alarm: true } },
+      ...baseContractInclude,
       user: { select: { id: true, name: true } },
-      customer: { select: { id: true, name: true } },
-      car: { select: { id: true, model: { select: { name: true } } } },
     },
   });
 
@@ -86,32 +102,14 @@ export const createContract = async ({
 
 export const getContractsGroupedByStatus = async () => {
   return prisma.contract.findMany({
-    include: {
-      car: {
-        include: {
-          model: true,
-        },
-      },
-      customer: true,
-      user: true,
-      meeting: {
-        include: {
-          alarm: true,
-        },
-      },
-    },
+    include: baseContractInclude,
   });
 };
 
 export const findGroupedContracts = async (where: Prisma.ContractWhereInput) => {
   return prisma.contract.findMany({
     where,
-    include: {
-      car: { include: { model: true } },
-      customer: true,
-      user: true,
-      meeting: { include: { alarm: true } },
-    },
+    include: baseContractInclude,
   });
 };
 
@@ -145,12 +143,7 @@ export const updateContractInDB = async (
   return prisma.contract.update({
     where: { id: contractId },
     data: updateData.basic,
-    include: {
-      user: true,
-      customer: true,
-      car: { include: { model: true } },
-      meeting: { include: { alarm: true } },
-    },
+    include: baseContractInclude,
   });
 };
 

@@ -8,7 +8,6 @@ import {
 } from '../services/contractService';
 import { CreateContractDTO } from '../dto/contractDTO';
 import { asyncHandler } from '../lib/async-handler';
-import BadRequestError from '../lib/errors/badRequestError';
 import {
   createContractBodyStruct,
   updateContractBodyStruct,
@@ -18,14 +17,11 @@ import { create } from 'superstruct';
 import { GroupedContractSearchParams } from '../types/contractType';
 import { IdParamsStruct } from '../structs/commonStruct';
 import { AuthenticatedRequest } from '../types/express';
+import { getLastPathSegment } from '../lib/utils/request';
 
 export const createContract = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const { carId, customerId, meetings } = create(req.body, createContractBodyStruct);
   const user = req.user;
-
-  if (!carId || !customerId || !meetings) {
-    throw new BadRequestError('잘못된 요청입니다.');
-  }
 
   const dto: CreateContractDTO = {
     carId,
@@ -33,7 +29,7 @@ export const createContract = asyncHandler(async (req: AuthenticatedRequest, res
     userId: user.userId,
     companyId: user.companyId,
     contractPrice: 0,
-    meetings: meetings.map((meet) => ({
+    meetings: (meetings ?? []).map((meet) => ({
       date: meet.date,
       alarms: meet.alarms ?? [],
     })),
@@ -86,9 +82,8 @@ export const deleteContract = asyncHandler(async (req: AuthenticatedRequest, res
 
 export const getDetailList = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
   const user = req.user;
-  const path = req.path;
-  const segments = path.split('/').filter(Boolean);
-  const lastSegment = segments[segments.length - 1] as 'cars' | 'customers' | 'users';
+
+  const lastSegment = getLastPathSegment(req.path);
 
   const result = await detailList({
     companyId: user.companyId,
